@@ -1,0 +1,115 @@
+curl -fsSL https://ollama.com/install.sh | sh
+
+
+Lang graph workflow:
+ user provide data and click on invistagation:
+1, state created which initially contains services and their meta data
+2. user description or prompt given during incident creation
+
+then workflow start:
+
+first node it decide what what user provide , if user provide images go to vision model and summarize them and their details add in evidence list in state:
+second parallely if user provide documents , the second node parrallely fetch data from documents and summarize or create points from data and add it to evidence list:
+ then after collecting evidences, 
+ 
+ we will go to the node which is llm with tools , here llm decide , either go to tool node or straight go to next node , 
+if go to tool node there we can fetch logs from structured data base , on the base of dates, time, error type, log type etc everything , and this node to back to llm with tools node means its a loop with max iteration 5, if needed to set iteration
+
+
+the other side of llm with tools is the node called incident analyzer it analyze the incident  and decide now go to retrival of document or we don't need them to answer 
+
+if retrival document needed they will go to retrive document and then their is a  reranking node which   evaluating document , are the documents qulify for investigation and we make their refiend documents and then we go to the Evidence analyzer , there from the retrive documents and evidence we analyze  what happend to our system , 
+(retrival document means retrive document from database top 8, and retrive top 2 previous incident related to it if needed ) and on reranking we evaulate both
+
+if retrivel don't need then we straight go to evidence analyzer
+
+after evidence analyzer we have all thing now we are ready to generate hypothesis
+after this you should give your architecture what to do but explain me also , 
+
+remember we don't want to make our system too delay ok do less things and task freely ok 
+
+now create complete architecture and discuss with me 
+
+
+
+
+
+
+
+
+
+                         USER
+                          │
+                          ▼
+                 Incident Creation
+                          │
+                          ▼
+                  INITIAL STATE
+                          │
+             ┌────────────┴────────────┐
+             │                         │
+             ▼                         ▼
+       IMAGE PROCESSOR          DOCUMENT PROCESSOR
+             │                         │
+        Vision LLM                 Extraction
+             │                         │
+             ▼                         ▼
+        Image Evidence            LLM Summary
+             │                         │
+             └────────────┬────────────┘
+                          ▼
+                    EVIDENCE STATE
+                          │
+                          ▼
+                 ┌────────────────┐
+                 │ LLM + TOOLS    │◄──────────────┐
+                 └───────┬────────┘               │
+                         │                        │
+                    Tool needed?                 │
+                    /         \                   │
+                  YES          NO                 │
+                   │            │                 │
+                   ▼            │                 │
+               TOOL NODE        │                 │
+                   │            │                 │
+                   └────────────┘                 │
+                                                  │
+                 max 3–5 iterations ─────────────┘
+                         │
+                         ▼
+                 INCIDENT ANALYZER
+                         │
+                   Need knowledge?
+                    /           \
+                  NO             YES
+                  │               │
+                  │               ▼
+                  │        QDRANT RETRIEVAL
+                  │          │         │
+                  │       Top 8      Top 2
+                  │      Knowledge  Incidents
+                  │          │         │
+                  │       Reranker  Reranker
+                  │          │         │
+                  │          └────┬────┘
+                  │               │
+                  └───────────────┤
+                                  ▼
+                         EVIDENCE ANALYZER
+                                  │
+                                  ▼
+                         HYPOTHESIS GENERATOR
+                                  │
+                                  ▼
+                         HYPOTHESIS EVALUATOR
+                                  │
+                         Evidence sufficient?
+                            /           \
+                          NO             YES
+                          │               │
+                          ▼               ▼
+                    Investigation       RCA
+                       loop              │
+                                         ▼
+                                  FINAL REPORT
+

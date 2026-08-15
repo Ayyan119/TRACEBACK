@@ -1,0 +1,44 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	initialize_state(initialize_state)
+	process_images(process_images)
+	process_documents(process_documents)
+	collect_evidence(collect_evidence)
+	reason_with_tools(reason_with_tools)
+	execute_log_tools(execute_log_tools)
+	incident_analyzer(incident_analyzer)
+	retrieve_knowledge(retrieve_knowledge)
+	retrieve_previous_incidents(retrieve_previous_incidents)
+	rerank_retrieved_information(rerank_retrieved_information)
+	analyze_evidence(analyze_evidence)
+	generate_hypotheses(generate_hypotheses)
+	evaluate_hypotheses(evaluate_hypotheses)
+	generate_final_report(generate_final_report)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> initialize_state;
+	analyze_evidence --> generate_hypotheses;
+	collect_evidence --> reason_with_tools;
+	evaluate_hypotheses -.-> generate_final_report;
+	evaluate_hypotheses -.-> reason_with_tools;
+	execute_log_tools --> reason_with_tools;
+	generate_hypotheses --> evaluate_hypotheses;
+	incident_analyzer -.-> analyze_evidence;
+	incident_analyzer -.-> retrieve_knowledge;
+	initialize_state --> process_documents;
+	initialize_state --> process_images;
+	process_documents --> collect_evidence;
+	process_images --> collect_evidence;
+	reason_with_tools -.-> execute_log_tools;
+	reason_with_tools -.-> incident_analyzer;
+	rerank_retrieved_information --> analyze_evidence;
+	retrieve_knowledge --> retrieve_previous_incidents;
+	retrieve_previous_incidents --> rerank_retrieved_information;
+	generate_final_report --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

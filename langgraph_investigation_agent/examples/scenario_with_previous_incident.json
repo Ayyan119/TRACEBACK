@@ -1,0 +1,14 @@
+{
+  "investigation_id": "inv-scenario-d",
+  "project_id": "art-gallary",
+  "incident_id": "INC-1004",
+  "incident_description": "Recurring checkout latency spike matching last week's database lock contention incident.",
+  "incident_log_reference": {
+    "file_name": "checkout_cluster.log",
+    "file_size_bytes": 1048576
+  },
+  "services": ["checkout-service"],
+  "service_metadata": {},
+  "incident_documents": [],
+  "incident_images": []
+}

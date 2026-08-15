@@ -1,0 +1,22 @@
+{
+  "scenario_id": "SCENARIO-8",
+  "name": "Previous Incident Retrieval Required",
+  "description": "Outage matching historical incident INC-2024-DB-DEADLOCK stored as atomic JSON in Qdrant.",
+  "incident_id": "INC-S8-108",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "Checkout database transaction deadlock on orders table causing 504 timeouts.",
+  "services": ["checkout-service", "checkout-db"],
+  "service_metadata": {
+    "checkout-service": {"environment": "production"}
+  },
+  "incident_log_reference": {
+    "file_name": "checkout_db_deadlock.log",
+    "file_size_bytes": 1048576,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [],
+  "incident_images": [],
+  "expected_accepted_evidence_sources": ["description", "log", "previous_incident"],
+  "expected_rejected_evidence_count": 0,
+  "expected_retrieval_required": true
+}

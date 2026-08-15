@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "langgraph-investigation-agent"
+version = "0.1.0"
+description = "TRACEBACK Isolated AI Root-Cause Investigation Agent using LangChain and LangGraph"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "langchain>=0.3.0",
+    "langchain-core>=0.3.0",
+    "langgraph>=0.2.0",
+    "langchain-google-genai>=2.0.0",
+    "langchain-groq>=0.2.0",
+    "langchain-huggingface>=0.1.0",
+    "pydantic>=2.0.0",
+    "qdrant-client>=1.7.0",
+    "sentence-transformers>=2.2.2",
+    "sqlalchemy>=2.0.0",
+    "asyncpg>=0.29.0",
+    "aiosqlite>=0.19.0",
+    "pillow>=10.0.0",
+    "pypdf>=4.0.0",
+    "python-docx>=1.0.0",
+    "python-pptx>=0.6.23",
+    "python-dotenv>=1.0.0",
+    "mermaid-cli>=0.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-mock>=3.12.0",
+]

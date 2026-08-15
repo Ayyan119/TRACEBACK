@@ -1,0 +1,27 @@
+{
+  "scenario_id": "SCENARIO-6",
+  "name": "Irrelevant Image Rejection",
+  "description": "Database connection failure incident attached with company marketing logo screenshot.",
+  "incident_id": "INC-S6-106",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "PostgreSQL database connection pool locked up.",
+  "services": ["auth-service", "postgresql_db"],
+  "service_metadata": {
+    "auth-service": {"environment": "production"}
+  },
+  "incident_log_reference": {
+    "file_name": "auth_db.log",
+    "file_size_bytes": 524288,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [],
+  "incident_images": [
+    {
+      "title": "Company Marketing Banner Logo",
+      "file_url": "https://storage.local/company_logo_banner.png"
+    }
+  ],
+  "expected_accepted_evidence_sources": ["description", "log"],
+  "expected_rejected_evidence_count": 1,
+  "expected_retrieval_required": false
+}

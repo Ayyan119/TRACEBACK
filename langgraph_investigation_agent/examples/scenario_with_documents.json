@@ -1,0 +1,25 @@
+{
+  "investigation_id": "inv-scenario-b",
+  "project_id": "art-gallary",
+  "incident_id": "INC-1002",
+  "incident_description": "Database connection pool timeout errors on checkout-service during peak promotion sales.",
+  "incident_log_reference": {
+    "file_name": "db_telemetry.log",
+    "file_size_bytes": 2097152
+  },
+  "services": ["checkout-service", "postgresql_db"],
+  "service_metadata": {
+    "checkout-service": { "database": "postgresql_db" }
+  },
+  "incident_documents": [
+    {
+      "name": "Database Pool Post-Mortem Notes.docx",
+      "content": "Observed severe PostgreSQL connection pool exhaustion. Active connections reached 100/100 limit due to long-running unindexed queries on orders table."
+    },
+    {
+      "name": "Onboarding Guide.pdf",
+      "content": "Welcome to the art-gallary workspace repository."
+    }
+  ],
+  "incident_images": []
+}

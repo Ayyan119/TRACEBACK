@@ -1,0 +1,856 @@
+[
+  {
+    "title": "SCENARIO 1: PostgreSQL Connection Pool & Lock Contention",
+    "investigation_id": "inv-scenario-1-db-lock",
+    "incident_id": "INC-2001",
+    "duration_ms": 785.38,
+    "inputs": {
+      "description": "Checkout service returning HTTP 504 Gateway Timeouts during flash sale launch. PostgreSQL active connections reached 100/100 limit due to unindexed row locks on the orders table.",
+      "log_file": {
+        "file_name": "checkout_app.log",
+        "file_size_bytes": 1258291,
+        "log_type": "telemetry"
+      },
+      "documents_count": 2,
+      "images_count": 2,
+      "services": [
+        "checkout-service",
+        "postgresql_db"
+      ]
+    },
+    "execution_trace": [
+      {
+        "node": "initialize_state",
+        "timestamp": "2026-08-15T12:25:12Z",
+        "duration_ms": 0.01,
+        "details": "Initialized investigation inv-scenario-1-db-lock"
+      },
+      {
+        "node": "process_documents",
+        "timestamp": "2026-08-15T12:25:12Z",
+        "duration_ms": 0.19,
+        "details": "Processed 2 documents"
+      },
+      {
+        "node": "process_images",
+        "timestamp": "2026-08-15T12:25:12Z",
+        "duration_ms": 0.11,
+        "details": "Processed 2 images"
+      },
+      {
+        "node": "collect_evidence",
+        "timestamp": "2026-08-15T12:25:12Z",
+        "duration_ms": 0.01,
+        "details": "Accepted 4 evidence items, rejected 2"
+      },
+      {
+        "node": "reason_with_tools",
+        "timestamp": "2026-08-15T12:25:12Z",
+        "duration_ms": 0.0,
+        "details": "Decision: query_logs (iteration 1)"
+      },
+      {
+        "node": "execute_log_tools",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 224.5,
+        "details": "Retrieved 2 log records"
+      },
+      {
+        "node": "reason_with_tools",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.01,
+        "details": "Decision: no_tool needed"
+      },
+      {
+        "node": "incident_analyzer",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.23,
+        "details": "Retrieval required: True"
+      },
+      {
+        "node": "retrieve_knowledge",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 130.07,
+        "details": "Retrieved 3 Qdrant knowledge chunks"
+      },
+      {
+        "node": "retrieve_previous_incidents",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 213.29,
+        "details": "Retrieved 1 previous incidents"
+      },
+      {
+        "node": "rerank_retrieved_information",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.27,
+        "details": "Reranked 4 items -> 4 kept"
+      },
+      {
+        "node": "analyze_evidence",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.06,
+        "details": "Synthesized evidence analysis for checkout-service"
+      },
+      {
+        "node": "generate_hypotheses",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.11,
+        "details": "Generated 2 hypotheses (Primary confidence: 94.5%)"
+      },
+      {
+        "node": "evaluate_hypotheses",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.05,
+        "details": "Evaluated evidence sufficiency: True (Cycle 1/3)"
+      },
+      {
+        "node": "generate_final_report",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.08,
+        "details": "Generated final RCA report with 94.5% confidence"
+      }
+    ],
+    "accepted_evidence": [
+      {
+        "evidence_id": "EVD-DESC-1",
+        "source_type": "description",
+        "source_name": "Incident Description",
+        "content": "Checkout service returning HTTP 504 Gateway Timeouts during flash sale launch. PostgreSQL active connections reached 100/100 limit due to unindexed row locks on the orders table.",
+        "relevance": true,
+        "confidence": 1.0
+      },
+      {
+        "evidence_id": "EVD-LOG-REF-1",
+        "source_type": "log_reference",
+        "source_name": "checkout_app.log",
+        "content": "Mandatory incident log file attached (1258291 bytes).",
+        "relevance": true,
+        "confidence": 1.0
+      },
+      {
+        "evidence_id": "EVD-IMG-3",
+        "source_type": "image",
+        "source_name": "Grafana_504_Latency_Spike.png",
+        "content": "Screenshot 'Grafana_504_Latency_Spike.png' explicitly displays production system error metrics and gateway timeouts.",
+        "relevance": true,
+        "confidence": 0.92,
+        "metadata": {
+          "relevant": true,
+          "confidence": 0.92,
+          "observations": [
+            "Visual telemetry screenshot 'Grafana_504_Latency_Spike.png' shows HTTP 504 Gateway Timeout and P95 latency spike.",
+            "Database connection pool exhaustion indicator visible in Grafana panel."
+          ],
+          "error_indicators": [
+            "HTTP 504 Gateway Timeout",
+            "ConnectionPoolTimeoutException"
+          ],
+          "technical_entities": [
+            "checkout-service",
+            "postgresql_db",
+            "redis_cache"
+          ],
+          "reasoning_summary": "Screenshot 'Grafana_504_Latency_Spike.png' explicitly displays production system error metrics and gateway timeouts."
+        }
+      },
+      {
+        "evidence_id": "EVD-DOC-4",
+        "source_type": "document",
+        "source_name": "PostgreSQL_Pool_Diagnostics.pdf",
+        "content": "Incident document 'PostgreSQL_Pool_Diagnostics.pdf' details active service exception traces and connection timeouts.",
+        "relevance": true,
+        "confidence": 0.9,
+        "metadata": {
+          "relevant": true,
+          "confidence": 0.9,
+          "summary": "Incident document 'PostgreSQL_Pool_Diagnostics.pdf' details active service exception traces and connection timeouts.",
+          "key_points": [
+            "Connection pool overflow detected.",
+            "Transaction rollback observed in logs."
+          ],
+          "technical_entities": [
+            "checkout-service",
+            "postgresql_db"
+          ],
+          "error_signatures": [
+            "ConnectionPoolTimeoutException: Timeout waiting for connection from pool"
+          ],
+          "timestamps": [
+            "2026-08-15T10:00:00Z"
+          ],
+          "affected_services": [
+            "checkout-service"
+          ],
+          "root_cause_hints": [
+            "Database connection pool capacity exhausted under high load."
+          ]
+        }
+      }
+    ],
+    "rejected_evidence": [
+      {
+        "image": {
+          "title": "Company_Logo.jpg",
+          "file_url": "/tmp/logo.jpg"
+        },
+        "analysis": {
+          "relevant": false,
+          "confidence": 0.88,
+          "observations": [
+            "Image 'Company_Logo.jpg' appears to be a generic logo, desktop background, or unrelated asset."
+          ],
+          "error_indicators": [],
+          "technical_entities": [],
+          "reasoning_summary": "Image 'Company_Logo.jpg' does not contain production error logs, metrics graphs, or technical exception traces."
+        },
+        "relevant": false
+      },
+      {
+        "document": {
+          "name": "Employee_Onboarding_Guide.pdf",
+          "content": "Welcome to art-gallary engineering workspace onboarding notes."
+        },
+        "analysis": {
+          "relevant": false,
+          "confidence": 0.85,
+          "summary": "Document 'Employee_Onboarding_Guide.pdf' contains general project onboarding notes unrelated to current outage.",
+          "key_points": [],
+          "technical_entities": [],
+          "error_signatures": [],
+          "timestamps": [],
+          "affected_services": [],
+          "root_cause_hints": []
+        },
+        "relevant": false
+      }
+    ],
+    "retrieved_logs_count": 2,
+    "retrieval_decision": {
+      "required": true,
+      "reason": "Technical knowledge base runbooks required for database connection pool parameters.",
+      "search_queries": [
+        "PostgreSQL database connection pool troubleshooting runbook",
+        "Redis cache timeout latency SOP"
+      ]
+    },
+    "reranked_documents_count": 4,
+    "evidence_analysis": {
+      "what_happened": "Checkout service experienced severe degradation and HTTP 504 timeouts due to database lock contention.",
+      "when_it_happened": "2026-08-15T10:00:00Z to ongoing",
+      "affected_service": "checkout-service",
+      "symptoms": [
+        "HTTP 504 Gateway Timeout on checkout endpoints",
+        "PostgreSQL active connections maxed at 100/100",
+        "Row-level lock contention on orders table",
+        "Telemetry log error: Connection pool exhausted on postgresql://checkout_db. Keyword match 'pool'."
+      ],
+      "error_patterns": [
+        "HTTP 504 Gateway Timeout on checkout endpoints"
+      ],
+      "correlations": [
+        "System degradation on checkout-service correlates with peak load and telemetry error spikes."
+      ],
+      "possible_causes": [
+        "Checkout service experienced severe degradation and HTTP 504 timeouts due to database lock contention."
+      ],
+      "contradictory_evidence": [],
+      "missing_information": []
+    },
+    "hypotheses": [
+      {
+        "hypothesis_id": "HYP-1",
+        "title": "PostgreSQL Connection Pool Exhaustion due to Unindexed Query Lock Contention",
+        "description": "High volume checkout transactions created row-level lock contention on orders table. Connection slots filled up to max_connections=100 limit, causing 504 Gateway Timeouts on checkout-service.",
+        "confidence": 94.5,
+        "supporting_evidence_ids": [
+          "EVD-DESC-1",
+          "EVD-LOG-REF-1",
+          "EVD-IMG-3",
+          "EVD-DOC-4"
+        ],
+        "contradicting_evidence_ids": [],
+        "affected_services": [
+          "checkout-service",
+          "postgresql_db"
+        ],
+        "likely_root_cause": "Missing index on foreign key customer_id causing full table scans and row locks during peak checkout traffic.",
+        "recommended_next_check": "Run EXPLAIN ANALYZE on checkout queries and scale PostgreSQL max_connections from 100 to 250."
+      },
+      {
+        "hypothesis_id": "HYP-2",
+        "title": "Redis Cache Key Eviction Throttling",
+        "description": "Secondary Redis key eviction latency overhead.",
+        "confidence": 45.0,
+        "supporting_evidence_ids": [
+          "EVD-DESC-1"
+        ],
+        "contradicting_evidence_ids": [],
+        "affected_services": [
+          "redis_cache"
+        ],
+        "likely_root_cause": "Volatile key eviction strategy overhead.",
+        "recommended_next_check": "Check Redis INFO memory metrics and maxmemory-policy setting."
+      }
+    ],
+    "selected_hypothesis": {
+      "hypothesis_id": "HYP-1",
+      "title": "PostgreSQL Connection Pool Exhaustion due to Unindexed Query Lock Contention",
+      "description": "High volume checkout transactions created row-level lock contention on orders table. Connection slots filled up to max_connections=100 limit, causing 504 Gateway Timeouts on checkout-service.",
+      "confidence": 94.5,
+      "supporting_evidence_ids": [
+        "EVD-DESC-1",
+        "EVD-LOG-REF-1",
+        "EVD-IMG-3",
+        "EVD-DOC-4"
+      ],
+      "contradicting_evidence_ids": [],
+      "affected_services": [
+        "checkout-service",
+        "postgresql_db"
+      ],
+      "likely_root_cause": "Missing index on foreign key customer_id causing full table scans and row locks during peak checkout traffic.",
+      "recommended_next_check": "Run EXPLAIN ANALYZE on checkout queries and scale PostgreSQL max_connections from 100 to 250."
+    },
+    "confidence": 94.5
+  },
+  {
+    "title": "SCENARIO 2: Redis Cache Memory Eviction & Latency Spike",
+    "investigation_id": "inv-scenario-2-redis-eviction",
+    "incident_id": "INC-2002",
+    "duration_ms": 459.46,
+    "inputs": {
+      "description": "User authentication and session verification service returning HTTP 500 Internal Server Errors. Redis cluster memory hit 100% maxmemory limit causing blocking key evictions and 2000ms latency spikes.",
+      "log_file": {
+        "file_name": "auth_session.log",
+        "file_size_bytes": 870400,
+        "log_type": "telemetry"
+      },
+      "documents_count": 1,
+      "images_count": 1,
+      "services": [
+        "auth-service",
+        "redis_cache"
+      ]
+    },
+    "execution_trace": [
+      {
+        "node": "initialize_state",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.01,
+        "details": "Initialized investigation inv-scenario-2-redis-eviction"
+      },
+      {
+        "node": "process_documents",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.14,
+        "details": "Processed 1 documents"
+      },
+      {
+        "node": "process_images",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.1,
+        "details": "Processed 1 images"
+      },
+      {
+        "node": "collect_evidence",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.01,
+        "details": "Accepted 4 evidence items, rejected 0"
+      },
+      {
+        "node": "reason_with_tools",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.0,
+        "details": "Decision: query_logs (iteration 1)"
+      },
+      {
+        "node": "execute_log_tools",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 103.48,
+        "details": "Retrieved 2 log records"
+      },
+      {
+        "node": "reason_with_tools",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.0,
+        "details": "Decision: no_tool needed"
+      },
+      {
+        "node": "incident_analyzer",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.17,
+        "details": "Retrieval required: True"
+      },
+      {
+        "node": "retrieve_knowledge",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 126.12,
+        "details": "Retrieved 3 Qdrant knowledge chunks"
+      },
+      {
+        "node": "retrieve_previous_incidents",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 169.46,
+        "details": "Retrieved 1 previous incidents"
+      },
+      {
+        "node": "rerank_retrieved_information",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.22,
+        "details": "Reranked 4 items -> 4 kept"
+      },
+      {
+        "node": "analyze_evidence",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.09,
+        "details": "Synthesized evidence analysis for auth-service"
+      },
+      {
+        "node": "generate_hypotheses",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.11,
+        "details": "Generated 2 hypotheses (Primary confidence: 96.0%)"
+      },
+      {
+        "node": "evaluate_hypotheses",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.06,
+        "details": "Evaluated evidence sufficiency: True (Cycle 1/3)"
+      },
+      {
+        "node": "generate_final_report",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.1,
+        "details": "Generated final RCA report with 96.0% confidence"
+      }
+    ],
+    "accepted_evidence": [
+      {
+        "evidence_id": "EVD-DESC-1",
+        "source_type": "description",
+        "source_name": "Incident Description",
+        "content": "User authentication and session verification service returning HTTP 500 Internal Server Errors. Redis cluster memory hit 100% maxmemory limit causing blocking key evictions and 2000ms latency spikes.",
+        "relevance": true,
+        "confidence": 1.0
+      },
+      {
+        "evidence_id": "EVD-LOG-REF-1",
+        "source_type": "log_reference",
+        "source_name": "auth_session.log",
+        "content": "Mandatory incident log file attached (870400 bytes).",
+        "relevance": true,
+        "confidence": 1.0
+      },
+      {
+        "evidence_id": "EVD-IMG-3",
+        "source_type": "image",
+        "source_name": "Redis_Memory_Grafana.png",
+        "content": "Screenshot 'Redis_Memory_Grafana.png' explicitly displays production system error metrics and gateway timeouts.",
+        "relevance": true,
+        "confidence": 0.92,
+        "metadata": {
+          "relevant": true,
+          "confidence": 0.92,
+          "observations": [
+            "Visual telemetry screenshot 'Redis_Memory_Grafana.png' shows HTTP 504 Gateway Timeout and P95 latency spike.",
+            "Database connection pool exhaustion indicator visible in Grafana panel."
+          ],
+          "error_indicators": [
+            "HTTP 504 Gateway Timeout",
+            "ConnectionPoolTimeoutException"
+          ],
+          "technical_entities": [
+            "checkout-service",
+            "postgresql_db",
+            "redis_cache"
+          ],
+          "reasoning_summary": "Screenshot 'Redis_Memory_Grafana.png' explicitly displays production system error metrics and gateway timeouts."
+        }
+      },
+      {
+        "evidence_id": "EVD-DOC-4",
+        "source_type": "document",
+        "source_name": "Redis_Eviction_SOP.docx",
+        "content": "Incident document 'Redis_Eviction_SOP.docx' details active service exception traces and connection timeouts.",
+        "relevance": true,
+        "confidence": 0.9,
+        "metadata": {
+          "relevant": true,
+          "confidence": 0.9,
+          "summary": "Incident document 'Redis_Eviction_SOP.docx' details active service exception traces and connection timeouts.",
+          "key_points": [
+            "Connection pool overflow detected.",
+            "Transaction rollback observed in logs."
+          ],
+          "technical_entities": [
+            "checkout-service",
+            "postgresql_db"
+          ],
+          "error_signatures": [
+            "ConnectionPoolTimeoutException: Timeout waiting for connection from pool"
+          ],
+          "timestamps": [
+            "2026-08-15T10:00:00Z"
+          ],
+          "affected_services": [
+            "checkout-service"
+          ],
+          "root_cause_hints": [
+            "Database connection pool capacity exhausted under high load."
+          ]
+        }
+      }
+    ],
+    "rejected_evidence": [],
+    "retrieved_logs_count": 2,
+    "retrieval_decision": {
+      "required": true,
+      "reason": "Technical knowledge base runbooks required for database connection pool parameters.",
+      "search_queries": [
+        "PostgreSQL database connection pool troubleshooting runbook",
+        "Redis cache timeout latency SOP"
+      ]
+    },
+    "reranked_documents_count": 4,
+    "evidence_analysis": {
+      "what_happened": "Authentication service experienced severe HTTP 500 failure due to Redis cache memory eviction delays.",
+      "when_it_happened": "2026-08-15T10:00:00Z to ongoing",
+      "affected_service": "auth-service",
+      "symptoms": [
+        "HTTP 500 Internal Server Error on authentication endpoint",
+        "Redis maxmemory limit 100% full",
+        "P95 session verification latency spike 2000ms",
+        "Telemetry log error: Connection pool exhausted on postgresql://checkout_db. Keyword match 'pool'."
+      ],
+      "error_patterns": [
+        "HTTP 500 Internal Server Error on authentication endpoint"
+      ],
+      "correlations": [
+        "System degradation on auth-service correlates with peak load and telemetry error spikes."
+      ],
+      "possible_causes": [
+        "Authentication service experienced severe HTTP 500 failure due to Redis cache memory eviction delays."
+      ],
+      "contradictory_evidence": [],
+      "missing_information": []
+    },
+    "hypotheses": [
+      {
+        "hypothesis_id": "HYP-1",
+        "title": "Redis Cluster Memory Exhaustion & LRU Key Eviction Latency Throttling",
+        "description": "Active user sessions hit 100% maxmemory limit on redis_cache. Synchronous LRU key evictions introduced 2000ms latency spikes on auth-service.",
+        "confidence": 96.0,
+        "supporting_evidence_ids": [
+          "EVD-DESC-1",
+          "EVD-LOG-REF-1",
+          "EVD-IMG-3",
+          "EVD-DOC-4"
+        ],
+        "contradicting_evidence_ids": [],
+        "affected_services": [
+          "auth-service",
+          "redis_cache"
+        ],
+        "likely_root_cause": "Redis maxmemory threshold reached with non-volatile key TTLs causing blocking LRU eviction delays.",
+        "recommended_next_check": "Increase maxmemory limit from 2GB to 4GB and switch maxmemory-policy to volatile-lru."
+      },
+      {
+        "hypothesis_id": "HYP-2",
+        "title": "Downstream Network Connection Pool Timeout",
+        "description": "HTTP client connection pool timeouts on auth-service.",
+        "confidence": 42.0,
+        "supporting_evidence_ids": [
+          "EVD-DESC-1"
+        ],
+        "contradicting_evidence_ids": [],
+        "affected_services": [
+          "auth-service"
+        ],
+        "likely_root_cause": "Transient VPC network latency.",
+        "recommended_next_check": "Check VPC flow logs and container network interface packet drops."
+      }
+    ],
+    "selected_hypothesis": {
+      "hypothesis_id": "HYP-1",
+      "title": "Redis Cluster Memory Exhaustion & LRU Key Eviction Latency Throttling",
+      "description": "Active user sessions hit 100% maxmemory limit on redis_cache. Synchronous LRU key evictions introduced 2000ms latency spikes on auth-service.",
+      "confidence": 96.0,
+      "supporting_evidence_ids": [
+        "EVD-DESC-1",
+        "EVD-LOG-REF-1",
+        "EVD-IMG-3",
+        "EVD-DOC-4"
+      ],
+      "contradicting_evidence_ids": [],
+      "affected_services": [
+        "auth-service",
+        "redis_cache"
+      ],
+      "likely_root_cause": "Redis maxmemory threshold reached with non-volatile key TTLs causing blocking LRU eviction delays.",
+      "recommended_next_check": "Increase maxmemory limit from 2GB to 4GB and switch maxmemory-policy to volatile-lru."
+    },
+    "confidence": 96.0
+  },
+  {
+    "title": "SCENARIO 3: Kubernetes Pod OOMKilled & Container CrashLoop",
+    "investigation_id": "inv-scenario-3-k8s-oom",
+    "incident_id": "INC-2003",
+    "duration_ms": 262.34,
+    "inputs": {
+      "description": "Payment gateway microservice pods continuously restarting in CrashLoopBackOff state. Worker memory limit of 512MB exceeded due to unclosed HTTP client connection leak in payment processor.",
+      "log_file": {
+        "file_name": "payment_gateway_k8s.log",
+        "file_size_bytes": 2202010,
+        "log_type": "telemetry"
+      },
+      "documents_count": 1,
+      "images_count": 1,
+      "services": [
+        "payment-service",
+        "k8s_cluster"
+      ]
+    },
+    "execution_trace": [
+      {
+        "node": "initialize_state",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.01,
+        "details": "Initialized investigation inv-scenario-3-k8s-oom"
+      },
+      {
+        "node": "process_documents",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.07,
+        "details": "Processed 1 documents"
+      },
+      {
+        "node": "process_images",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.06,
+        "details": "Processed 1 images"
+      },
+      {
+        "node": "collect_evidence",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.01,
+        "details": "Accepted 3 evidence items, rejected 1"
+      },
+      {
+        "node": "reason_with_tools",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.0,
+        "details": "Decision: query_logs (iteration 1)"
+      },
+      {
+        "node": "execute_log_tools",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 72.53,
+        "details": "Retrieved 2 log records"
+      },
+      {
+        "node": "reason_with_tools",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.0,
+        "details": "Decision: no_tool needed"
+      },
+      {
+        "node": "incident_analyzer",
+        "timestamp": "2026-08-15T12:25:13Z",
+        "duration_ms": 0.25,
+        "details": "Retrieval required: True"
+      },
+      {
+        "node": "retrieve_knowledge",
+        "timestamp": "2026-08-15T12:25:14Z",
+        "duration_ms": 131.32,
+        "details": "Retrieved 3 Qdrant knowledge chunks"
+      },
+      {
+        "node": "retrieve_previous_incidents",
+        "timestamp": "2026-08-15T12:25:14Z",
+        "duration_ms": 0.0,
+        "details": "Retrieved 0 previous incidents"
+      },
+      {
+        "node": "rerank_retrieved_information",
+        "timestamp": "2026-08-15T12:25:14Z",
+        "duration_ms": 0.25,
+        "details": "Reranked 3 items -> 3 kept"
+      },
+      {
+        "node": "analyze_evidence",
+        "timestamp": "2026-08-15T12:25:14Z",
+        "duration_ms": 0.12,
+        "details": "Synthesized evidence analysis for payment-service"
+      },
+      {
+        "node": "generate_hypotheses",
+        "timestamp": "2026-08-15T12:25:14Z",
+        "duration_ms": 0.15,
+        "details": "Generated 2 hypotheses (Primary confidence: 95.5%)"
+      },
+      {
+        "node": "evaluate_hypotheses",
+        "timestamp": "2026-08-15T12:25:14Z",
+        "duration_ms": 0.04,
+        "details": "Evaluated evidence sufficiency: True (Cycle 1/3)"
+      },
+      {
+        "node": "generate_final_report",
+        "timestamp": "2026-08-15T12:25:14Z",
+        "duration_ms": 0.09,
+        "details": "Generated final RCA report with 95.5% confidence"
+      }
+    ],
+    "accepted_evidence": [
+      {
+        "evidence_id": "EVD-DESC-1",
+        "source_type": "description",
+        "source_name": "Incident Description",
+        "content": "Payment gateway microservice pods continuously restarting in CrashLoopBackOff state. Worker memory limit of 512MB exceeded due to unclosed HTTP client connection leak in payment processor.",
+        "relevance": true,
+        "confidence": 1.0
+      },
+      {
+        "evidence_id": "EVD-LOG-REF-1",
+        "source_type": "log_reference",
+        "source_name": "payment_gateway_k8s.log",
+        "content": "Mandatory incident log file attached (2202010 bytes).",
+        "relevance": true,
+        "confidence": 1.0
+      },
+      {
+        "evidence_id": "EVD-IMG-3",
+        "source_type": "image",
+        "source_name": "K8s_Pod_Status_Console.png",
+        "content": "Screenshot 'K8s_Pod_Status_Console.png' explicitly displays production system error metrics and gateway timeouts.",
+        "relevance": true,
+        "confidence": 0.92,
+        "metadata": {
+          "relevant": true,
+          "confidence": 0.92,
+          "observations": [
+            "Visual telemetry screenshot 'K8s_Pod_Status_Console.png' shows HTTP 504 Gateway Timeout and P95 latency spike.",
+            "Database connection pool exhaustion indicator visible in Grafana panel."
+          ],
+          "error_indicators": [
+            "HTTP 504 Gateway Timeout",
+            "ConnectionPoolTimeoutException"
+          ],
+          "technical_entities": [
+            "checkout-service",
+            "postgresql_db",
+            "redis_cache"
+          ],
+          "reasoning_summary": "Screenshot 'K8s_Pod_Status_Console.png' explicitly displays production system error metrics and gateway timeouts."
+        }
+      }
+    ],
+    "rejected_evidence": [
+      {
+        "document": {
+          "name": "Kubernetes_OOMKilled_Policy.pdf",
+          "content": "Kubernetes pod memory limits policy. Exit code 137 indicates OOMKilled state triggered by cgroup memory limit overflow."
+        },
+        "analysis": {
+          "relevant": false,
+          "confidence": 0.85,
+          "summary": "Document 'Kubernetes_OOMKilled_Policy.pdf' contains general project onboarding notes unrelated to current outage.",
+          "key_points": [],
+          "technical_entities": [],
+          "error_signatures": [],
+          "timestamps": [],
+          "affected_services": [],
+          "root_cause_hints": []
+        },
+        "relevant": false
+      }
+    ],
+    "retrieved_logs_count": 2,
+    "retrieval_decision": {
+      "required": true,
+      "reason": "Technical knowledge base runbooks required for database connection pool parameters.",
+      "search_queries": [
+        "PostgreSQL database connection pool troubleshooting runbook",
+        "Redis cache timeout latency SOP"
+      ]
+    },
+    "reranked_documents_count": 3,
+    "evidence_analysis": {
+      "what_happened": "Payment gateway service containers entered CrashLoopBackOff state following memory limit exhaustion.",
+      "when_it_happened": "2026-08-15T10:00:00Z to ongoing",
+      "affected_service": "payment-service",
+      "symptoms": [
+        "Kubernetes pod status CrashLoopBackOff",
+        "Exit Code 137 (OOMKilled)",
+        "Memory usage exceeded 512Mi cgroup container limit",
+        "Telemetry log error: Connection pool exhausted on postgresql://checkout_db. Keyword match 'pool'."
+      ],
+      "error_patterns": [
+        "Kubernetes pod status CrashLoopBackOff"
+      ],
+      "correlations": [
+        "System degradation on payment-service correlates with peak load and telemetry error spikes."
+      ],
+      "possible_causes": [
+        "Payment gateway service containers entered CrashLoopBackOff state following memory limit exhaustion."
+      ],
+      "contradictory_evidence": [],
+      "missing_information": []
+    },
+    "hypotheses": [
+      {
+        "hypothesis_id": "HYP-1",
+        "title": "Kubernetes Worker Container OOMKilled (Exit Code 137) due to HTTP Connection Memory Leak",
+        "description": "Worker pods for payment-service exceeded the 512Mi cgroup memory limit due to unclosed HTTP client connection leaks in the payment processor module.",
+        "confidence": 95.5,
+        "supporting_evidence_ids": [
+          "EVD-DESC-1",
+          "EVD-LOG-REF-1",
+          "EVD-IMG-3"
+        ],
+        "contradicting_evidence_ids": [],
+        "affected_services": [
+          "payment-service",
+          "k8s_cluster"
+        ],
+        "likely_root_cause": "Unclosed HTTP connection handles causing steady heap memory leaks until cgroup kernel OOM killer terminates the pod.",
+        "recommended_next_check": "Apply HTTP connection pooling with explicit response body closing and increase pod memory request/limit to 1Gi."
+      },
+      {
+        "hypothesis_id": "HYP-2",
+        "title": "Kubernetes Liveness Probe Failure Timeout",
+        "description": "Liveness probe failed 3 consecutive times during startup.",
+        "confidence": 38.0,
+        "supporting_evidence_ids": [
+          "EVD-DESC-1"
+        ],
+        "contradicting_evidence_ids": [],
+        "affected_services": [
+          "payment-service"
+        ],
+        "likely_root_cause": "Initial delay seconds too short.",
+        "recommended_next_check": "Inspect kubectl describe pod logs for liveness probe failures."
+      }
+    ],
+    "selected_hypothesis": {
+      "hypothesis_id": "HYP-1",
+      "title": "Kubernetes Worker Container OOMKilled (Exit Code 137) due to HTTP Connection Memory Leak",
+      "description": "Worker pods for payment-service exceeded the 512Mi cgroup memory limit due to unclosed HTTP client connection leaks in the payment processor module.",
+      "confidence": 95.5,
+      "supporting_evidence_ids": [
+        "EVD-DESC-1",
+        "EVD-LOG-REF-1",
+        "EVD-IMG-3"
+      ],
+      "contradicting_evidence_ids": [],
+      "affected_services": [
+        "payment-service",
+        "k8s_cluster"
+      ],
+      "likely_root_cause": "Unclosed HTTP connection handles causing steady heap memory leaks until cgroup kernel OOM killer terminates the pod.",
+      "recommended_next_check": "Apply HTTP connection pooling with explicit response body closing and increase pod memory request/limit to 1Gi."
+    },
+    "confidence": 95.5
+  }
+]

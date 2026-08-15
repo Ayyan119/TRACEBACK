@@ -1,0 +1,22 @@
+{
+  "scenario_id": "SCENARIO-1",
+  "name": "Log-Only Investigation",
+  "description": "Intermittent 500 Internal Server Errors due to database connection pool timeout.",
+  "incident_id": "INC-S1-101",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "Service order-service returning intermittent 500 errors during checkout peak traffic.",
+  "services": ["order-service", "checkout-db"],
+  "service_metadata": {
+    "order-service": {"environment": "production", "version": "v2.4.1"}
+  },
+  "incident_log_reference": {
+    "file_name": "order_service_err.log",
+    "file_size_bytes": 1048576,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [],
+  "incident_images": [],
+  "expected_accepted_evidence_sources": ["description", "log"],
+  "expected_rejected_evidence_count": 0,
+  "expected_retrieval_required": false
+}

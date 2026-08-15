@@ -1,0 +1,40 @@
+import { Service } from '@/types';
+
+export const demoServices: Service[] = [
+  {
+    id: 'auth-demo',
+    projectId: 'demo-project',
+    name: 'auth-demo',
+    health: 'Healthy',
+    latencyMs: 18,
+    errorRatePercent: 0.0,
+    recentIncidentsCount: 0,
+    dependencies: [],
+    recentDeployments: [],
+    ownerTeam: 'Sandbox Team',
+  },
+  {
+    id: 'cart-demo',
+    projectId: 'demo-project',
+    name: 'cart-demo',
+    health: 'Degraded',
+    latencyMs: 840,
+    errorRatePercent: 2.1,
+    recentIncidentsCount: 1,
+    dependencies: [{ id: 'redis-demo', name: 'redis-demo', type: 'cache' }],
+    recentDeployments: [{ id: 'dep-demo-1', version: 'v0.9.1-beta', deployedAt: '2 hours ago', author: 'Demo Bot' }],
+    ownerTeam: 'Sandbox Team',
+  },
+  {
+    id: 'redis-demo',
+    projectId: 'demo-project',
+    name: 'redis-demo',
+    health: 'Healthy',
+    latencyMs: 1,
+    errorRatePercent: 0.0,
+    recentIncidentsCount: 0,
+    dependencies: [],
+    recentDeployments: [],
+    ownerTeam: 'Sandbox Team',
+  },
+];

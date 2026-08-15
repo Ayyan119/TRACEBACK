@@ -1,0 +1,1 @@
+Sample incident technical notes describing architectural impact and initial observations.

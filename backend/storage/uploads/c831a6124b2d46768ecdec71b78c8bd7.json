@@ -1,0 +1,111 @@
+{
+  "project": {
+    "name": "Art Gallery",
+    "description": "Making some stuff",
+    "environment": "production",
+    "owner_team": null,
+    "repository_url": null,
+    "id": "fa1b40ea-f790-4dba-a6bb-d02f02a707ba",
+    "slug": "art-gallery",
+    "service_count": 2,
+    "active_incident_count": 0,
+    "created_at": "2026-08-14T11:48:34.693655Z",
+    "updated_at": "2026-08-14T11:58:59.613691Z"
+  },
+  "services": [
+    {
+      "name": "Backend",
+      "type": "Backend",
+      "description": "",
+      "owner_team": "",
+      "repository_url": null,
+      "environment": "Production",
+      "id": "41666249-dadb-4404-abe8-83053e807752",
+      "project_id": "fa1b40ea-f790-4dba-a6bb-d02f02a707ba",
+      "health": "Healthy",
+      "latency_ms": 15,
+      "error_rate_percent": 0,
+      "recent_incidents_count": 0,
+      "dependencies": [],
+      "recent_deployments": [],
+      "created_at": "2026-08-14T11:48:34.937328Z",
+      "updated_at": "2026-08-14T11:48:34.937373Z"
+    },
+    {
+      "name": "fgh",
+      "type": "Other",
+      "description": "Time wasting service",
+      "owner_team": "",
+      "repository_url": null,
+      "environment": "Production",
+      "id": "df4c412a-ba20-4fae-a991-398f78352241",
+      "project_id": "fa1b40ea-f790-4dba-a6bb-d02f02a707ba",
+      "health": "Healthy",
+      "latency_ms": 15,
+      "error_rate_percent": 0,
+      "recent_incidents_count": 0,
+      "dependencies": [],
+      "recent_deployments": [],
+      "created_at": "2026-08-14T11:48:35.048368Z",
+      "updated_at": "2026-08-14T11:48:35.048382Z"
+    }
+  ],
+  "incidents": [],
+  "knowledge": [
+    {
+      "title": "requirements.txt",
+      "category": "Post-Mortem",
+      "content": "Extracted content from requirements.txt",
+      "metadata_json": {
+        "original_filename": "requirements.txt"
+      },
+      "id": "f07ebe36-9fc5-47db-9c64-1cdf5f239706",
+      "project_id": "fa1b40ea-f790-4dba-a6bb-d02f02a707ba",
+      "file_url": "/static/uploads/03fe1f98a4724d119fd7076a00681b0b.txt",
+      "file_size": 2980,
+      "mime_type": "text/plain",
+      "status": "ready",
+      "chunk_count": 1,
+      "created_at": "2026-08-14T11:50:52.628433Z",
+      "updated_at": "2026-08-14T11:50:52.628487Z"
+    },
+    {
+      "title": "practice.txt",
+      "category": "Architecture",
+      "content": "Extracted content from practice.txt",
+      "metadata_json": {
+        "original_filename": "practice.txt"
+      },
+      "id": "48122951-c9de-4689-90f5-a30151729ff8",
+      "project_id": "fa1b40ea-f790-4dba-a6bb-d02f02a707ba",
+      "file_url": "/static/uploads/190fe5bceba647eab9e89ee36feb192d.txt",
+      "file_size": 46,
+      "mime_type": "text/plain",
+      "status": "ready",
+      "chunk_count": 1,
+      "created_at": "2026-08-14T11:49:58.722092Z",
+      "updated_at": "2026-08-14T11:49:58.722102Z"
+    },
+    {
+      "title": "Ayyan Shahid CV.pdf",
+      "category": "Architecture",
+      "content": "Extracted content from Ayyan Shahid CV.pdf",
+      "metadata_json": {
+        "original_filename": "Ayyan Shahid CV.pdf"
+      },
+      "id": "2876fbcf-e696-4818-b01e-8813b29adfa4",
+      "project_id": "fa1b40ea-f790-4dba-a6bb-d02f02a707ba",
+      "file_url": "/static/uploads/76557b1d031d47f78a33a5d986ffc369.pdf",
+      "file_size": 72044,
+      "mime_type": "application/pdf",
+      "status": "ready",
+      "chunk_count": 1,
+      "created_at": "2026-08-14T11:49:29.060127Z",
+      "updated_at": "2026-08-14T11:49:29.060140Z"
+    }
+  ],
+  "investigations": [],
+  "deployments": [],
+  "logs": [],
+  "exportedAt": "2026-08-14T11:59:32.498745+00:00"
+}

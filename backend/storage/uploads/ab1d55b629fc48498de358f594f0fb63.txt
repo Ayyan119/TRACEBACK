@@ -1,0 +1,1 @@
+Redis maxmemory is set to 2GB.

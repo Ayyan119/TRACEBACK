@@ -1,0 +1,27 @@
+{
+  "scenario_id": "SCENARIO-2",
+  "name": "Log + Relevant Document",
+  "description": "PostgreSQL connection pool exhaustion diagnosed with attached DB Diagnostic Runbook.",
+  "incident_id": "INC-S2-102",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "PostgreSQL max_connections=100 limit reached causing 504 gateway timeouts.",
+  "services": ["checkout-service", "postgresql_db"],
+  "service_metadata": {
+    "checkout-service": {"environment": "production"}
+  },
+  "incident_log_reference": {
+    "file_name": "postgres_telemetry.log",
+    "file_size_bytes": 204800,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [
+    {
+      "name": "DB_Connection_Pool_Runbook.pdf",
+      "content": "Diagnostics: max_connections=100 limit reached. Active idle connections holding transactions open without returning to pool."
+    }
+  ],
+  "incident_images": [],
+  "expected_accepted_evidence_sources": ["description", "log", "document"],
+  "expected_rejected_evidence_count": 0,
+  "expected_retrieval_required": false
+}

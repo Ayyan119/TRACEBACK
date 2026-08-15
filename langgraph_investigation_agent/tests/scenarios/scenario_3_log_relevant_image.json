@@ -1,0 +1,28 @@
+{
+  "scenario_id": "SCENARIO-3",
+  "name": "Log + Relevant Image",
+  "description": "Grafana Dashboard showing 504 Gateway Timeout spike correlated with Redis memory exhaustion.",
+  "incident_id": "INC-S3-103",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "Grafana monitoring alert showing 98% HTTP 504 error rate on payment endpoint.",
+  "services": ["payment-service", "redis-cache"],
+  "service_metadata": {
+    "payment-service": {"environment": "production"}
+  },
+  "incident_log_reference": {
+    "file_name": "payment_gateway.log",
+    "file_size_bytes": 524288,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [],
+  "incident_images": [
+    {
+      "title": "Grafana Dashboard 504 Latency Spike Screenshot",
+      "file_url": "https://storage.local/grafana_504_spike.png",
+      "file_path": "/var/uploads/grafana_504_spike.png"
+    }
+  ],
+  "expected_accepted_evidence_sources": ["description", "log", "image"],
+  "expected_rejected_evidence_count": 0,
+  "expected_retrieval_required": false
+}

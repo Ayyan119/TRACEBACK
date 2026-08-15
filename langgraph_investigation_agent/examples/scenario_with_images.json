@@ -1,0 +1,23 @@
+{
+  "investigation_id": "inv-scenario-c",
+  "project_id": "art-gallary",
+  "incident_id": "INC-1003",
+  "incident_description": "Latency anomaly observed on order placement endpoints.",
+  "incident_log_reference": {
+    "file_name": "app_error.log",
+    "file_size_bytes": 512000
+  },
+  "services": ["checkout-service"],
+  "service_metadata": {},
+  "incident_documents": [],
+  "incident_images": [
+    {
+      "title": "Grafana Latency & Error Rate Screenshot.png",
+      "file_path": "/path/to/grafana_screenshot_504_error.png"
+    },
+    {
+      "title": "Company Wallpaper.jpg",
+      "file_path": "/path/to/logo.jpg"
+    }
+  ]
+}

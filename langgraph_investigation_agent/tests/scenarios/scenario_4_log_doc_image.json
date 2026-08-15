@@ -1,0 +1,32 @@
+{
+  "scenario_id": "SCENARIO-4",
+  "name": "Log + Document + Image (Full Evidence)",
+  "description": "Cascading microservice failure with telemetry log, architecture PDF runbook, and Datadog alert screenshot.",
+  "incident_id": "INC-S4-104",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "Checkout service total outage across production cluster following deployment v3.2.0.",
+  "services": ["checkout-service", "inventory-service", "postgresql_db"],
+  "service_metadata": {
+    "checkout-service": {"environment": "production", "version": "v3.2.0"}
+  },
+  "incident_log_reference": {
+    "file_name": "checkout_cluster_telemetry.log",
+    "file_size_bytes": 2097152,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [
+    {
+      "name": "Microservice_Cascading_Failure_Runbook.pdf",
+      "content": "Cascading Outage Remediation: Inspect database connection pool limits and verify circuit breaker thresholds."
+    }
+  ],
+  "incident_images": [
+    {
+      "title": "Datadog Latency & Error Rate Spike Screenshot",
+      "file_url": "https://storage.local/datadog_outage_alert.png"
+    }
+  ],
+  "expected_accepted_evidence_sources": ["description", "log", "document", "image"],
+  "expected_rejected_evidence_count": 0,
+  "expected_retrieval_required": false
+}

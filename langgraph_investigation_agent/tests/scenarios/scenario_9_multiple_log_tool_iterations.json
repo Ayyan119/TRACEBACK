@@ -1,0 +1,23 @@
+{
+  "scenario_id": "SCENARIO-9",
+  "name": "Multiple Log Tool Iterations",
+  "description": "Multi-stage investigation requiring sequential log queries across timestamps and error levels.",
+  "incident_id": "INC-S9-109",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "Intermittent payment failure requiring log searches by error level, service name, and timeframe.",
+  "services": ["payment-service", "gateway-service"],
+  "service_metadata": {
+    "payment-service": {"environment": "production"}
+  },
+  "incident_log_reference": {
+    "file_name": "multi_stage_telemetry.log",
+    "file_size_bytes": 2097152,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [],
+  "incident_images": [],
+  "expected_accepted_evidence_sources": ["description", "log"],
+  "expected_rejected_evidence_count": 0,
+  "expected_min_tool_iterations": 2,
+  "expected_retrieval_required": false
+}

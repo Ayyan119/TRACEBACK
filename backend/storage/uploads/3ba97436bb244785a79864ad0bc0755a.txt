@@ -1,0 +1,18 @@
+TRACEBACK Smart Parking Investigation Test Case
+
+Files:
+1. incident_description.txt  - paste/use as incident description.
+2. parking_incident.log       - mandatory incident log.
+3. parking_camera_runbook.docx - incident evidence document.
+4. expected_result.txt        - evaluator answer; keep hidden during the test.
+
+Suggested test:
+- Create/use a project such as "Smart Parking".
+- Create an incident with the description.
+- Upload parking_camera_runbook.docx as evidence.
+- Upload parking_incident.log as the mandatory log.
+- Run the AI investigation.
+- Compare the generated RCA against expected_result.txt.
+
+The expected answer is intentionally evidence-bound. The agent should not claim a
+specific CPU/GPU/memory cause unless it has evidence for that claim.

@@ -1,0 +1,22 @@
+{
+  "scenario_id": "SCENARIO-7",
+  "name": "Knowledge Retrieval Required",
+  "description": "Complex deployment architecture ambiguity requiring Qdrant vector retrieval of system design documents.",
+  "incident_id": "INC-S7-107",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "Payment webhook fails with signature mismatch error after architecture migration.",
+  "services": ["payment-webhook-service"],
+  "service_metadata": {
+    "payment-webhook-service": {"environment": "production"}
+  },
+  "incident_log_reference": {
+    "file_name": "webhook_err.log",
+    "file_size_bytes": 1048576,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [],
+  "incident_images": [],
+  "expected_accepted_evidence_sources": ["description", "log", "knowledge"],
+  "expected_rejected_evidence_count": 0,
+  "expected_retrieval_required": true
+}

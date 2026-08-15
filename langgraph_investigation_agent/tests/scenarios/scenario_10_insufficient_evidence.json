@@ -1,0 +1,23 @@
+{
+  "scenario_id": "SCENARIO-10",
+  "name": "Insufficient Evidence Scenario",
+  "description": "Vague symptom report 'Order processing is failing' with empty log snippet requiring cautious hypotheses.",
+  "incident_id": "INC-S10-110",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "Order processing is failing.",
+  "services": ["order-service"],
+  "service_metadata": {
+    "order-service": {"environment": "production"}
+  },
+  "incident_log_reference": {
+    "file_name": "empty_vague.log",
+    "file_size_bytes": 1024,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [],
+  "incident_images": [],
+  "expected_accepted_evidence_sources": ["description", "log"],
+  "expected_rejected_evidence_count": 0,
+  "expected_confidence_max": 95.0,
+  "expected_retrieval_required": false
+}

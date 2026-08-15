@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* DARK THEME (Default) */
+  --bg-app: #0F1115;
+  --bg-secondary: #15181E;
+  --bg-surface: #191D24;
+  --bg-surface-hover: #222731;
+  --bg-elevated: #1E232B;
+  --border-color: #2A3039;
+  
+  --text-primary: #E7EAF0;
+  --text-secondary: #9AA3B2;
+  --text-muted: #697384;
+  
+  --accent-primary: #4F8CFF;
+  --accent-hover: #6A9EFF;
+  --accent-subtle: rgba(79, 140, 255, 0.12);
+  
+  --status-success: #3FB950;
+  --status-warning: #D29922;
+  --status-danger: #F85149;
+  --status-info: #58A6FF;
+
+  /* STATUS & CONFIDENCE BADGE TOKENS (DARK THEME) */
+  --badge-critical-bg: rgba(248, 81, 73, 0.14);
+  --badge-critical-text: #FF7B72;
+  --badge-critical-border: rgba(248, 81, 73, 0.35);
+
+  --badge-warning-bg: rgba(210, 153, 34, 0.14);
+  --badge-warning-text: #E3B341;
+  --badge-warning-border: rgba(210, 153, 34, 0.35);
+
+  --badge-healthy-bg: rgba(63, 185, 80, 0.12);
+  --badge-healthy-text: #56D364;
+  --badge-healthy-border: rgba(63, 185, 80, 0.3);
+
+  --badge-info-bg: rgba(88, 166, 255, 0.12);
+  --badge-info-text: #79C0FF;
+  --badge-info-border: rgba(88, 166, 255, 0.3);
+
+  --badge-confidence-bg: rgba(79, 140, 255, 0.1);
+  --badge-confidence-text: #A5C5FF;
+  --badge-confidence-border: rgba(79, 140, 255, 0.28);
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+[data-theme='light'] {
+  /* REFINED LIGHT THEME */
+  --bg-app: #F6F7F9;
+  --bg-secondary: #F1F3F6;
+  --bg-surface: #FFFFFF;
+  --bg-surface-hover: #F4F6F9;
+  --bg-elevated: #FFFFFF;
+  --border-color: #DDE1E7;
+  
+  --text-primary: #171A21;
+  --text-secondary: #667085;
+  --text-muted: #8A94A4;
+  
+  --accent-primary: #356AE6;
+  --accent-hover: #2858C7;
+  --accent-subtle: rgba(53, 106, 230, 0.08);
+  
+  --status-success: #218739;
+  --status-warning: #A66B00;
+  --status-danger: #D1242F;
+  --status-info: #2563EB;
+
+  /* STATUS & CONFIDENCE BADGE TOKENS (LIGHT THEME - RESTRAINED & OPERATIONAL) */
+  --badge-critical-bg: #FEF2F2;
+  --badge-critical-text: #991B1B;
+  --badge-critical-border: #FCA5A5;
+
+  --badge-warning-bg: #FFFBEB;
+  --badge-warning-text: #92400E;
+  --badge-warning-border: #FCD34D;
+
+  --badge-healthy-bg: #F0FDF4;
+  --badge-healthy-text: #166534;
+  --badge-healthy-border: #86EFAC;
+
+  --badge-info-bg: #EFF6FF;
+  --badge-info-text: #1E40AF;
+  --badge-info-border: #93C5FD;
+
+  --badge-confidence-bg: #F8FAFC;
+  --badge-confidence-text: #334155;
+  --badge-confidence-border: #CBD5E1;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

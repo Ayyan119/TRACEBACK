@@ -1,0 +1,27 @@
+{
+  "scenario_id": "SCENARIO-5",
+  "name": "Irrelevant Document Rejection",
+  "description": "Redis memory exhaustion incident attached with completely unrelated Employee Vacation Policy document.",
+  "incident_id": "INC-S5-105",
+  "project_id": "PROJ-PROD-1",
+  "incident_description": "Redis cluster maxmemory threshold exceeded causing command rejection on order cache.",
+  "services": ["order-service", "redis-cache"],
+  "service_metadata": {
+    "order-service": {"environment": "production"}
+  },
+  "incident_log_reference": {
+    "file_name": "redis_err.log",
+    "file_size_bytes": 1048576,
+    "log_type": "telemetry"
+  },
+  "incident_documents": [
+    {
+      "name": "Employee_Vacation_Policy_2026.pdf",
+      "content": "Company Policy: Employees are entitled to 20 days of annual paid leave subject to manager approval."
+    }
+  ],
+  "incident_images": [],
+  "expected_accepted_evidence_sources": ["description", "log"],
+  "expected_rejected_evidence_count": 1,
+  "expected_retrieval_required": false
+}

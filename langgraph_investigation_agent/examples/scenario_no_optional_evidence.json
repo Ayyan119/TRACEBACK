@@ -1,0 +1,21 @@
+{
+  "investigation_id": "inv-scenario-a",
+  "project_id": "art-gallary",
+  "incident_id": "INC-1001",
+  "incident_description": "Checkout service returning HTTP 504 gateway timeouts for the past 15 minutes during high user traffic.",
+  "incident_log_reference": {
+    "file_name": "checkout_app.log",
+    "file_size_bytes": 1048576,
+    "log_type": "telemetry"
+  },
+  "services": ["checkout-service"],
+  "service_metadata": {
+    "checkout-service": {
+      "environment": "production",
+      "framework": "FastAPI",
+      "database": "postgresql_db"
+    }
+  },
+  "incident_documents": [],
+  "incident_images": []
+}

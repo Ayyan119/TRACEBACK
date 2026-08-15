@@ -1,0 +1,165 @@
+import { Investigation } from '@/types';
+
+export const finbankInvestigations: Record<string, Investigation> = {
+  'inc-finbank-2001': {
+    id: 'inv-finbank-2001',
+    incidentId: 'inc-finbank-2001',
+    title: 'Ledger reconciliation batch execution drift',
+    status: 'analyzing',
+    severity: 'Critical',
+    confidence: 88,
+    summary:
+      'Ledger reconciliation throughput dropped by 84% following release v3.1.0 (commit f49a12e). Evidence points to missing index on ledger_entries(tenant_id, created_at) causing sequential table scans during lock acquisition.',
+    impact: {
+      affectedFunctionality: 'End-of-Hour Ledger Settlement',
+      affectedServices: ['ledger-service', 'transaction-service'],
+      estimatedImpact: '3,400 pending posting entries queued, 14.8% transaction processing delay',
+      startTime: '12:20 UTC',
+      currentDuration: '45m',
+    },
+    detectedChanges: [
+      {
+        id: 'fin-mc-1',
+        name: 'Reconciliation duration',
+        baseline: '180 ms',
+        current: '4.2 s',
+        percentChange: '+2233%',
+        isNegative: true,
+      },
+      {
+        id: 'fin-mc-2',
+        name: 'Postgres row lock wait time',
+        baseline: '2.1 ms',
+        current: '840 ms',
+        percentChange: '+39900%',
+        isNegative: true,
+      },
+      {
+        id: 'fin-mc-3',
+        name: 'Unsettled transaction queue',
+        baseline: '12 items',
+        current: '3,400 items',
+        percentChange: '+28233%',
+        isNegative: true,
+      },
+    ],
+    primaryHypothesis: {
+      id: 'hyp-fin-1',
+      investigationId: 'inv-finbank-2001',
+      title: 'Missing Composite Index on ledger_entries table',
+      description:
+        'Release v3.1.0 migration dropped the compound index on (tenant_id, created_at), forcing full table scans during batch reconciliation lock checks.',
+      confidenceLabel: 'HIGH',
+      probability: 0.88,
+      status: 'primary',
+      evidenceItems: [
+        { id: 'ev-f1', text: 'PostgreSQL EXPLAIN query shows Seq Scan on ledger_entries (cost 0.00..4291.00)', isSupporting: true },
+        { id: 'ev-f2', text: 'Lock wait duration increased from 2.1ms to 840ms', isSupporting: true },
+        { id: 'ev-f3', text: 'Migration script 0042_ledger_idx.sql removed composite index', isSupporting: true },
+      ],
+    },
+    alternativeHypotheses: [
+      {
+        id: 'hyp-fin-2',
+        investigationId: 'inv-finbank-2001',
+        title: 'Redis session store memory pressure',
+        description: 'Session key expiration delay creating worker queue latency.',
+        confidenceLabel: 'LOW',
+        probability: 0.12,
+        status: 'alternative',
+        evidenceItems: [
+          { id: 'ev-f4', text: 'Redis memory utilization healthy at 31%', isSupporting: false },
+        ],
+      },
+    ],
+    timeline: [
+      {
+        id: 'tl-f1',
+        investigationId: 'inv-finbank-2001',
+        timestamp: '12:15 UTC',
+        title: 'Release v3.1.0 deployed to FinBank',
+        description: 'Deployed commit f49a12e containing migration 0042_ledger_idx.sql.',
+        category: 'deployment',
+        severity: 'info',
+      },
+      {
+        id: 'tl-f2',
+        investigationId: 'inv-finbank-2001',
+        timestamp: '12:20 UTC',
+        title: 'Reconciliation batch latency spike',
+        description: 'P99 batch item processing time rose to 4.2s.',
+        category: 'anomaly',
+        severity: 'warning',
+      },
+      {
+        id: 'tl-f3',
+        investigationId: 'inv-finbank-2001',
+        timestamp: '12:35 UTC',
+        title: 'Queue depth alert fired',
+        description: 'Unsettled ledger queue exceeded 3,000 pending items.',
+        category: 'alert',
+        severity: 'critical',
+      },
+    ],
+    evidenceChain: [
+      {
+        id: 'ec-f1',
+        stepNumber: 1,
+        title: 'Index dropped in migration',
+        description: 'Migration 0042_ledger_idx.sql removed composite index.',
+      },
+      {
+        id: 'ec-f2',
+        stepNumber: 2,
+        title: 'PostgreSQL sequential scans',
+        description: 'Query planner fallback to full table scan on 2.4M rows.',
+      },
+      {
+        id: 'ec-f3',
+        stepNumber: 3,
+        title: 'Row lock wait accumulation',
+        description: 'Exclusive lock wait time spiked from 2.1ms to 840ms per batch item.',
+      },
+      {
+        id: 'ec-f4',
+        stepNumber: 4,
+        title: 'Reconciliation backlog',
+        description: 'Settlement throughput degraded by 84%.',
+      },
+    ],
+    recommendations: [
+      {
+        id: 'rec-f1',
+        category: 'Immediate',
+        action: 'Re-create composite index on ledger_entries(tenant_id, created_at CONCURRENTLY).',
+        reason: 'Eliminate full table scan overhead during lock checks.',
+        expectedResult: 'Drop query time from 4.2s to <10ms.',
+        risk: 'Low',
+      },
+      {
+        id: 'rec-f2',
+        category: 'Investigation',
+        action: 'Review migration approval checklist for DDL index removals.',
+        reason: 'Prevent unindexed queries from passing CI/CD checks.',
+        expectedResult: 'Automate pg_stat_statements query plan verification in CI.',
+        risk: 'Low',
+      },
+    ],
+    evidenceGaps: [
+      {
+        id: 'eg-f1',
+        gapDescription: 'PostgreSQL pg_stat_statements query execution history logs prior to 12:00 UTC are missing.',
+        recommendedNextEvidence: 'Upload postgres-query-stats.csv from 11:30–12:30 UTC.',
+        actionPrompt: 'Upload query stats',
+        impactLevel: 'Medium',
+      },
+    ],
+    activityTrace: [
+      { id: 'act-f1', timestamp: '12:25:01', action: 'Analyzed FinBank ledger reconciliation alerts', status: 'done' },
+      { id: 'act-f2', timestamp: '12:25:04', action: 'Queried PostgreSQL EXPLAIN ANALYZE for ledger_entries', status: 'done' },
+      { id: 'act-f3', timestamp: '12:25:09', action: 'Detected Sequential Scan replacing Index Scan', status: 'done' },
+    ],
+    createdAt: '2026-08-14T12:25:00Z',
+    updatedAt: '2026-08-14T12:30:00Z',
+  },
+};

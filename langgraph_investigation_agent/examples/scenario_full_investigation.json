@@ -1,0 +1,31 @@
+{
+  "investigation_id": "inv-scenario-full",
+  "project_id": "art-gallary",
+  "incident_id": "INC-1005",
+  "incident_description": "Critical production outage: Checkout service failing with 504 Gateway Timeouts during promotion launch. High lock contention on PostgreSQL database and connection pool exhaustion.",
+  "incident_log_reference": {
+    "file_name": "production_telemetry.log",
+    "file_size_bytes": 4194304,
+    "log_type": "telemetry"
+  },
+  "services": ["checkout-service", "postgresql_db"],
+  "service_metadata": {
+    "checkout-service": {
+      "environment": "production",
+      "version": "v2.1.4",
+      "database": "postgresql_db"
+    }
+  },
+  "incident_documents": [
+    {
+      "name": "Database Connection Pool Diagnostic.pdf",
+      "content": "Diagnostics report showing connection pool max_connections=100 reached. Long transactions on orders table holding exclusive row locks."
+    }
+  ],
+  "incident_images": [
+    {
+      "title": "Grafana Latency & Pool Exhaustion Screenshot.png",
+      "file_path": "/path/to/grafana_screenshot_504_error.png"
+    }
+  ]
+}

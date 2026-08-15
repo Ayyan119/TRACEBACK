@@ -1,0 +1,48 @@
+import { KnowledgeDocument } from '@/types';
+
+export const mockKnowledgeDocuments: KnowledgeDocument[] = [
+  {
+    id: 'kn-1',
+    projectId: 'shopflow',
+    name: 'payment-service-runbook.md',
+    category: 'Runbooks',
+    chunks: 128,
+    status: 'Indexed',
+    lastUpdated: '2 hours ago',
+    summary: 'Operational procedures, retry configuration limits, and emergency gateway circuit breaker controls.',
+    tags: ['payment', 'runbook', 'circuit-breaker', 'stripe'],
+  },
+  {
+    id: 'kn-2',
+    projectId: 'shopflow',
+    name: 'order-service-architecture.md',
+    category: 'Architecture',
+    chunks: 94,
+    status: 'Indexed',
+    lastUpdated: '3 days ago',
+    summary: 'Order processing state machine, Saga orchestrator pattern, and database transaction boundaries.',
+    tags: ['architecture', 'order-service', 'state-machine'],
+  },
+  {
+    id: 'kn-3',
+    projectId: 'shopflow',
+    name: 'q2-payment-timeout-postmortem.md',
+    category: 'Previous incidents',
+    chunks: 62,
+    status: 'Indexed',
+    lastUpdated: 'May 12, 2026',
+    summary: 'Post-mortem report on upstream payment gateway timeout spike during black friday load test.',
+    tags: ['postmortem', 'payment', 'timeout'],
+  },
+  {
+    id: 'kn-4',
+    projectId: 'shopflow',
+    name: 'postgres-connection-tuning.md',
+    category: 'Troubleshooting guides',
+    chunks: 45,
+    status: 'Indexed',
+    lastUpdated: '1 week ago',
+    summary: 'PgBouncer pooler sizing rules and max_connections configuration troubleshooting guidelines.',
+    tags: ['postgres', 'pgbouncer', 'troubleshooting'],
+  },
+];

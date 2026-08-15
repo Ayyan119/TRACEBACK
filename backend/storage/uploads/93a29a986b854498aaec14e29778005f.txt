@@ -1,0 +1,12 @@
+Parking service incident — investigation test case
+
+From 24 July 2026 through 26 July 2026, the Smart Parking application intermittently
+stopped registering newly parked vehicles. Users reported that some parking slots
+remained marked as available even after a vehicle entered.
+
+The issue appears concentrated on the parking-camera processing service. Please
+investigate the incident, correlate the application logs with the provided technical
+document, and determine the most likely root cause. Mention the affected service,
+timeline, supporting evidence, confidence, and recommended verification/remediation.
+
+Do not assume facts that are not supported by the evidence.

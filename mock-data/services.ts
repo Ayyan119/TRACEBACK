@@ -1,0 +1,93 @@
+import { Service } from '@/types';
+
+export const mockServices: Service[] = [
+  {
+    id: 'order-service',
+    projectId: 'shopflow',
+    name: 'order-service',
+    health: 'Degraded',
+    latencyMs: 3800,
+    errorRatePercent: 12.4,
+    recentIncidentsCount: 1,
+    dependencies: [
+      { id: 'payment-service', name: 'payment-service', type: 'internal' },
+      { id: 'inventory-service', name: 'inventory-service', type: 'internal' },
+      { id: 'postgres', name: 'postgres', type: 'database' },
+    ],
+    recentDeployments: [
+      { id: 'dep-102', version: 'v2.4.1', deployedAt: '13:30 UTC', author: 'Alex Chen' },
+    ],
+    ownerTeam: 'Checkout & Core Platform',
+  },
+  {
+    id: 'payment-service',
+    projectId: 'shopflow',
+    name: 'payment-service',
+    health: 'Critical',
+    latencyMs: 3500,
+    errorRatePercent: 18.2,
+    recentIncidentsCount: 1,
+    dependencies: [
+      { id: 'stripe-api', name: 'Stripe API', type: 'external' },
+      { id: 'redis', name: 'redis', type: 'cache' },
+    ],
+    recentDeployments: [
+      { id: 'dep-101', version: 'v1.9.0', deployedAt: 'Yesterday 18:00 UTC', author: 'Sarah Jenkins' },
+    ],
+    ownerTeam: 'Payments SRE',
+  },
+  {
+    id: 'inventory-service',
+    projectId: 'shopflow',
+    name: 'inventory-service',
+    health: 'Healthy',
+    latencyMs: 45,
+    errorRatePercent: 0.1,
+    recentIncidentsCount: 0,
+    dependencies: [
+      { id: 'postgres', name: 'postgres', type: 'database' },
+    ],
+    recentDeployments: [
+      { id: 'dep-099', version: 'v3.1.2', deployedAt: '3 days ago', author: 'DevOps Automation' },
+    ],
+    ownerTeam: 'Inventory Team',
+  },
+  {
+    id: 'user-service',
+    projectId: 'shopflow',
+    name: 'user-service',
+    health: 'Healthy',
+    latencyMs: 32,
+    errorRatePercent: 0.05,
+    recentIncidentsCount: 0,
+    dependencies: [
+      { id: 'redis', name: 'redis', type: 'cache' },
+    ],
+    recentDeployments: [],
+    ownerTeam: 'Identity Team',
+  },
+  {
+    id: 'postgres',
+    projectId: 'shopflow',
+    name: 'postgres',
+    health: 'Healthy',
+    latencyMs: 4,
+    errorRatePercent: 0.0,
+    recentIncidentsCount: 0,
+    dependencies: [],
+    recentDeployments: [],
+    ownerTeam: 'Database Reliability',
+  },
+  {
+    id: 'redis',
+    projectId: 'shopflow',
+    name: 'redis',
+    health: 'Healthy',
+    latencyMs: 1,
+    errorRatePercent: 0.0,
+    recentIncidentsCount: 0,
+    dependencies: [],
+    recentDeployments: [],
+    ownerTeam: 'Database Reliability',
+  },
+];
