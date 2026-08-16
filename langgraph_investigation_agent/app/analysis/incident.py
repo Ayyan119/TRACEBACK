@@ -13,7 +13,7 @@ async def analyze_incident_needs(
     retrieved_logs: List[Dict[str, Any]],
 ) -> IncidentAnalysisDecision:
     """Self-RAG decision: determines if knowledge base or previous incident search is required using LLM reasoning."""
-    structured_llm = get_structured_llm(IncidentAnalysisDecision)
+    structured_llm = get_structured_llm(IncidentAnalysisDecision, model_type="extraction")
     if structured_llm is not None:
         try:
             prompt = (

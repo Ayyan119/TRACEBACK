@@ -30,8 +30,10 @@ class AgentConfig:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/traceback_db")
     
     DEFAULT_LLM_MODEL: str = os.getenv("DEFAULT_LLM_MODEL", "gpt-4o-mini")
+    EXTRACTION_LLM_MODEL: str = os.getenv("EXTRACTION_LLM_MODEL", os.getenv("DEFAULT_LLM_MODEL", "gpt-4o-mini"))
+    REASONING_LLM_MODEL: str = os.getenv("REASONING_LLM_MODEL", os.getenv("DEFAULT_LLM_MODEL", "gpt-4o-mini"))
     FALLBACK_LLM_MODEL: str = os.getenv("FALLBACK_LLM_MODEL", "gpt-4o-mini")
-    VISION_LLM_MODEL: str = os.getenv("VISION_LLM_MODEL", "gpt-4o-mini")
+    VISION_LLM_MODEL: str = os.getenv("VISION_LLM_MODEL", os.getenv("EXTRACTION_LLM_MODEL", "gpt-4o-mini"))
     
     MAX_TOOL_ITERATIONS: int = int(os.getenv("MAX_TOOL_ITERATIONS", "5"))
     MAX_INVESTIGATION_ITERATIONS: int = int(os.getenv("MAX_INVESTIGATION_ITERATIONS", "3"))

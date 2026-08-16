@@ -12,8 +12,8 @@ async def analyze_incident_document(doc: Dict[str, Any], incident_description: s
     title = doc.get("name", doc.get("title", "Document"))
     content = doc.get("content", doc.get("summary", ""))
 
-    # 1. Attempt structured LLM analysis
-    structured_llm = get_structured_llm(DocumentAnalysis)
+    # 1. Attempt structured LLM extraction (nano model)
+    structured_llm = get_structured_llm(DocumentAnalysis, model_type="extraction")
     if structured_llm is not None:
         try:
             prompt = (

@@ -39,7 +39,7 @@ async def generate_ranked_hypotheses(
         f"- ALL AVAILABLE EVIDENCE IDs: {valid_ids}\n\n"
         f"DETAILED EVIDENCE ITEMS:\n"
         f"{evidence_formatted_str}\n\n"
-        f"Formulate 1 to 3 ranked hypotheses explaining the root cause. You MUST cite ALL matching evidence IDs from {valid_ids} in supporting_evidence_ids."
+        f"Formulate 2 to 4 ranked hypotheses explaining the root cause. You MUST cite ALL matching evidence IDs from {valid_ids} in supporting_evidence_ids."
     )
     
     ranking = await safe_invoke_structured_llm(

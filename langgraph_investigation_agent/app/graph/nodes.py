@@ -174,7 +174,7 @@ async def collect_evidence_node(state: InvestigationState) -> Dict[str, Any]:
 
 
 async def reason_with_tools_node(state: InvestigationState) -> Dict[str, Any]:
-    """LLM tool reasoning node: decides if PostgreSQL log querying is needed or if max iterations reached."""
+    """Deterministic tool node: decides if PostgreSQL log querying is needed using Python logic."""
     start_time = time.time()
     tool_iterations = state.get("tool_iterations", 0)
     
@@ -185,29 +185,18 @@ async def reason_with_tools_node(state: InvestigationState) -> Dict[str, Any]:
         return updates
 
     retrieved_logs = state.get("retrieved_logs", [])
-    accepted = state.get("accepted_evidence", [])
-    desc = state.get("incident_description", "")
 
-    # Attempt LLM decision if not yet queried
+    # Deterministic decision: query logs if no logs retrieved yet
     if len(retrieved_logs) == 0 and tool_iterations == 0:
-        prompt = f"Given incident description '{desc}' and {len(accepted)} evidence items, should we query database telemetry log records for errors? Respond with 'YES' or 'NO' and brief reason."
-        res = await safe_invoke_reasoning_llm(prompt, node_name="reason_with_tools")
-        if res is not None:
-            content = str(res.content).upper()
-            if "NO" in content and "YES" not in content:
-                updates = {"tool_decision": "no_tool"}
-                _add_trace(updates, "reason_with_tools", (time.time() - start_time) * 1000, "LLM Decision: no_tool")
-                return updates
-
         updates = {
             "tool_decision": "query_logs",
             "tool_iterations": tool_iterations + 1,
         }
-        _add_trace(updates, "reason_with_tools", (time.time() - start_time) * 1000, "Decision: query_logs (iteration 1)")
+        _add_trace(updates, "reason_with_tools", (time.time() - start_time) * 1000, "Deterministic Decision: query_logs (iteration 1)")
         return updates
     else:
         updates = {"tool_decision": "no_tool"}
-        _add_trace(updates, "reason_with_tools", (time.time() - start_time) * 1000, "Decision: no_tool needed")
+        _add_trace(updates, "reason_with_tools", (time.time() - start_time) * 1000, "Deterministic Decision: no_tool needed")
         return updates
 
 
