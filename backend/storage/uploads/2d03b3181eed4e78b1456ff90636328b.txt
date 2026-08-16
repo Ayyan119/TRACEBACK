@@ -1,0 +1,7 @@
+Evidence ID: E-005
+Source: object-storage metrics
+Timestamp: 2026-08-16 14:00-14:30 UTC
+Availability: 99.99%
+P95 latency: 72 ms
+Error rate: 0.01%
+Interpretation: object-storage showed no significant degradation.

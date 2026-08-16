@@ -79,7 +79,29 @@ async def retrieve_knowledge_chunks(
                 "project_id": project_id,
             })
         
+        diag = {
+            "project_id": project_id,
+            "query": combined_query,
+            "collection": config.QDRANT_COLLECTION,
+            "filters": {"project_id": project_id, "source_type": "knowledge_document"},
+            "top_k": top_k,
+            "raw_results_count": len(hits),
+            "filtered_results_count": len(results),
+            "selected_results_count": len(results)
+        }
+        logger.info(f"QDRANT_KNOWLEDGE_DIAGNOSTICS: {diag}")
+
+        if len(results) == 0:
+            logger.info(f"Qdrant knowledge retrieval returned 0 results for project '{project_id}' with query '{combined_query}'. Reason: Collection '{config.QDRANT_COLLECTION}' may be unindexed or contains no matching 'knowledge_document' records for project_id='{project_id}'.")
+
         return results
     except Exception as e:
-        logger.warning(f"Qdrant knowledge retrieval unavailable for project '{project_id}': {e}")
+        diag = {
+            "project_id": project_id,
+            "query": search_queries,
+            "collection": config.QDRANT_COLLECTION,
+            "error": str(e),
+            "selected_results_count": 0
+        }
+        logger.warning(f"Qdrant knowledge retrieval unavailable: {diag}")
         return []

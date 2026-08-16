@@ -1,0 +1,9 @@
+Evidence ID: E-003
+Source: deployment configuration
+Deployment: video-transcoding-service v6.1.0
+Deployment time: 2026-08-16 13:58 UTC
+Temporary FFmpeg workspace:
+Before deployment: 40 GiB
+After deployment: 8 GiB
+Additional change: Failed FFmpeg retry artifacts were retained in the temporary workspace.
+Interpretation: the deployment reduced available temporary workspace and changed artifact retention behavior.

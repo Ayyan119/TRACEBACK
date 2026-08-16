@@ -1,0 +1,8 @@
+Evidence ID: E-007
+Source: metadata-db metrics
+Timestamp: 2026-08-16 14:00-14:30 UTC
+CPU: 22%
+Connections: 61 / 300
+P95 query latency: 14 ms
+Error rate: 0.02%
+Interpretation: metadata-db remained healthy.

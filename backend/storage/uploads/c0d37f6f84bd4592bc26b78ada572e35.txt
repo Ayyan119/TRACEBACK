@@ -1,0 +1,7 @@
+Evidence ID: E-006
+Source: CDN metrics
+Timestamp: 2026-08-16 14:00-14:30 UTC
+Edge latency: 35 ms
+Packet loss: 0%
+HTTP 5xx rate: 0.01%
+Interpretation: CDN health was normal.

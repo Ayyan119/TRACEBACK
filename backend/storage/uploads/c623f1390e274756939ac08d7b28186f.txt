@@ -1,0 +1,10 @@
+Evidence ID: E-008
+Source: video-transcoding-service queue metrics
+Timestamp: 2026-08-16 14:00-14:25 UTC
+14:00 -> 31 jobs
+14:05 -> 46 jobs
+14:10 -> 118 jobs
+14:15 -> 410 jobs
+14:20 -> 860 jobs
+14:25 -> 1210 jobs
+Interpretation: transcoding backlog increased sharply during the incident.

@@ -93,11 +93,7 @@ export default function ProjectInvestigationReportPage() {
   }
 
   const inv = investigation;
-  const rootCauseTitle = inv.primaryHypothesis
-    ? (inv.primaryHypothesis.title?.includes('Suspected Root Cause for') && inv.primaryHypothesis.description
-        ? inv.primaryHypothesis.description
-        : inv.primaryHypothesis.title)
-    : undefined;
+  const rootCauseTitle = inv.primaryHypothesis?.title;
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto text-xs pb-12">

@@ -1,0 +1,8 @@
+Evidence ID: E-004
+Source: playback-service metrics
+Timestamp: 2026-08-16 14:10-14:25 UTC
+GET /videos/new-7742/manifest.m3u8
+HTTP status: 503
+reason=manifest_not_found
+Existing video manifests continued returning HTTP 200.
+Interpretation: playback failures were limited to newly uploaded videos.

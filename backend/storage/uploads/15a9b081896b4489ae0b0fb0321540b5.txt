@@ -1,0 +1,10 @@
+Evidence ID: E-002
+Source: video-transcoding-service node metrics
+Timestamp: 2026-08-16 14:02-14:20 UTC
+Node disk utilization:
+transcoder-01: 96%
+transcoder-02: 97%
+transcoder-03: 98%
+Normal operating range: below 80%.
+Alert threshold: 90%.
+Interpretation: transcoder nodes experienced unusually high disk utilization.

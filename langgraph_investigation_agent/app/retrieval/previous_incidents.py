@@ -67,7 +67,29 @@ async def retrieve_previous_incidents(
                 "project_id": project_id,
             })
         
+        diag = {
+            "project_id": project_id,
+            "query": query,
+            "collection": config.QDRANT_COLLECTION,
+            "filters": {"project_id": project_id, "source_type": "incident_history"},
+            "top_k": top_k,
+            "raw_results_count": len(hits),
+            "filtered_results_count": len(results),
+            "selected_results_count": len(results)
+        }
+        logger.info(f"QDRANT_INCIDENT_HISTORY_DIAGNOSTICS: {diag}")
+
+        if len(results) == 0:
+            logger.info(f"Qdrant previous incident retrieval returned 0 results for project '{project_id}' with query '{query}'. Reason: Collection '{config.QDRANT_COLLECTION}' may be unindexed or contains no matching 'incident_history' records for project_id='{project_id}'.")
+
         return results
     except Exception as e:
-        logger.warning(f"Qdrant previous incident retrieval unavailable for project '{project_id}': {e}")
+        diag = {
+            "project_id": project_id,
+            "query": search_queries,
+            "collection": config.QDRANT_COLLECTION,
+            "error": str(e),
+            "selected_results_count": 0
+        }
+        logger.warning(f"Qdrant previous incident retrieval unavailable: {diag}")
         return []

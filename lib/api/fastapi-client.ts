@@ -317,7 +317,7 @@ export class FastApiClient implements ApiClient {
           description: primaryH.description || primaryH.likely_root_cause || summaryText,
           confidenceLabel: (confidence >= 90 ? 'HIGH' : confidence >= 70 ? 'MEDIUM' : 'LOW') as 'HIGH' | 'MEDIUM' | 'LOW',
           probability: confidence,
-          status: 'confirmed' as const,
+          status: 'primary' as const,
           evidenceItems: (primaryH.supporting_evidence_ids || []).map((eid: string, idx: number) => ({
             id: `ev-${idx}`,
             text: `Supporting Evidence ID: ${eid}`,
