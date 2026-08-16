@@ -1,0 +1,107 @@
+{
+  "incident_id": "INC-4721",
+  "project_id": "CloudForge Media",
+  "product": "CloudForge Video Platform",
+  "environment": "Production",
+  "title": "Newly uploaded videos intermittently fail playback",
+  "description": "Users report that newly uploaded videos intermittently fail to play, returning HTTP 503 errors. Videos uploaded prior to the incident continue to play normally. The incident began shortly after a deployment to transcoding-service.",
+  "affected_service": "transcoding-service",
+  "timeline": "16 August 2026 18:02 UTC",
+  "services": [
+    "upload-service",
+    "transcoding-service",
+    "object-storage",
+    "manifest-service",
+    "cdn",
+    "database-service"
+  ],
+  "canonical_ground_truth": {
+    "primary_affected_service": "transcoding-service",
+    "initiating_event": "Deployment of transcoding-service v5.4.0 at 17:58 UTC reduced temp workspace size from 50Gi to 10Gi and retained retry files longer",
+    "root_cause_mechanism": "Temporary workspace disk exhaustion (ENOSPC) caused FFmpeg temporary file creation failures, leading to transcoding job drops and missing video manifests",
+    "healthy_dependencies": [
+      "upload-service",
+      "object-storage",
+      "cdn",
+      "database-service"
+    ],
+    "downstream_symptoms": [
+      "manifest-service HTTP 503 reason=manifest_not_found",
+      "transcoding queue depth backlog growing to 970 jobs"
+    ]
+  },
+  "evidence": [
+    {
+      "evidence_id": "E-001",
+      "source_type": "document",
+      "source_name": "e1.txt - Upload Service Metrics",
+      "content": "upload-service telemetry (17:55 - 18:20 UTC): availability: 99.98%, p95 latency: 390ms, error rate: 0.02%. Active upload channels: 225/300. Upload service is healthy and operating normally."
+    },
+    {
+      "evidence_id": "E-002",
+      "source_type": "document",
+      "source_name": "e2.txt - Transcoding Storage Disk Utilization",
+      "content": "transcoding-service node disk utilization: node-1: 96%, node-2: 97%, node-3: 98%. Normal baseline: 55%-65%. Critical threshold: 90%. Utilization increase began shortly after 18:02 UTC."
+    },
+    {
+      "evidence_id": "E-003",
+      "source_type": "document",
+      "source_name": "e3.txt - Deployment Configuration Change Record",
+      "content": "Deployment Event: transcoding-service version 5.4.0 deployed at 17:58 UTC. Previous temporary workspace allocation: 50 GiB. New temporary workspace allocation: 10 GiB. Deployment configuration also changed FFmpeg retry-file cleanup behavior so retry files are retained longer than before."
+    },
+    {
+      "evidence_id": "E-004",
+      "source_type": "document",
+      "source_name": "e4.txt - Transcoding Service Logs",
+      "content": "transcoding-service log traces:\n17:58:00 deployment v5.4.0 completed\n18:02:15 workspace utilization increasing\n18:05:00 disk utilization > 90%\n18:06:02 ENOSPC: No space left on device path=/tmp/ffmpeg_workspace/job-812\n18:06:05 FFmpeg temporary file creation failed\n18:07:00 transcoding jobs failed"
+    },
+    {
+      "evidence_id": "E-005",
+      "source_type": "document",
+      "source_name": "e5.txt - Transcoding Queue Backlog Timeline",
+      "content": "transcoding-service queue backlog timeline:\n17:55 UTC: 28 jobs\n18:00 UTC: 34 jobs\n18:03 UTC: 71 jobs\n18:06 UTC: 190 jobs\n18:10 UTC: 540 jobs\n18:15 UTC: 970 jobs"
+    },
+    {
+      "evidence_id": "E-006",
+      "source_type": "document",
+      "source_name": "e6.txt - Manifest Service Error Telemetry",
+      "content": "manifest-service error logs (18:10 - 18:15 UTC):\n18:10:02 GET /manifests/video-991.m3u8 -> HTTP 503 reason=manifest_not_found\n18:11:15 GET /manifests/video-998.m3u8 -> HTTP 503 reason=manifest_not_found\nRequests affected: newly uploaded videos. Existing videos uploaded prior to incident: normal."
+    },
+    {
+      "evidence_id": "E-007",
+      "source_type": "document",
+      "source_name": "e7.txt - Object Storage Telemetry",
+      "content": "object-storage metrics: availability: 99.99%, error rate: 0.01%, p95 latency: 62ms. No storage cluster failures during incident."
+    },
+    {
+      "evidence_id": "E-008",
+      "source_type": "document",
+      "source_name": "e8.txt - CDN Health Telemetry",
+      "content": "CDN edge performance: availability: 99.999%, packet loss: 0%, p95 latency: 31ms. No abnormal edge errors."
+    },
+    {
+      "evidence_id": "E-009",
+      "source_type": "document",
+      "source_name": "e9.txt - Database Service Telemetry",
+      "content": "database-service metrics: CPU: 22%, connections: 61/250, p95 query latency: 14ms, error rate: 0.03%. Database is healthy and operating normally."
+    },
+    {
+      "evidence_id": "E-010",
+      "source_type": "document",
+      "source_name": "e10.txt - Historical Database Alert Log (Distractor)",
+      "content": "database-service alert log: 17:40 UTC database backup process temporarily increased CPU. 17:48 UTC database returned to normal baseline. Incident began later at 17:58+ UTC."
+    },
+    {
+      "evidence_id": "E-011",
+      "source_type": "document",
+      "source_name": "e11.txt - Previous Incident Record INC-3190 (Distractor RAG)",
+      "content": "Historical Incident INC-3190 (Resolved in 2025): Cause: database connection exhaustion. Remediation: increase database connection pool."
+    },
+    {
+      "evidence_id": "E-012",
+      "source_type": "log",
+      "source_name": "cloudforge_INC-4721_complete.log",
+      "content": "17:50:00 transcoding-service INFO Transcoding job-790 completed successfully\n17:58:00 deployment-service INFO Deployment transcoding-service v5.4.0 complete. Temp workspace: 10Gi, retain_retry_files=true\n18:02:15 transcoding-service WARN Workspace utilization increasing node-1: 76%, node-2: 78%\n18:05:00 transcoding-service ERROR Disk utilization > 90% node-1: 96%, node-2: 97%, node-3: 98%\n18:06:02 transcoding-service ERROR ENOSPC: No space left on device path=/tmp/ffmpeg_workspace/job-812\n18:06:05 transcoding-service ERROR FFmpeg temporary file creation failed\n18:07:00 transcoding-service ERROR Transcoding jobs failed job-812\n18:10:00 transcoding-service ERROR Queue depth rapidly increasing: 540 jobs\n18:12:00 manifest-service ERROR GET /manifests/video-991.m3u8 -> HTTP 503 reason=manifest_not_found\n18:13:00 manifest-service ERROR Manifest unavailable for newly uploaded videos"
+    }
+  ]
+}
