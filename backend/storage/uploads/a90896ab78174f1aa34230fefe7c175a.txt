@@ -1,0 +1,17 @@
+E-006 — CDN Health
+
+Type: Infrastructure Metrics
+
+Timestamp: 2026-08-16 14:00–14:20 UTC
+
+CDN availability: 99.98%
+
+HTTP 5xx:
+baseline: 0.3%
+current: 0.4%
+
+Packet loss: 0%
+
+p95 latency: 41ms
+
+CDN infrastructure remained healthy.

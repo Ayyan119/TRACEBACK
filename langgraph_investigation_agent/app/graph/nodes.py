@@ -12,7 +12,7 @@ from langgraph_investigation_agent.app.retrieval.qdrant_retriever import retriev
 from langgraph_investigation_agent.app.retrieval.previous_incidents import retrieve_previous_incidents
 from langgraph_investigation_agent.app.retrieval.reranker import rerank_retrieved_items
 from langgraph_investigation_agent.app.analysis.hypotheses import generate_ranked_hypotheses
-from langgraph_investigation_agent.app.models.structured_models import EvidenceAnalysis, HypothesisEvaluation, FinalInvestigationReport
+from langgraph_investigation_agent.app.models.structured_models import EvidenceAnalysis, HypothesisEvaluation, FinalInvestigationReport, GroundingValidationResult
 from langgraph_investigation_agent.app.models.llm import safe_invoke_structured_llm, safe_invoke_reasoning_llm
 from langgraph_investigation_agent.app.prompts.evidence_prompts import EVIDENCE_ANALYSIS_SYSTEM_PROMPT, FINAL_REPORT_SYSTEM_PROMPT
 
@@ -105,21 +105,25 @@ async def process_documents_node(state: InvestigationState) -> Dict[str, Any]:
 async def collect_evidence_node(state: InvestigationState) -> Dict[str, Any]:
     """Merges relevant document and image evidence into accepted_evidence collection."""
     start_time = time.time()
-    accepted = []
-    rejected = []
+    existing_accepted = state.get("accepted_evidence", []) or []
+    existing_ids = set([e.get("evidence_id") for e in existing_accepted if e.get("evidence_id")])
+    
+    accepted = list(existing_accepted)
+    rejected = list(state.get("rejected_evidence", []) or [])
     
     # Process mandatory description & log reference
     description = state.get("incident_description", "")
     log_ref = state.get("incident_log_reference", {})
     
-    accepted.append({
-        "evidence_id": "EVD-DESC-1",
-        "source_type": "description",
-        "source_name": "Incident Description",
-        "content": description,
-        "relevance": True,
-        "confidence": 1.0,
-    })
+    if "EVD-DESC-1" not in existing_ids:
+        accepted.append({
+            "evidence_id": "EVD-DESC-1",
+            "source_type": "description",
+            "source_name": "Incident Description",
+            "content": description,
+            "relevance": True,
+            "confidence": 1.0,
+        })
     
     if log_ref:
         accepted.append({
@@ -423,25 +427,86 @@ async def evaluate_hypotheses_node(state: InvestigationState) -> Dict[str, Any]:
     return updates
 
 
-async def generate_final_report_node(state: InvestigationState) -> Dict[str, Any]:
-    """Node 14: Synthesizes final Root Cause Analysis (RCA) report using LLM reasoning."""
+async def validate_grounding_node(state: InvestigationState) -> Dict[str, Any]:
+    """Node 13.5: Grounding Validation Node: Validates that selected hypothesis claims have direct supporting evidence IDs."""
     start_time = time.time()
-    primary_h = state.get("selected_hypothesis", {})
-    ev_analysis = state.get("evidence_analysis", {})
-    accepted = state.get("accepted_evidence", [])
-    reranked = state.get("reranked_documents", [])
-    prev_incidents = state.get("retrieved_previous_incidents", [])
+    selected_h = state.get("selected_hypothesis", {}) or {}
+    accepted_ev = state.get("accepted_evidence", []) or []
+    valid_ids = set([e.get("evidence_id") for e in accepted_ev if e.get("evidence_id")])
+    
+    cited_ids = selected_h.get("supporting_evidence_ids", [])
+    invalid_citations = [cid for cid in cited_ids if cid not in valid_ids]
+    
+    grounded = len(valid_ids) > 0 and len(cited_ids) > 0 and len(invalid_citations) == 0
+    unsupported = []
+    
+    if not valid_ids or not cited_ids:
+        grounded = False
+        unsupported.append("Selected hypothesis lacks direct supporting evidence IDs in current state.")
+    if invalid_citations:
+        grounded = False
+        unsupported.append(f"Cites invalid or missing evidence IDs: {invalid_citations}")
+        
+    validation = GroundingValidationResult(
+        grounded=grounded,
+        unsupported_claims=unsupported,
+        invalid_evidence_references=invalid_citations,
+        confidence_consistent=True,
+        root_cause_consistent=True,
+        reason="Claims backed by valid evidence IDs." if grounded else "Insufficient evidence to confirm root cause."
+    )
+    
+    updates: Dict[str, Any] = {
+        "grounding_validation": validation.model_dump()
+    }
+    
+    # If ungrounded or evidence insufficient, override selected_hypothesis to explicit inconclusive statement
+    if not grounded and (not accepted_ev or not cited_ids):
+        inconclusive_title = "Root cause cannot be conclusively determined from the supplied evidence."
+        updated_h = dict(selected_h)
+        updated_h["title"] = inconclusive_title
+        updated_h["likely_root_cause"] = inconclusive_title
+        updated_h["confidence"] = min(float(selected_h.get("confidence", 30.0)), 30.0)
+        updated_h["is_evidence_grounded"] = False
+        updates["selected_hypothesis"] = updated_h
+        updates["confidence"] = updated_h["confidence"]
+        
+    _add_trace(updates, "validate_grounding", (time.time() - start_time) * 1000, f"Grounding validation: {grounded} ({validation.reason})")
+    return updates
+
+
+async def generate_final_report_node(state: InvestigationState) -> Dict[str, Any]:
+    """Node 14: Synthesizes final Root Cause Analysis (RCA) report strictly grounded in canonical selected_hypothesis."""
+    start_time = time.time()
+    primary_h = state.get("selected_hypothesis", {}) or {}
+    ev_analysis = state.get("evidence_analysis", {}) or {}
+    accepted = state.get("accepted_evidence", []) or []
+    retrieved_logs = state.get("retrieved_logs", []) or []
+    reranked = state.get("reranked_documents", []) or []
+    
+    know_docs = [r for r in reranked if r.get("source_type") == "knowledge_document"]
+    prev_incidents = [r for r in reranked if r.get("source_type") == "incident_history"]
+    grounding_val = state.get("grounding_validation", {}) or {}
+    
+    canonical_root_cause = primary_h.get("likely_root_cause") or primary_h.get("title") or "Root cause cannot be conclusively determined from the supplied evidence."
+    canonical_confidence = float(state.get("confidence", primary_h.get("confidence", 0.0)))
     
     prompt = (
         f"{FINAL_REPORT_SYSTEM_PROMPT}\n\n"
-        f"INCIDENT DETAILS:\n"
-        f"- Description: {state.get('incident_description')}\n"
+        f"CANONICAL INVESTIGATION DATA:\n"
+        f"- Incident Description: {state.get('incident_description')}\n"
         f"- Primary Service: {state.get('services', ['target-service'])[0] if state.get('services') else 'target-service'}\n"
-        f"- Primary Hypothesis: {primary_h.get('title')} (Root Cause: {primary_h.get('likely_root_cause')}, Confidence: {state.get('confidence')}%)\n"
-        f"- Observed Symptoms: {ev_analysis.get('symptoms')}\n"
-        f"- Verification Check: {primary_h.get('recommended_next_check')}\n"
-        f"- Accepted Evidence: {[e.get('source_name') for e in accepted]}\n\n"
-        f"Synthesize the final RCA report."
+        f"- CANONICAL ROOT CAUSE (DO NOT CHANGE): {canonical_root_cause}\n"
+        f"- CANONICAL CONFIDENCE SCORE: {canonical_confidence}%\n"
+        f"- Causal Chain: {primary_h.get('causal_chain', ['Initiating Event -> Symptom'])}\n"
+        f"- Observed Symptoms: {ev_analysis.get('symptoms', [])}\n"
+        f"- Supporting Evidence IDs: {primary_h.get('supporting_evidence_ids', [])}\n\n"
+        f"RETRIEVAL TRUTHFULNESS DATA:\n"
+        f"- Retrieved Logs Count: {len(retrieved_logs)} (If 0, FORBIDDEN to claim 'logs show' or 'logs indicate')\n"
+        f"- Retrieved Knowledge Documents Count: {len(know_docs)} (If 0, FORBIDDEN to claim 'runbook states')\n"
+        f"- Retrieved Historical Incidents Count: {len(prev_incidents)} (If 0, FORBIDDEN to claim 'historical incidents show')\n"
+        f"- Grounding Validation Status: {grounding_val.get('grounded', False)}\n\n"
+        f"Synthesize the final RCA report. Your output MUST match the canonical root cause and confidence exactly."
     )
     
     report = await safe_invoke_structured_llm(
@@ -451,13 +516,25 @@ async def generate_final_report_node(state: InvestigationState) -> Dict[str, Any
     )
     
     if report:
+        # Enforce canonical root cause and confidence alignment
+        report.root_cause = canonical_root_cause
+        report.confidence = canonical_confidence
         report.confidence_source = state.get("confidence_source", "llm")
         report.analysis_status = state.get("analysis_status", "success")
+        
+        # Enforce retrieval truthfulness in summaries
+        if not retrieved_logs and any("log" in s.lower() for s in report.accepted_evidence_summary):
+            report.accepted_evidence_summary = [s for s in report.accepted_evidence_summary if "log" not in s.lower()]
+        if not know_docs:
+            report.retrieved_knowledge_summary = ["No runbooks or knowledge documents retrieved for this incident."]
+        if not prev_incidents:
+            report.historical_incidents_summary = ["No historical incidents retrieved for this incident."]
+            
         updates: Dict[str, Any] = {
             "final_report": report.model_dump(),
             "investigation_summary": f"FINAL RCA COMPLETE for {state.get('incident_id')}: {report.root_cause} (Confidence: {report.confidence}%)",
         }
-        _add_trace(updates, "generate_final_report", (time.time() - start_time) * 1000, f"Generated LLM final RCA report with {report.confidence}% confidence")
+        _add_trace(updates, "generate_final_report", (time.time() - start_time) * 1000, f"Generated LLM final RCA report matching canonical root cause with {report.confidence}% confidence")
         return updates
 
     # 2. Dynamic Evidence-Based Fallback (when LLM fails)
@@ -468,10 +545,10 @@ async def generate_final_report_node(state: InvestigationState) -> Dict[str, Any
         timeline="Ongoing",
         observed_symptoms=ev_analysis.get("symptoms", [state.get("incident_description", "Service degradation")]),
         accepted_evidence_summary=[f"[{e.get('evidence_id')}] {e.get('source_name')}" for e in accepted],
-        retrieved_knowledge_summary=[r.get("title", "") for r in reranked if r.get("source_type") == "knowledge_document"],
-        historical_incidents_summary=[r.get("title", "") for r in reranked if r.get("source_type") == "incident_history"],
-        root_cause=primary_h.get("likely_root_cause", "Unidentified service degradation"),
-        confidence=state.get("confidence", 0.0),
+        retrieved_knowledge_summary=[r.get("title", "") for r in know_docs] if know_docs else ["No knowledge documents retrieved."],
+        historical_incidents_summary=[r.get("title", "") for r in prev_incidents] if prev_incidents else ["No historical incidents retrieved."],
+        root_cause=canonical_root_cause,
+        confidence=canonical_confidence,
         confidence_source=conf_src,
         analysis_status="degraded",
         supporting_evidence=[f"Evidence ID: {eid}" for eid in primary_h.get("supporting_evidence_ids", [])],
@@ -488,5 +565,5 @@ async def generate_final_report_node(state: InvestigationState) -> Dict[str, Any
         "failed_llm_nodes": ["generate_final_report"],
         "investigation_summary": f"FINAL RCA COMPLETE (DEGRADED) for {state.get('incident_id')}: {report.root_cause}",
     }
-    _add_trace(updates, "generate_final_report", (time.time() - start_time) * 1000, f"Generated fallback final RCA report (Confidence: {report.confidence}%, Source: fallback)")
+    _add_trace(updates, "generate_final_report", (time.time() - start_time) * 1000, f"Generated fallback final RCA report matching canonical root cause (Confidence: {report.confidence}%, Source: fallback)")
     return updates

@@ -1,0 +1,17 @@
+E-008 — Transcoding Queue Metrics
+
+Type: Metrics
+
+Timestamp: 2026-08-16 13:45–14:20 UTC
+
+13:45 queue depth: 41
+13:52 queue depth: 44
+14:00 queue depth: 57
+14:05 queue depth: 132
+14:10 queue depth: 418
+14:15 queue depth: 731
+14:20 queue depth: 1094
+
+Normal queue depth:
+
+30–80 jobs

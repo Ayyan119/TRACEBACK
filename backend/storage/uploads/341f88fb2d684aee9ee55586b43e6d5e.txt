@@ -1,0 +1,63 @@
+5. Knowledge Base
+KB-001 — Video Transcoding Disk Exhaustion Runbook
+
+Title: Transcoder Worker Ephemeral Storage Exhaustion
+
+Content:
+
+When transcoding workers report:
+
+No space left on device
+
+check the following:
+
+Worker ephemeral disk utilization.
+Temporary FFmpeg workspace size.
+Cleanup behavior between retries.
+Recent deployment changes.
+Number of concurrent transcoding jobs.
+
+If worker disk utilization exceeds 90% and FFmpeg reports inability to create or write segment files, treat worker storage exhaustion as a primary investigation candidate.
+
+A transcoding worker that cannot create HLS segments will fail to produce a valid manifest.
+
+Playback services may subsequently return:
+
+HTTP 503
+manifest_not_found
+
+This HTTP 503 is normally a downstream symptom rather than the initiating root cause.
+
+KB-002 — MediaStream Deployment Troubleshooting Guide
+
+Title: Transcoding Deployment Regression Investigation
+
+Content:
+
+When transcoding failures begin shortly after deployment:
+
+Compare worker resource limits before and after deployment.
+Compare temporary workspace configuration.
+Check filesystem utilization.
+Review changes to cleanup and retry behavior.
+Correlate deployment time with the first infrastructure error.
+
+A deployment-related resource configuration change is stronger evidence than a generic application failure when the failure begins immediately after deployment and corresponding resource exhaustion is observed.
+
+KB-003 — Healthy Dependency Identification
+
+Title: Dependency Isolation During Media Incidents
+
+Content:
+
+When investigating playback failures, independently validate:
+
+Upload service
+Object storage
+CDN
+Playback service
+Transcoding workers
+
+Do not identify object storage or CDN as root cause solely because playback fails.
+
+If object storage and CDN maintain normal error rates, latency, and availability while transcoding workers show filesystem exhaustion, prioritize the transcoding workers.

@@ -71,22 +71,35 @@ class EvidenceAnalysis(BaseModel):
 
 
 class Hypothesis(BaseModel):
-    """Structured hypothesis for root-cause ranking."""
+    """Structured hypothesis for root-cause ranking with evidence grounding."""
     hypothesis_id: str = Field(description="Unique hypothesis identifier (e.g. HYP-1).")
     title: str = Field(description="Clear title of suspected root cause.")
     description: str = Field(description="Detailed technical mechanism of failure.")
     confidence: float = Field(ge=0.0, le=100.0, description="Confidence percentage score (0-100%).")
-    supporting_evidence_ids: List[str] = Field(default_factory=list, description="IDs of evidence supporting this hypothesis.")
+    supporting_evidence_ids: List[str] = Field(default_factory=list, description="IDs of evidence explicitly supporting this hypothesis.")
     contradicting_evidence_ids: List[str] = Field(default_factory=list, description="IDs of evidence contradicting this hypothesis.")
     affected_services: List[str] = Field(default_factory=list, description="Impacted microservices.")
+    initiating_event: Optional[str] = Field(None, description="The initiating trigger or root cause event.")
+    causal_chain: List[str] = Field(default_factory=list, description="Sequence: Initiating Event -> Mechanism -> Component Failure -> Symptom.")
     likely_root_cause: str = Field(description="Single primary root cause statement.")
     recommended_next_check: str = Field(description="Actionable verification or rollback recommendation.")
+    is_evidence_grounded: bool = Field(default=True, description="True if claims are supported by present evidence IDs.")
 
 
 class HypothesisRanking(BaseModel):
     """Container for ranked list of hypotheses."""
     hypotheses: List[Hypothesis] = Field(default_factory=list)
     primary_hypothesis_id: str = Field(description="ID of the highest confidence hypothesis.")
+
+
+class GroundingValidationResult(BaseModel):
+    """Result of strict evidence-grounding validation check."""
+    grounded: bool = Field(description="True if all claims are backed by present evidence IDs.")
+    unsupported_claims: List[str] = Field(default_factory=list, description="Claims without evidence citations.")
+    invalid_evidence_references: List[str] = Field(default_factory=list, description="Evidence IDs cited but not in state.")
+    confidence_consistent: bool = Field(default=True, description="True if confidence reflects evidence strength.")
+    root_cause_consistent: bool = Field(default=True, description="True if selected hypothesis matches root cause.")
+    reason: str = Field(default="", description="Summary of grounding validation verdict.")
 
 
 class HypothesisEvaluation(BaseModel):

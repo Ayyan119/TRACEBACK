@@ -75,6 +75,7 @@ class InvestigationState(TypedDict, total=False):
     # Hypothesis Evaluation & Investigation Loop Controls
     hypothesis_evaluation: Optional[Dict[str, Any]]
     evidence_sufficient: bool
+    grounding_validation: Optional[Dict[str, Any]]
     final_report: Optional[Dict[str, Any]]
     
     # Observability & Safety (Annotated for parallel updates)

@@ -1,0 +1,15 @@
+E-007 — Upload Service Metrics
+
+Type: Application Metrics
+
+Timestamp: 2026-08-16 14:00–14:20 UTC
+
+Upload success rate: 99.97%
+
+Upload latency p95: 620ms
+
+Upload queue depth: normal
+
+Upload errors: 0.03%
+
+The upload service successfully accepted user videos.

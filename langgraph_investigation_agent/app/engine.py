@@ -93,8 +93,14 @@ async def run_engine_investigation(input_data: EngineIncidentInput) -> EngineInv
     status_str = "degraded" if is_degraded else "completed"
     
     # 4. Construct Primary Root Cause
-    root_cause_title = primary_h.get("title", f"Outage on {input_data.affected_service}")
-    root_cause_exp = primary_h.get("description", primary_h.get("likely_root_cause", input_data.description))
+    title_str = primary_h.get("title", f"Outage on {input_data.affected_service}")
+    likely_rc = primary_h.get("likely_root_cause") or ""
+    
+    root_cause_title = title_str if likely_rc.lower() in title_str.lower() or not likely_rc else f"{title_str} — {likely_rc}"
+    root_cause_exp = primary_h.get("description") or likely_rc or input_data.description
+    if likely_rc and likely_rc not in root_cause_exp:
+        root_cause_exp = f"{likely_rc}. {root_cause_exp}"
+        
     confidence_val = float(final_state.get("confidence", primary_h.get("confidence", 0.0)))
     
     sup_ids = primary_h.get("supporting_evidence_ids", [])

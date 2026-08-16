@@ -1,0 +1,31 @@
+E-003 — Deployment Record
+
+Type: Deployment Evidence
+
+Source: Kubernetes deployment history
+
+Deployment: video-transcoding-service v3.8.0
+
+Deployment Time: 2026-08-16 13:52 UTC
+
+Deployment change:
+
+Previous:
+temporary transcoding workspace = emptyDir
+sizeLimit = 50Gi
+
+New:
+temporary transcoding workspace = emptyDir
+sizeLimit = 8Gi
+
+Additional deployment change:
+
+FFmpeg temporary files retained until job completion.
+
+Previous cleanup behavior:
+
+temporary workspace cleaned after each completed job
+
+New behavior:
+
+temporary files retained during retry lifecycle.

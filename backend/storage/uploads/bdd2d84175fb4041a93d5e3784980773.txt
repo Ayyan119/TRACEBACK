@@ -1,0 +1,18 @@
+E-004 — Playback-Service Logs
+
+Type: Logs
+
+Timestamp: 2026-08-16 14:10 UTC
+
+2026-08-16T14:10:41Z [WARN] playback-service
+
+Manifest unavailable for asset video-774821.
+
+HTTP 503 returned to client.
+
+reason="manifest_not_found"
+2026-08-16T14:11:02Z [WARN] playback-service
+
+Manifest unavailable for asset video-774839.
+
+HTTP 503 returned to client.

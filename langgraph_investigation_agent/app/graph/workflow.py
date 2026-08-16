@@ -16,6 +16,7 @@ from langgraph_investigation_agent.app.graph.nodes import (
     analyze_evidence_node,
     generate_hypotheses_node,
     evaluate_hypotheses_node,
+    validate_grounding_node,
     generate_final_report_node,
 )
 from langgraph_investigation_agent.app.graph.routers import (
@@ -31,7 +32,7 @@ def build_investigation_graph():
     """Constructs and compiles the complete TRACEBACK LangGraph AI Investigation Agent workflow graph."""
     builder = StateGraph(InvestigationState)
 
-    # 1. Register All 14 Graph Nodes
+    # 1. Register All Graph Nodes
     builder.add_node("initialize_state", initialize_state_node)
     builder.add_node("process_images", process_images_node)
     builder.add_node("process_documents", process_documents_node)
@@ -45,6 +46,7 @@ def build_investigation_graph():
     builder.add_node("analyze_evidence", analyze_evidence_node)
     builder.add_node("generate_hypotheses", generate_hypotheses_node)
     builder.add_node("evaluate_hypotheses", evaluate_hypotheses_node)
+    builder.add_node("validate_grounding", validate_grounding_node)
     builder.add_node("generate_final_report", generate_final_report_node)
 
     # 2. Parallel Processing Branch & Evidence Collection
@@ -93,9 +95,10 @@ def build_investigation_graph():
         route_after_hypothesis_evaluation,
         {
             "reason_with_tools": "reason_with_tools",
-            "generate_final_report": "generate_final_report",
+            "generate_final_report": "validate_grounding",
         },
     )
+    builder.add_edge("validate_grounding", "generate_final_report")
 
     # Final RCA Report & Termination
     builder.add_edge("generate_final_report", END)

@@ -1,0 +1,23 @@
+E-002 — Worker Disk Metrics
+
+Type: Metrics
+
+Source: Prometheus
+
+Timestamp: 2026-08-16 14:00–14:15 UTC
+
+transcoder-4 disk usage: 96%
+transcoder-7 disk usage: 99%
+transcoder-9 disk usage: 98%
+
+Available ephemeral storage:
+transcoder-4: 3.1 GB
+transcoder-7: 0.7 GB
+transcoder-9: 1.2 GB
+
+Normal baseline:
+45–60% disk utilization
+
+At 14:06 UTC, disk utilization crossed 90%.
+
+At 14:07 UTC, transcoding failures increased sharply.

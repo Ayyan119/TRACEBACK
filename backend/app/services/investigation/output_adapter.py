@@ -19,11 +19,12 @@ class OutputAdapter:
         investigation_id = final_state.get("investigation_id", "unknown-investigation")
         confidence = float(final_state.get("confidence", 0.0))
         
-        # Summary string fallback
+        selected_hypothesis = final_state.get("selected_hypothesis", {}) or {}
+        root_cause_str = selected_hypothesis.get("likely_root_cause") or selected_hypothesis.get("title") or "Root cause cannot be conclusively determined from the supplied evidence."
+        
         summary = final_state.get("investigation_summary")
-        if not summary:
-            primary_h = final_state.get("selected_hypothesis", {})
-            summary = f"Investigation completed for {incident_id}. Primary root cause: {primary_h.get('title', 'Unknown')}."
+        if not summary or "FINAL RCA COMPLETE" in summary:
+            summary = f"Investigation completed for incident {incident_id}. Primary root cause: {root_cause_str}"
 
         # Extract structured outputs
         final_report = final_state.get("final_report")

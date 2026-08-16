@@ -301,18 +301,19 @@ export class FastApiClient implements ApiClient {
       }
     }
 
-    const confidence = parsedResult?.confidence || incident.confidence || 85.0;
+    const confidence = typeof parsedResult?.confidence === 'number' ? parsedResult.confidence : (typeof incident.confidence === 'number' ? incident.confidence : 0.0);
+    const primaryH = parsedResult?.selected_hypothesis || parsedResult?.hypotheses?.[0];
+    const rootCauseTitle = primaryH?.title || primaryH?.likely_root_cause || "Root cause cannot be conclusively determined from the supplied evidence.";
+    
     const summaryText = parsedResult?.investigation_summary || 
       parsedResult?.final_report?.incident_summary || 
-      incident.rootCauseSummary || 
-      `AI Root-Cause Investigation conducted for incident ${incident.code}.`;
+      `AI Root-Cause Investigation conducted for incident ${incident.code}. Primary Root Cause: ${rootCauseTitle}`;
 
-    const primaryH = parsedResult?.selected_hypothesis || parsedResult?.hypotheses?.[0];
     const primaryHypothesis = primaryH
       ? {
           id: primaryH.hypothesis_id || `hyp-${incident.id}-1`,
           investigationId: incident.id,
-          title: primaryH.title || `Suspected Root Cause for ${incident.code}`,
+          title: rootCauseTitle,
           description: primaryH.description || primaryH.likely_root_cause || summaryText,
           confidenceLabel: (confidence >= 90 ? 'HIGH' : confidence >= 70 ? 'MEDIUM' : 'LOW') as 'HIGH' | 'MEDIUM' | 'LOW',
           probability: confidence,
@@ -326,9 +327,9 @@ export class FastApiClient implements ApiClient {
       : {
           id: `hyp-${incident.id}-1`,
           investigationId: incident.id,
-          title: `Suspected Root Cause for ${incident.code}`,
+          title: "Root cause cannot be conclusively determined from the supplied evidence.",
           description: summaryText,
-          confidenceLabel: (confidence >= 90 ? 'HIGH' : 'MEDIUM') as 'HIGH' | 'MEDIUM',
+          confidenceLabel: 'LOW' as const,
           probability: confidence,
           status: 'confirmed' as const,
           evidenceItems: [],
@@ -342,7 +343,7 @@ export class FastApiClient implements ApiClient {
         title: h.title || 'Alternative Hypothesis',
         description: h.description || h.likely_root_cause || 'Evaluated candidate root cause.',
         confidenceLabel: (h.confidence >= 80 ? 'MEDIUM' : 'LOW') as 'HIGH' | 'MEDIUM' | 'LOW',
-        probability: h.confidence || 40,
+        probability: h.confidence || 0,
         status: 'alternative' as const,
         evidenceItems: [],
       }));
@@ -389,16 +390,6 @@ export class FastApiClient implements ApiClient {
         action: parsedResult.final_report.recommended_remediation,
         reason: 'Permanent prevention of recurrence',
         expectedResult: 'Restore system resilience',
-        risk: 'Low' as const,
-      });
-    }
-    if (recommendations.length === 0) {
-      recommendations.push({
-        id: 'rec-1',
-        category: 'Immediate' as const,
-        action: `Inspect and rollback recent deployments on ${incident.affectedService || 'affected service'}`,
-        reason: 'Correlated latency spike and connection pool exhaustion',
-        expectedResult: 'Restore service latency to baseline threshold',
         risk: 'Low' as const,
       });
     }

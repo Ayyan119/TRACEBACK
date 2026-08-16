@@ -1,0 +1,17 @@
+E-005 — Object Storage Health
+
+Type: Infrastructure Metrics
+
+Timestamp: 2026-08-16 14:00–14:20 UTC
+
+Object Storage:
+availability: 99.99%
+error_rate: 0.01%
+latency_p95: 82ms
+
+Upload failures: 0
+
+Storage capacity:
+61% utilized
+
+No storage-side errors were observed during the incident.
