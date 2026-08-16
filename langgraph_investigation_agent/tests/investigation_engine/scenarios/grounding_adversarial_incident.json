@@ -1,0 +1,105 @@
+{
+  "incident_id": "INC-GROUND-001",
+  "project_id": "AcmeStream",
+  "title": "Newly uploaded videos intermittently fail playback",
+  "description": "Starting around 18:05 UTC on 16 August 2026, users reported that newly uploaded videos on AcmeStream intermittently fail to play, returning HTTP 503 errors. Videos transcoded prior to 18:05 UTC continue playing normally. Telemetry shows video uploads succeed, but downstream transcoding output manifests are missing.",
+  "affected_service": "video-transcoding-service",
+  "timeline": "16 August 2026 18:05 UTC",
+  "services": [
+    "upload-service",
+    "video-transcoding-service",
+    "object-storage",
+    "playback-service",
+    "cdn",
+    "database-service"
+  ],
+  "canonical_ground_truth": {
+    "primary_affected_service": "video-transcoding-service",
+    "initiating_event": "Deployment v3.8.0 reduced transcoder temporary workspace size from 50Gi to 8Gi and retained retry files",
+    "root_cause_mechanism": "Temporary workspace exhaustion (ENOSPC) during video transcoding caused FFmpeg write failures and missing manifests",
+    "healthy_dependencies": [
+      "upload-service",
+      "object-storage",
+      "cdn",
+      "database-service"
+    ],
+    "downstream_symptoms": [
+      "playback-service HTTP 503 manifest_not_found",
+      "transcoding queue depth backlog growing to 980 jobs"
+    ]
+  },
+  "evidence": [
+    {
+      "evidence_id": "E-001",
+      "source_type": "document",
+      "source_name": "e1.txt - Upload Service Health Metrics",
+      "content": "upload-service health telemetry: p95 request latency: 380ms, HTTP success rate: 99.98%, active upload streams: 210/300. No network connection timeouts or upload drops detected. upload-service is operating normally."
+    },
+    {
+      "evidence_id": "E-002",
+      "source_type": "document",
+      "source_name": "e2.txt - Transcoder Disk Utilization",
+      "content": "video-transcoding-service disk metrics: Node-3 disk: 97%, Node-5 disk: 97%, Node-8 disk: 98%. Storage threshold 90% crossed at 18:05 UTC. Transcoding job write errors spiked immediately after threshold breach."
+    },
+    {
+      "evidence_id": "E-003",
+      "source_type": "document",
+      "source_name": "e3.txt - Transcoding Service Deployment Record",
+      "content": "Deployment Event: video-transcoding-service release v3.8.0 deployed at 17:58 UTC. Configuration changes: temporary working directory space reduced from 50Gi to 8Gi. Retry policy updated so temporary FFmpeg working files are retained during retry attempts."
+    },
+    {
+      "evidence_id": "E-004",
+      "source_type": "document",
+      "source_name": "e4.txt - Playback Service Error Telemetry",
+      "content": "playback-service error logs (18:10 - 18:15 UTC):\n18:10:02 GET /videos/v-1092/manifest.m3u8 -> HTTP 503 reason=manifest_not_found\n18:11:15 GET /videos/v-1104/manifest.m3u8 -> HTTP 503 reason=manifest_not_found\n18:12:44 GET /videos/v-1120/manifest.m3u8 -> HTTP 503 reason=manifest_not_found"
+    },
+    {
+      "evidence_id": "E-005",
+      "source_type": "document",
+      "source_name": "e5.txt - Object Storage Telemetry",
+      "content": "object-storage metrics: p95 latency: 65ms, availability: 99.99%, error rate: 0.00%. Object storage cluster read/write operations are operating normally without storage-side errors."
+    },
+    {
+      "evidence_id": "E-006",
+      "source_type": "document",
+      "source_name": "e6.txt - CDN Edge Telemetry",
+      "content": "CDN edge performance: p95 edge latency: 32ms, packet loss: 0.0%, legacy video cache hit ratio: 95.1%. Edge infrastructure is fully healthy."
+    },
+    {
+      "evidence_id": "E-007",
+      "source_type": "document",
+      "source_name": "e7.txt - Database Service Telemetry",
+      "content": "database-service metrics: active connection pool: 45/200, CPU utilization: 18%, p95 query latency: 12ms, deadlocks: 0. Database is operating normally."
+    },
+    {
+      "evidence_id": "E-008",
+      "source_type": "document",
+      "source_name": "e8.txt - Transcoding Queue Depth Telemetry",
+      "content": "video-transcoding-service queue backlog metrics:\n18:00 UTC: 35 jobs\n18:05 UTC: 62 jobs\n18:07 UTC: 175 jobs\n18:10 UTC: 580 jobs\n18:15 UTC: 980 jobs"
+    },
+    {
+      "evidence_id": "E-009",
+      "source_type": "document",
+      "source_name": "e9.txt - Database Connection Pool Alert (Distractor)",
+      "content": "database-service alert log (17:45 UTC): WARN database connection pool usage spiked to 80% during scheduled maintenance backup. Connection usage returned to baseline 45/200 by 17:50 UTC."
+    },
+    {
+      "evidence_id": "E-010",
+      "source_type": "log",
+      "source_name": "streamforge_INC-GROUND-001_complete.log",
+      "content": "17:50:00 video-transcoding-service INFO Transcoding job-710 completed successfully\n17:58:00 deployment-service INFO Deployment video-transcoding-service v3.8.0 complete. Temp workspace: 8Gi, retain_retry_files=true\n18:02:15 video-transcoding-service WARN Disk utilization increasing node-3: 75%, node-5: 78%\n18:05:10 video-transcoding-service ERROR Disk utilization threshold breach node-3: 97%, node-5: 97%\n18:06:02 video-transcoding-service ERROR ENOSPC: No space left on device path=/tmp/ffmpeg_workspace/job-771\n18:06:12 video-transcoding-service ERROR ffmpeg failed to write output manifest for v-1092\n18:10:02 playback-service ERROR GET /videos/v-1092/manifest.m3u8 -> HTTP 503 reason=manifest_not_found"
+    },
+    {
+      "evidence_id": "KB-001",
+      "source_type": "document",
+      "source_name": "transcoder-runbook.txt",
+      "content": "Transcoding Service Operations Runbook:\n1. Transcoder node disk usage above 90% requires immediate intervention.\n2. ENOSPC error indicates FFmpeg temporary working directory space is exhausted.\n3. Emergency Mitigation: Roll back recent deployment and clear temporary workspace."
+    },
+    {
+      "evidence_id": "KB-002",
+      "source_type": "document",
+      "source_name": "INC-1988 Historical Incident Record (Distractor)",
+      "content": "Historical Incident INC-1988 (Resolved in 2024): Database lock contention caused transcoders to stall. Resolved by increasing database connection pool and adding query index."
+    }
+  ]
+}
