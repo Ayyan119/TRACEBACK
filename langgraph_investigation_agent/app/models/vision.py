@@ -13,8 +13,8 @@ async def analyze_image_with_vision(image_input: Dict[str, Any], incident_descri
     title = image_input.get("title", "Screenshot")
     file_path_or_url = image_input.get("file_url") or image_input.get("file_path", "")
 
-    # 1. Attempt structured LLM analysis
-    structured_llm = get_structured_llm(ImageAnalysis)
+    # 1. Attempt structured LLM vision extraction
+    structured_llm = get_structured_llm(ImageAnalysis, model_type="extraction")
     if structured_llm is not None:
         try:
             prompt = (

@@ -1,0 +1,77 @@
+{
+  "incident_id": "INC-3057",
+  "project_id": "StreamForge Video Platform",
+  "title": "Newly Uploaded Videos Fail Playback",
+  "description": "Starting around 18:05 UTC on 16 August 2026, users reported that newly uploaded videos on StreamForge frequently fail to play and return HTTP 503 responses. Existing videos that were successfully transcoded before 18:05 UTC continue to play normally. Video uploads succeed at the upload layer, but transcoding jobs fail downstream, leaving playback manifests unavailable.",
+  "affected_service": "video-transcoding-service",
+  "timeline": "16 August 2026 18:05 UTC",
+  "services": [
+    "upload-service",
+    "video-transcoding-service",
+    "object-storage",
+    "playback-service",
+    "cdn"
+  ],
+  "evidence": [
+    {
+      "evidence_id": "E-001",
+      "source_type": "document",
+      "source_name": "e1.txt - Upload Service Health Metrics",
+      "content": "upload-service metrics (17:50 - 18:15 UTC): Success rate: 99.98%, p95 latency: 410ms, active upload streams: 240/300. No meaningful upload errors detected. Upload service is operating normally."
+    },
+    {
+      "evidence_id": "E-002",
+      "source_type": "document",
+      "source_name": "e2.txt - Transcoder Storage Disk Metrics",
+      "content": "video-transcoding-service node disk utilization (17:50 - 18:15 UTC): Baseline disk utilization: 45-60%. Node-4 disk: 96%, Node-7 disk: 98%, Node-9 disk: 97%. Storage threshold crossed 90% around 18:05-18:06 UTC. Transcoding job write failures increased immediately after threshold was crossed."
+    },
+    {
+      "evidence_id": "E-003",
+      "source_type": "document",
+      "source_name": "e3.txt - Transcoding Service Deployment Record",
+      "content": "Deployment Event: video-transcoding-service release v4.2.0 deployed at 17:58 UTC. Configuration changes: temporary workspace size allocated per node reduced from 50Gi to 8Gi. Retry policy updated so temporary FFmpeg working files are retained during retry attempts instead of purged."
+    },
+    {
+      "evidence_id": "E-004",
+      "source_type": "document",
+      "source_name": "e4.txt - Playback Service Error Logs",
+      "content": "playback-service logs (18:10 - 18:15 UTC):\n18:10:02 GET /videos/video-8821/manifest.m3u8 -> HTTP 503 reason=manifest_not_found\n18:11:15 GET /videos/video-8834/manifest.m3u8 -> HTTP 503 reason=manifest_not_found\n18:12:44 GET /videos/video-8850/manifest.m3u8 -> HTTP 503 reason=manifest_not_found"
+    },
+    {
+      "evidence_id": "E-005",
+      "source_type": "document",
+      "source_name": "e5.txt - Object Storage Metrics",
+      "content": "object-storage metrics: Availability: 99.99%, error rate: 0.01%, p95 latency: 76ms. Storage bucket read/write operations healthy. No storage-side cluster failures or permission denials."
+    },
+    {
+      "evidence_id": "E-006",
+      "source_type": "document",
+      "source_name": "e6.txt - CDN Health Metrics",
+      "content": "CDN edge metrics: p95 latency: 39ms, network packet loss: 0.0%. Cache hit ratio for legacy assets: 94.2%. No edge network or CDN infrastructure failures."
+    },
+    {
+      "evidence_id": "E-007",
+      "source_type": "document",
+      "source_name": "e7.txt - Transcoding Queue Depth Metrics",
+      "content": "video-transcoding-service queue depth timeline:\n17:55 UTC: 42 jobs\n18:00 UTC: 51 jobs\n18:05 UTC: 74 jobs\n18:07 UTC: 180 jobs\n18:10 UTC: 620 jobs\n18:15 UTC: 1040 jobs\nNormal queue depth baseline: 30-80 jobs."
+    },
+    {
+      "evidence_id": "E-008",
+      "source_type": "log",
+      "source_name": "streamforge_INC-3057_complete.log",
+      "content": "17:50:00 video-transcoding-service INFO Transcoding job job-901 completed successfully in 42s\n17:52:10 video-transcoding-service INFO Disk utilization node-4: 52%, node-7: 54%, node-9: 51%\n17:55:00 video-transcoding-service INFO Queue depth: 42 jobs\n17:58:00 deployment-service INFO Deployment completed: video-transcoding-service v4.2.0 deployed. Temp workspace: 8Gi, retain_retry_files=true\n18:00:00 video-transcoding-service INFO Queue depth: 51 jobs\n18:02:15 video-transcoding-service WARN Disk utilization increasing node-4: 74%, node-7: 78%\n18:04:30 video-transcoding-service WARN Disk utilization threshold warning node-4: 87%, node-7: 88%\n18:05:10 video-transcoding-service ERROR Disk utilization node-4: 93%, node-7: 94%\n18:06:02 video-transcoding-service ERROR ENOSPC: No space left on device path=/tmp/ffmpeg_workspace/job-944\n18:06:05 video-transcoding-service ERROR temporary workspace exhausted on node-4, node-7\n18:06:12 video-transcoding-service ERROR ffmpeg failed to write output manifest for video-8821\n18:06:15 video-transcoding-service ERROR transcoding job failed job-944 error='ENOSPC: temporary workspace exhausted'\n18:07:00 video-transcoding-service WARN Queue depth growing: 180 jobs\n18:10:00 video-transcoding-service ERROR Queue depth critical: 620 jobs\n18:10:02 playback-service ERROR GET /videos/video-8821/manifest.m3u8 -> HTTP 503 reason=manifest_not_found\n18:11:15 playback-service ERROR GET /videos/video-8834/manifest.m3u8 -> HTTP 503 reason=manifest_not_found\n18:15:00 video-transcoding-service ERROR Queue depth backlog: 1040 jobs"
+    },
+    {
+      "evidence_id": "KB-001",
+      "source_type": "document",
+      "source_name": "transcoding-runbook.txt",
+      "content": "Transcoding Service Operations Runbook:\n1. Transcoder disk utilization above 90% requires immediate investigation.\n2. ENOSPC error indicates FFmpeg temporary working directory space is exhausted.\n3. Failed transcoding jobs leave playback artifacts ungenerated, causing downstream manifest_not_found errors.\n4. Emergency Mitigation: Roll back recent transcoding deployment and clean orphaned temporary workspace directories."
+    },
+    {
+      "evidence_id": "KB-002",
+      "source_type": "document",
+      "source_name": "INC-2911 Historical Incident Record",
+      "content": "Historical Incident INC-2911 (Resolved): Transcoder temporary workspace exhaustion caused by unpurged temp files. Resolved by rolling back deployment and purging /tmp/ffmpeg_workspace."
+    }
+  ]
+}
