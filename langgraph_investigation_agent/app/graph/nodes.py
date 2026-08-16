@@ -417,7 +417,7 @@ async def evaluate_hypotheses_node(state: InvestigationState) -> Dict[str, Any]:
 
 
 async def validate_grounding_node(state: InvestigationState) -> Dict[str, Any]:
-    """Node 13.5: Grounding Validation Node: Validates that selected hypothesis claims have direct supporting evidence IDs."""
+    """Node 13.5: Grounding Validation Node: Validates that selected hypothesis claims have direct supporting evidence IDs and zero unsupported claims."""
     start_time = time.time()
     selected_h = state.get("selected_hypothesis", {}) or {}
     accepted_ev = state.get("accepted_evidence", []) or []
@@ -436,13 +436,27 @@ async def validate_grounding_node(state: InvestigationState) -> Dict[str, Any]:
         grounded = False
         unsupported.append(f"Cites invalid or missing evidence IDs: {invalid_citations}")
         
+    # Check for healthy services misidentified as primary root cause
+    all_evidence_str = " ".join([str(e.get("content", "")) for e in accepted_ev]).lower()
+    selected_title = str(selected_h.get("title", "")).lower()
+    selected_cause = str(selected_h.get("likely_root_cause", "")).lower()
+    combined_selected = f"{selected_title} {selected_cause}"
+    
+    # Deterministic Check: Exclude explicit healthy components from being root cause
+    for svc in state.get("services", []):
+        svc_lower = svc.lower()
+        if f"{svc_lower} is operating normally" in all_evidence_str or f"{svc_lower} healthy" in all_evidence_str or f"no {svc_lower} failures" in all_evidence_str:
+            if svc_lower in selected_cause and "unlikely" not in selected_cause and "not" not in selected_cause:
+                grounded = False
+                unsupported.append(f"Primary hypothesis blames service '{svc}' which has explicit healthy metrics in evidence.")
+                
     validation = GroundingValidationResult(
         grounded=grounded,
         unsupported_claims=unsupported,
         invalid_evidence_references=invalid_citations,
         confidence_consistent=True,
         root_cause_consistent=True,
-        reason="Claims backed by valid evidence IDs." if grounded else "Insufficient evidence to confirm root cause."
+        reason="Claims backed by valid evidence IDs and healthy service exclusion." if grounded else "Insufficient or contradictory evidence to confirm root cause."
     )
     
     updates: Dict[str, Any] = {
@@ -450,15 +464,15 @@ async def validate_grounding_node(state: InvestigationState) -> Dict[str, Any]:
     }
     
     # If ungrounded or evidence insufficient, override selected_hypothesis to explicit inconclusive statement
-    if not grounded and (not accepted_ev or not cited_ids):
+    if not grounded and (not accepted_ev or not cited_ids or unsupported):
         inconclusive_title = "Root cause cannot be conclusively determined from the supplied evidence."
         updated_h = dict(selected_h)
         updated_h["title"] = inconclusive_title
         updated_h["likely_root_cause"] = inconclusive_title
-        updated_h["confidence"] = min(float(selected_h.get("confidence", 30.0)), 30.0)
+        updated_h["confidence"] = 0.0
         updated_h["is_evidence_grounded"] = False
         updates["selected_hypothesis"] = updated_h
-        updates["confidence"] = updated_h["confidence"]
+        updates["confidence"] = 0.0
         
     _add_trace(updates, "validate_grounding", (time.time() - start_time) * 1000, f"Grounding validation: {grounded} ({validation.reason})")
     return updates

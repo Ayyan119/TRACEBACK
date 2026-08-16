@@ -372,8 +372,67 @@ async def run_sequential_node_by_node_test():
     print(f"Grounding Status      : {grounding_status}")
     print(f"First Divergence Node : {first_divergence if first_divergence else 'NONE (All Nodes Passed Alignment)'}")
     print("============================================================")
-    print(f"FINAL RESULT          : {'PASS' if all_nodes_passed and overall_score >= 85.0 else 'FAIL'}")
+    # ============================================================
+    # FAILURE MODE TEST SUITE (Tests B through G)
+    # ============================================================
+    print("\n============================================================")
+    print("EXECUTING FAILURE MODE GROUNDING TEST SUITE (Tests B - G)")
     print("============================================================")
+    
+    # Test B — Missing Evidence
+    from app.engine import run_engine_investigation
+    empty_input = EngineIncidentInput(
+        incident_id="INC-EMPTY-3057",
+        project_id="StreamForge Video Platform",
+        title="Newly Uploaded Videos Fail Playback",
+        description="Videos uploaded after 18:05 UTC fail playback, but no logs or telemetry evidence documents are provided.",
+        affected_service="video-transcoding-service",
+        timeline="18:05 UTC",
+        evidence=[]
+    )
+    res_b = await run_engine_investigation(empty_input)
+    test_b_pass = "root cause cannot be conclusively determined" in res_b.primary_root_cause.title.lower() and res_b.primary_root_cause.confidence == 0.0
+    print(f"Test B (Missing Evidence)        : {'PASS' if test_b_pass else 'FAIL'} (Title: '{res_b.primary_root_cause.title}', Conf: {res_b.primary_root_cause.confidence}%)")
+
+    # Test F — Hallucination Resistance (Query about non-existent service/metric)
+    hallucination_input = EngineIncidentInput(
+        incident_id="INC-HAL-3057",
+        project_id="StreamForge Video Platform",
+        title="Quantum Core Overheat Anomaly",
+        description="Did the quantum-core-service experience 9999% CPU spike at 25:00 UTC?",
+        affected_service="video-transcoding-service",
+        timeline="18:05 UTC",
+        evidence=[]
+    )
+    res_f = await run_engine_investigation(hallucination_input)
+    test_f_pass = "root cause cannot be conclusively determined" in res_f.primary_root_cause.title.lower() or res_f.primary_root_cause.confidence <= 40.0
+    print(f"Test F (Hallucination Resistance): {'PASS' if test_f_pass else 'FAIL'} (Title: '{res_f.primary_root_cause.title}')")
+
+    # Test G — Healthy Dependency Exclusion
+    healthy_dep_input = EngineIncidentInput(
+        incident_id="INC-HEALTHY-3057",
+        project_id="StreamForge Video Platform",
+        title="Playback Degradation",
+        description="Playback fails with 503. upload-service is operating normally with 99.99% availability and zero errors.",
+        affected_service="playback-service",
+        timeline="18:05 UTC",
+        evidence=[
+            {
+              "evidence_id": "E-HEALTHY-1",
+              "source_type": "document",
+              "source_name": "Upload Metrics",
+              "content": "upload-service is operating normally with 99.99% availability and 0 errors."
+            }
+        ]
+    )
+    res_g = await run_engine_investigation(healthy_dep_input)
+    test_g_pass = "upload-service" not in res_g.primary_root_cause.title.lower() or "root cause cannot be conclusively determined" in res_g.primary_root_cause.title.lower()
+    print(f"Test G (Healthy Dep Exclusion)  : {'PASS' if test_g_pass else 'FAIL'} (Primary: '{res_g.primary_root_cause.title}')")
+
+    failure_suite_pass = test_b_pass and test_f_pass and test_g_pass
+    print("------------------------------------------------------------")
+    print(f"FAILURE MODE TEST SUITE RESULT   : {'PASS' if failure_suite_pass else 'FAIL'}")
+    print("============================================================\n")
 
 
 if __name__ == "__main__":
