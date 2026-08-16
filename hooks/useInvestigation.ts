@@ -23,6 +23,7 @@ export function useInvestigation(incidentId: string) {
   }, [incidentId]);
 
   const startInvestigation = async (options?: { forceRestart?: boolean }) => {
+    if (isTriggering) return null;
     setIsTriggering(true);
     setError(null);
     try {

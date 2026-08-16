@@ -1,0 +1,12 @@
+EXPLAIN ANALYZE of the affected checkout query shows:
+
+Seq Scan on orders
+Rows Removed by Filter: 2,847,921
+Execution Time: 10,842 ms
+
+
+
+Foreign key:
+orders.customer_id -> customers.id
+
+Index on orders.customer_id: NOT FOUND

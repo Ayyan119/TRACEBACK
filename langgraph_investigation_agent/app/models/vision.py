@@ -1,9 +1,9 @@
 import logging
 from typing import Optional, Dict, Any
-from app.config import config
-from app.models.structured_models import ImageAnalysis
-from app.models.llm import get_structured_llm
-from app.prompts.image_prompts import IMAGE_ANALYSIS_SYSTEM_PROMPT, IMAGE_ANALYSIS_USER_PROMPT
+from langgraph_investigation_agent.app.config import config
+from langgraph_investigation_agent.app.models.structured_models import ImageAnalysis
+from langgraph_investigation_agent.app.models.llm import get_structured_llm
+from langgraph_investigation_agent.app.prompts.image_prompts import IMAGE_ANALYSIS_SYSTEM_PROMPT, IMAGE_ANALYSIS_USER_PROMPT
 
 logger = logging.getLogger("langgraph_agent.models.vision")
 

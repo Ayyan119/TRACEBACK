@@ -5,8 +5,8 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from app.config import config
-from app.models.structured_models import LogQueryInput
+from langgraph_investigation_agent.app.config import config
+from langgraph_investigation_agent.app.models.structured_models import LogQueryInput
 
 logger = logging.getLogger("langgraph_agent.tools.log_tools")
 

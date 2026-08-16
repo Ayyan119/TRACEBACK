@@ -1,8 +1,8 @@
 import logging
 from langgraph.graph import StateGraph, START, END
 
-from app.graph.state import InvestigationState
-from app.graph.nodes import (
+from langgraph_investigation_agent.app.graph.state import InvestigationState
+from langgraph_investigation_agent.app.graph.nodes import (
     initialize_state_node,
     process_images_node,
     process_documents_node,
@@ -18,7 +18,7 @@ from app.graph.nodes import (
     evaluate_hypotheses_node,
     generate_final_report_node,
 )
-from app.graph.routers import (
+from langgraph_investigation_agent.app.graph.routers import (
     route_after_reason_with_tools,
     route_after_incident_analysis,
     route_after_hypothesis_evaluation,

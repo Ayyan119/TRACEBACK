@@ -19,16 +19,12 @@ logger = logging.getLogger("traceback.services.investigation.adapter")
 
 def _load_agent_graph():
     """Safely loads and compiles the LangGraph investigation workflow."""
-    if agent_root not in sys.path:
-        sys.path.insert(0, agent_root)
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+    if project_root not in sys.path:
+        sys.path.insert(0, project_root)
 
-    # Evict cached backend 'app' module entries so agent 'app' imports correctly
-    for k in list(sys.modules.keys()):
-        if k == "app" or k.startswith("app."):
-            del sys.modules[k]
-
-    import app.graph.workflow as agent_workflow
-    return agent_workflow.build_investigation_graph()
+    from langgraph_investigation_agent.app.graph.workflow import build_investigation_graph
+    return build_investigation_graph()
 
 
 class InvestigationAdapter:

@@ -1,0 +1,22 @@
+{
+  "incident_id": "INC-AUTH-03",
+  "project_id": "PROJ-AUTH",
+  "title": "Authentication Service HTTP 401 Unauthorized Errors Post-Deployment",
+  "description": "All user authentication requests failing with HTTP 401 Unauthorized immediately following release v2.4.0 deployment. Database, memory, and network metrics remain 100% healthy.",
+  "affected_service": "auth-service",
+  "timeline": "2026-08-16T09:00:00Z",
+  "evidence": [
+    {
+      "evidence_id": "EVD-LOG-AUTH-1",
+      "source_type": "log",
+      "source_name": "auth_service.log",
+      "content": "ERROR [jwt_validator] JWT signature verification failed: invalid issuer claim 'https://auth-legacy.internal'. Expected configured issuer 'https://auth.internal'."
+    },
+    {
+      "evidence_id": "EVD-DOC-AUTH-2",
+      "source_type": "document",
+      "source_name": "Deployment Changelog v2.4.0.md",
+      "content": "Deployment Release Notes v2.4.0: Updated AUTH_JWT_ISSUER environment variable to strictly match RFC7519 domain validation rules."
+    }
+  ]
+}

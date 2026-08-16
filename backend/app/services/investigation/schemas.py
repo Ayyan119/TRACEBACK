@@ -45,8 +45,11 @@ class InvestigationResult(BaseModel):
     """Clean API output response returned from the Investigation Adapter."""
     investigation_id: str = Field(..., description="Graph execution run UUID")
     incident_id: str = Field(..., description="Target incident ticket UUID")
-    status: str = Field(default="COMPLETED", description="Investigation status (COMPLETED, FAILED)")
+    status: str = Field(default="COMPLETED", description="Investigation status (COMPLETED, DEGRADED, FAILED)")
     confidence: float = Field(..., ge=0.0, le=100.0, description="AI root-cause confidence percentage (0-100%)")
+    confidence_source: str = Field(default="llm", description="Source of confidence score: 'llm', 'fallback', 'unavailable'")
+    analysis_status: str = Field(default="success", description="Status of LLM analysis: 'success', 'degraded', 'failed'")
+    failed_llm_nodes: List[str] = Field(default_factory=list, description="LangGraph nodes that failed LLM invocation")
     investigation_summary: str = Field(..., description="Executive summary statement")
     final_report: Optional[Dict[str, Any]] = Field(None, description="Complete Root Cause Analysis (RCA) document")
     selected_hypothesis: Optional[Dict[str, Any]] = Field(None, description="Primary root-cause hypothesis")

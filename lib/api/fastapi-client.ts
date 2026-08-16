@@ -410,6 +410,8 @@ export class FastApiClient implements ApiClient {
       status: 'completed',
       severity: incident.severity,
       confidence: Math.round(confidence * 10) / 10,
+      confidenceSource: parsedResult?.confidence_source,
+      analysisStatus: parsedResult?.analysis_status,
       summary: summaryText,
       impact: {
         affectedFunctionality: incident.affectedService || 'Core Services',

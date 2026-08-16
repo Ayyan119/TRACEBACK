@@ -3,8 +3,8 @@ from typing import List, Dict, Any
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest_models
 
-from app.config import config
-from app.retrieval.qdrant_retriever import get_embedding_model
+from langgraph_investigation_agent.app.config import config
+from langgraph_investigation_agent.app.retrieval.qdrant_retriever import get_embedding_model
 
 logger = logging.getLogger("langgraph_agent.retrieval.previous_incidents")
 

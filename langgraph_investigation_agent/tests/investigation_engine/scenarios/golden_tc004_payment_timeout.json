@@ -1,0 +1,46 @@
+{
+  "incident_id": "INC-SHOP-004",
+  "project_id": "ShopFlow",
+  "title": "ShopFlow Checkout Intermittent Payment Failures After Infrastructure Change",
+  "description": "Starting around 14:10 UTC, ShopFlow customers began experiencing intermittent checkout failures. Customers report that some orders complete successfully while others remain stuck on 'Processing' for 20-40 seconds before returning HTTP 504 Gateway Timeout. The checkout-service shows elevated latency and the API gateway reports an increase in 504 responses. payment-service also shows increased request latency, but CPU and memory utilization remain within normal limits. The incident began approximately 12 minutes after a deployment to payment-service. No application code changes were made to checkout-service or order-service during this period. Database CPU is approximately 48%, database connections are below the configured maximum, and Redis memory utilization is normal. The payment team reports that payment requests occasionally take significantly longer than normal. A network connectivity check between checkout-service and payment-service shows no packet loss.",
+  "affected_service": "payment-service",
+  "timeline": "26 July 2026 14:08 UTC to 14:20 UTC",
+  "evidence": [
+    {
+      "evidence_id": "EVD-LOG-004",
+      "source_type": "log",
+      "source_name": "Mandatory Incident Logs",
+      "content": "2026-07-26T14:08:41Z INFO payment-service deployment version=2026.07.26-3 status=SUCCESS\n2026-07-26T14:09:02Z INFO payment-service startup completed version=2026.07.26-3\n2026-07-26T14:10:14Z WARN payment-service request_id=pay-7812 latency_ms=4200 endpoint=/payments/authorize\n2026-07-26T14:10:21Z WARN checkout-service request_id=chk-11291 payment_latency_ms=4380\n2026-07-26T14:10:23Z ERROR api-gateway request_id=chk-11291 status=504 upstream=checkout-service\n2026-07-26T14:11:07Z WARN payment-service request_id=pay-7921 latency_ms=5100 endpoint=/payments/authorize\n2026-07-26T14:11:11Z WARN checkout-service request_id=chk-11304 payment_latency_ms=5240\n2026-07-26T14:11:14Z ERROR api-gateway request_id=chk-11304 status=504 upstream=checkout-service\n2026-07-26T14:12:36Z WARN payment-service request_id=pay-8018 latency_ms=6200 endpoint=/payments/authorize\n2026-07-26T14:12:42Z ERROR checkout-service request_id=chk-11391 error=\"payment provider timeout\"\n2026-07-26T14:12:44Z ERROR api-gateway request_id=chk-11391 status=504 upstream=checkout-service\n2026-07-26T14:13:02Z INFO postgresql-db cpu_percent=48 connections=61 max_connections=100\n2026-07-26T14:13:05Z INFO redis-cache memory_percent=52 evictions=0\n2026-07-26T14:13:22Z INFO network-check source=checkout-service destination=payment-service packet_loss=0 latency_ms=4\n2026-07-26T14:14:11Z WARN payment-service request_id=pay-8172 latency_ms=7100 endpoint=/payments/authorize\n2026-07-26T14:14:18Z ERROR checkout-service request_id=chk-11442 error=\"payment provider timeout\"\n2026-07-26T14:14:20Z ERROR api-gateway request_id=chk-11442 status=504 upstream=checkout-service"
+    },
+    {
+      "evidence_id": "E-001",
+      "source_type": "document",
+      "source_name": "Evidence Document 1 - Deployment Change",
+      "content": "Payment Service Deployment Change - 2026-07-26\nDeployment: payment-service version 2026.07.26-3 at 14:08 UTC.\nChanges: Payment provider client library upgraded from version 4.8.1 to 5.1.0. Default HTTP request timeout changed from 3 seconds to 10 seconds. Connection pool configuration was unchanged.\nNo changes were made to checkout-service, order-service, PostgreSQL, Redis, or API Gateway."
+    },
+    {
+      "evidence_id": "E-002",
+      "source_type": "document",
+      "source_name": "Evidence Document 2 - Payment Provider Behavior",
+      "content": "Payment Provider Integration Investigation:\nNormal payment authorization latency: 150-400 ms.\nObserved latency after 14:10 UTC: 4-8 seconds.\nProvider-side health: Healthy.\nNetwork connectivity: Healthy.\nObserved behavior: The new payment client library waits for an extended period when the provider response is delayed. The checkout-service has a request timeout of 5 seconds. Therefore, payment-service requests can remain active beyond the checkout-service timeout."
+    },
+    {
+      "evidence_id": "E-003",
+      "source_type": "telemetry",
+      "source_name": "Evidence Document 3 - System Metrics",
+      "content": "Infrastructure Metrics (14:00-14:20 UTC):\ncheckout-service: CPU 62%, Memory 58%\npayment-service: CPU 54%, Memory 61%\norder-service: CPU 41%, Memory 49%\nPostgreSQL: CPU 48%, Connections 61/100\nRedis: Memory 52%, Evictions 0\nNetwork: Packet loss 0%\nAPI Gateway: HTTP 504 rate increased from 0.2% to 8.7%"
+    },
+    {
+      "evidence_id": "KB-001",
+      "source_type": "document",
+      "source_name": "Knowledge Base Document - ShopFlow Checkout Timeout Runbook",
+      "content": "ShopFlow Checkout Timeout Runbook:\nWhen checkout-service communicates with payment-service, checkout-service has a downstream request timeout of 5 seconds. If payment-service takes longer than 5 seconds to return, checkout-service terminates the request and the API Gateway may return HTTP 504.\nWhen investigating checkout 504 errors, do not automatically assume database or checkout-service failure. Check: 1. payment-service latency 2. downstream dependency latency 3. recent payment-service deployments 4. timeout configuration 5. network connectivity 6. database connection utilization.\nA healthy database with normal CPU and connection utilization makes database connection-pool exhaustion less likely. If payment-service latency increases immediately following a payment-service deployment, investigate changes to the payment client, timeout behavior, retry configuration, and connection handling."
+    },
+    {
+      "evidence_id": "PREV-001",
+      "source_type": "document",
+      "source_name": "Previous Incident - INC-2026-041",
+      "content": "Resolved Incident INC-2026-041: Checkout 504s caused by payment dependency latency.\nAffected Service: payment-service.\nRoot Cause: Payment client timeout configuration caused downstream requests to exceed checkout timeout.\nSymptoms: HTTP 504 responses, Checkout latency increase, Payment authorization latency increase.\nResolution: Corrected payment client timeout configuration, aligned downstream timeout with checkout timeout, deployed corrected configuration.\nEvidence: Payment latency increased after deployment, Database remained healthy, Network connectivity remained healthy.\nConfidence: 94%"
+    }
+  ]
+}

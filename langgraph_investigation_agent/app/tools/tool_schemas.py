@@ -1,6 +1,6 @@
 from langchain_core.tools import StructuredTool
-from app.models.structured_models import LogQueryInput
-from app.tools.log_tools import query_incident_logs
+from langgraph_investigation_agent.app.models.structured_models import LogQueryInput
+from langgraph_investigation_agent.app.tools.log_tools import query_incident_logs
 
 log_query_tool = StructuredTool.from_function(
     coroutine=query_incident_logs,

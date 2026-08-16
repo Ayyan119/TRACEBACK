@@ -35,9 +35,15 @@ class OutputAdapter:
         log_query_history = final_state.get("log_query_history", [])
         execution_trace = final_state.get("execution_trace", [])
 
+        confidence_source = final_state.get("confidence_source", "llm")
+        analysis_status = final_state.get("analysis_status", "success")
+        failed_llm_nodes = final_state.get("failed_llm_nodes", [])
+
         # Check for errors in state
         errors = final_state.get("errors", [])
         status = "COMPLETED"
+        if analysis_status == "degraded" or confidence_source == "fallback":
+            status = "DEGRADED"
         if errors and not selected_hypothesis and not final_report:
             status = "FAILED"
 
@@ -46,6 +52,9 @@ class OutputAdapter:
             incident_id=incident_id,
             status=status,
             confidence=round(confidence, 2),
+            confidence_source=confidence_source,
+            analysis_status=analysis_status,
+            failed_llm_nodes=failed_llm_nodes,
             investigation_summary=summary,
             final_report=final_report,
             selected_hypothesis=selected_hypothesis,
@@ -59,6 +68,6 @@ class OutputAdapter:
 
         logger.info(
             f"OutputAdapter: Successfully created InvestigationResult for '{incident_id}' "
-            f"(Confidence: {result.confidence}%, Accepted Evidence: {len(result.accepted_evidence)})"
+            f"(Status: {result.status}, Confidence: {result.confidence}%, Source: {confidence_source}, Accepted Evidence: {len(result.accepted_evidence)})"
         )
         return result

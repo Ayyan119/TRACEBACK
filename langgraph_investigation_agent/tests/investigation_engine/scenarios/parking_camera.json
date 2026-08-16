@@ -1,0 +1,22 @@
+{
+  "incident_id": "INC-PARK-01",
+  "project_id": "PROJ-SMARTPARK",
+  "title": "Smart Parking Camera Vehicle Detection Pipeline Failure",
+  "description": "Smart Parking intermittently fails to register newly parked vehicles. Video stream feed is operational, but vehicle occupancy events are not published.",
+  "affected_service": "parking-camera-service",
+  "timeline": "2026-08-16T08:15:00Z",
+  "evidence": [
+    {
+      "evidence_id": "EVD-LOG-CAM-1",
+      "source_type": "log",
+      "source_name": "parking_camera_pipeline.log",
+      "content": "ERROR [inference_worker] Frame drop count spiked to 85% in parking-camera-pipeline due to CUDA out-of-memory error in object detection inference model v2.1. Inference queue full (500/500)."
+    },
+    {
+      "evidence_id": "EVD-DOC-CAM-2",
+      "source_type": "document",
+      "source_name": "Camera Diagnostic Sheet.pdf",
+      "content": "Camera Pipeline Diagnostic: Video decoder active at 30 FPS, but frame buffer overflows because object detection GPU memory leak prevents model from processing incoming frames."
+    }
+  ]
+}

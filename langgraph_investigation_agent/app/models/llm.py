@@ -4,38 +4,31 @@ from pydantic import BaseModel
 from langchain_core.language_models import BaseChatModel
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
-from app.config import config
+from langgraph_investigation_agent.app.config import config
 
 logger = logging.getLogger("langgraph_agent.models.llm")
 
 
+from langchain_openai import ChatOpenAI
+
+
 def get_reasoning_llm() -> Optional[BaseChatModel]:
-    """Returns the primary tool & reasoning language model."""
-    # 1. Try Google Gemini (Primary LLM)
-    if config.GOOGLE_API_KEY:
+    """
+    Returns the primary tool & reasoning language model.
+    OpenAI (gpt-4o-mini) is used as Primary for all reasoning, structured output, and tools.
+    """
+    if config.OPENAI_API_KEY:
         try:
-            return ChatGoogleGenerativeAI(
-                model=config.DEFAULT_LLM_MODEL or "gemini-3.5-flash",
-                google_api_key=config.GOOGLE_API_KEY,
+            return ChatOpenAI(
+                model=config.DEFAULT_LLM_MODEL or "gpt-4o-mini",
+                api_key=config.OPENAI_API_KEY,
                 temperature=0.1,
                 max_retries=0,
             )
         except Exception as e:
-            logger.warning(f"Failed to initialize ChatGoogleGenerativeAI: {e}")
+            logger.warning(f"Failed to initialize ChatOpenAI: {e}")
 
-    # 2. Try Groq (Fallback)
-    if config.GROQ_API_KEY:
-        try:
-            return ChatGroq(
-                model=config.FALLBACK_LLM_MODEL or "llama-3.3-70b-versatile",
-                groq_api_key=config.GROQ_API_KEY,
-                temperature=0.1,
-                max_retries=0,
-            )
-        except Exception as e:
-            logger.warning(f"Failed to initialize ChatGroq: {e}")
-
-    logger.warning("No active LLM API key detected.")
+    logger.warning("No active OPENAI_API_KEY detected.")
     return None
 
 
@@ -48,3 +41,50 @@ def get_structured_llm(output_schema: Type[BaseModel]) -> Any:
         except Exception as e:
             logger.warning(f"with_structured_output failed: {e}")
     return None
+
+
+async def safe_invoke_structured_llm(
+    output_schema: Type[BaseModel],
+    prompt: str,
+    node_name: str = "unknown_node",
+) -> Optional[Any]:
+    """Invokes structured LLM with exponential backoff, jitter, and error tracking."""
+    from langgraph_investigation_agent.app.models.llm_invoker import invoke_llm_with_orchestration
+
+    structured_llm = get_structured_llm(output_schema)
+    if structured_llm is None:
+        return None
+
+    try:
+        return await invoke_llm_with_orchestration(
+            structured_llm.ainvoke,
+            prompt,
+            provider_name="openai",
+            node_name=node_name,
+        )
+    except Exception as e:
+        logger.warning(f"safe_invoke_structured_llm failed for {node_name}: {e}")
+        return None
+
+
+async def safe_invoke_reasoning_llm(
+    prompt: str,
+    node_name: str = "unknown_node",
+) -> Optional[Any]:
+    """Invokes reasoning LLM with exponential backoff, jitter, and error tracking."""
+    from langgraph_investigation_agent.app.models.llm_invoker import invoke_llm_with_orchestration
+
+    llm = get_reasoning_llm()
+    if llm is None:
+        return None
+
+    try:
+        return await invoke_llm_with_orchestration(
+            llm.ainvoke,
+            prompt,
+            provider_name="openai",
+            node_name=node_name,
+        )
+    except Exception as e:
+        logger.warning(f"safe_invoke_reasoning_llm failed for {node_name}: {e}")
+        return None

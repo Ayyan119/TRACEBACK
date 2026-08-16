@@ -1,0 +1,64 @@
+{
+  "incident_id": "INC-AUTH-001",
+  "project_id": "SecureDesk",
+  "title": "Authentication requests fail with HTTP 401/403 after deployment",
+  "description": "From 16 August 2026 17:02 UTC to 17:31 UTC, users began receiving HTTP 401 and HTTP 403 responses when attempting to sign in to SecureDesk. The failures began shortly after a new auth-service deployment. Previously valid accounts were affected. Database health, network connectivity, and application CPU remained within normal operating ranges.",
+  "affected_service": "auth-service",
+  "timeline": "16 August 2026 17:02 UTC to 17:31 UTC",
+  "evidence": [
+    {
+      "evidence_id": "KB-001",
+      "source_type": "document",
+      "source_name": "KB-001 Authentication Architecture",
+      "content": "SecureDesk uses JWT tokens. Flow: Client -> auth-service -> JWT validation -> issuer/audience verification -> user authorization -> authenticated session. The JWT issuer must match the configured trusted issuer. If the issuer configuration is incorrect, otherwise valid tokens can fail validation."
+    },
+    {
+      "evidence_id": "KB-002",
+      "source_type": "document",
+      "source_name": "KB-002 Authentication Incident Runbook",
+      "content": "For widespread authentication failures: 1. Check token validation errors 2. Check issuer configuration 3. Check audience configuration 4. Compare current configuration against the previous deployment 5. Verify whether failures started immediately after deployment 6. Check database and network health to eliminate unrelated causes."
+    },
+    {
+      "evidence_id": "KB-003",
+      "source_type": "document",
+      "source_name": "KB-003 Normal Authentication Baseline",
+      "content": "Normal Authentication Baseline: HTTP 401/403 rate <1%, JWT validation success >99%, Database latency <100ms, Network packet loss <0.1%, CPU utilization <70%."
+    },
+    {
+      "evidence_id": "E-001",
+      "source_type": "log",
+      "source_name": "Authentication Logs",
+      "content": "17:02:11 auth-service INFO Deployment version=2026.08.16.3 started\n17:03:02 auth-service WARN JWT validation failed error=InvalidIssuer\n17:03:03 auth-service WARN JWT validation failed error=InvalidIssuer\n17:03:04 auth-service ERROR Authentication rejected status=401\n17:04:18 auth-service WARN JWT validation failed error=InvalidIssuer\n17:05:31 auth-service ERROR Authorization rejected status=403\n17:07:44 auth-service WARN JWT validation failed error=InvalidIssuer\n17:10:22 auth-service ERROR Authentication rejected status=401"
+    },
+    {
+      "evidence_id": "E-002",
+      "source_type": "document",
+      "source_name": "Deployment Configuration",
+      "content": "Previous deployment: JWT_ISSUER=https://auth.securedesk.com. Current deployment: JWT_ISSUER=https://authentication.securedesk.com. The configured issuer does not match the issuer contained in existing tokens."
+    },
+    {
+      "evidence_id": "E-003",
+      "source_type": "telemetry",
+      "source_name": "Authentication Metrics",
+      "content": "Before deployment: JWT validation success 99.6%, HTTP 401/403 rate 0.4%. After deployment: JWT validation success 21.3%, HTTP 401/403 rate 78.7%."
+    },
+    {
+      "evidence_id": "E-004",
+      "source_type": "telemetry",
+      "source_name": "Database Health",
+      "content": "PostgreSQL CPU: 42%, Database latency: 38ms, Connection utilization: 41%, Database errors: 0"
+    },
+    {
+      "evidence_id": "E-005",
+      "source_type": "telemetry",
+      "source_name": "Network Health",
+      "content": "Packet loss: 0.0%, DNS failures: 0, Network latency: normal"
+    },
+    {
+      "evidence_id": "E-006",
+      "source_type": "document",
+      "source_name": "Deployment Timeline",
+      "content": "17:00 UTC - auth-service deployment begins\n17:02 UTC - deployment completed\n17:03 UTC - first InvalidIssuer errors\n17:04 UTC - authentication failure rate increases\n17:31 UTC - incident remains active"
+    }
+  ]
+}

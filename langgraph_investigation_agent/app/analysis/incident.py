@@ -1,8 +1,8 @@
 import logging
 from typing import List, Dict, Any
-from app.models.structured_models import IncidentAnalysisDecision
-from app.models.llm import get_structured_llm
-from app.prompts.incident_prompts import INCIDENT_ANALYZER_SYSTEM_PROMPT
+from langgraph_investigation_agent.app.models.structured_models import IncidentAnalysisDecision
+from langgraph_investigation_agent.app.models.llm import get_structured_llm
+from langgraph_investigation_agent.app.prompts.incident_prompts import INCIDENT_ANALYZER_SYSTEM_PROMPT
 
 logger = logging.getLogger("langgraph_agent.analysis.incident")
 

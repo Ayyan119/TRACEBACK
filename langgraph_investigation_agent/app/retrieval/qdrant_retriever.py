@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest_models
 
-from app.config import config
+from langgraph_investigation_agent.app.config import config
 
 logger = logging.getLogger("langgraph_agent.retrieval.qdrant")
 

@@ -1,0 +1,58 @@
+{
+  "incident_id": "INC-PARK-001",
+  "project_id": "ParkSight Smart Parking",
+  "title": "Smart Parking intermittently fails to register newly parked vehicles",
+  "description": "From 16 August 2026 09:10 UTC to 09:48 UTC, the ParkSight Smart Parking application intermittently failed to register newly parked vehicles. Customers reported that vehicles entered parking spaces but some spaces continued to appear available in the application. The parking management API remained reachable and the database remained healthy during the incident. The issue was concentrated in the parking-camera-processing service.",
+  "affected_service": "parking-camera-processing",
+  "timeline": "16 August 2026 09:10 UTC to 09:48 UTC",
+  "evidence": [
+    {
+      "evidence_id": "KB-001",
+      "source_type": "document",
+      "source_name": "KB-001 Parking Camera Processing Architecture",
+      "content": "The ParkSight parking-camera-processing service receives frames from parking-lot cameras and performs vehicle detection. Pipeline: Camera -> Frame Capture -> Image Preprocessing -> Vehicle Detection -> Occupancy Decision -> Parking API. A failed or corrupted camera frame can prevent vehicle detection for that frame. The API should only receive an occupancy update after successful vehicle detection."
+    },
+    {
+      "evidence_id": "KB-002",
+      "source_type": "document",
+      "source_name": "KB-002 Camera Processing Runbook",
+      "content": "For camera-processing incidents, engineers should verify: 1. Camera frame ingestion 2. Frame corruption/drop rate 3. Object detection inference 4. Model inference latency 5. GPU/CPU utilization 6. API connectivity 7. Database health. If frame ingestion is failing while downstream API and database services remain healthy, investigate the camera ingestion/processing layer first."
+    },
+    {
+      "evidence_id": "KB-003",
+      "source_type": "document",
+      "source_name": "KB-003 Normal Operating Baseline",
+      "content": "Normal camera processing: Frame ingestion success rate >99.5%, Vehicle detection latency <150ms, Camera frame drop rate <0.5%, GPU utilization 40-75%, Parking API latency <200ms, Database CPU <70%."
+    },
+    {
+      "evidence_id": "E-001",
+      "source_type": "log",
+      "source_name": "Application Logs",
+      "content": "09:10:03 parking-camera-processing INFO Camera stream connected camera_id=CAM-17\n09:11:12 parking-camera-processing WARN Frame decode failed camera_id=CAM-17\n09:11:13 parking-camera-processing WARN Dropped corrupted frame camera_id=CAM-17\n09:12:01 parking-camera-processing WARN Frame decode failed camera_id=CAM-17\n09:12:02 parking-camera-processing WARN Dropped corrupted frame camera_id=CAM-17\n09:14:45 parking-camera-processing ERROR Vehicle detection skipped reason=invalid_frame\n09:16:22 parking-camera-processing WARN Frame decode failed camera_id=CAM-17\n09:18:05 parking-camera-processing ERROR Vehicle detection skipped reason=invalid_frame"
+    },
+    {
+      "evidence_id": "E-002",
+      "source_type": "telemetry",
+      "source_name": "Camera Metrics",
+      "content": "Camera CAM-17 frame ingestion success rate: 71.4%, Frame drop rate: 28.6%, Vehicle detection success rate: 69.8%, Normal frame drop rate: <0.5%"
+    },
+    {
+      "evidence_id": "E-003",
+      "source_type": "telemetry",
+      "source_name": "System Metrics",
+      "content": "parking-camera-processing CPU: 54%, memory: 48%, GPU utilization: 61%, Parking API latency: 142ms, Parking API error rate: 0.2%, PostgreSQL CPU: 43%, PostgreSQL connection utilization: 38%"
+    },
+    {
+      "evidence_id": "E-004",
+      "source_type": "document",
+      "source_name": "Deployment Evidence",
+      "content": "No deployment occurred during the incident window. Last parking-camera-processing deployment: 15 August 2026 17:20 UTC."
+    },
+    {
+      "evidence_id": "E-005",
+      "source_type": "telemetry",
+      "source_name": "Camera Diagnostic",
+      "content": "camera_id: CAM-17, RTSP stream: unstable, Packet loss: 31%, Frame corruption: elevated, Camera firmware: 4.2.1"
+    }
+  ]
+}

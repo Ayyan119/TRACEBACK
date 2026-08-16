@@ -1,0 +1,28 @@
+{
+  "incident_id": "INC-SHOP-02",
+  "project_id": "PROJ-SHOPFLOW",
+  "title": "Checkout Service HTTP 504 Gateway Timeout Outage",
+  "description": "Checkout service returning HTTP 504 gateway timeouts during peak promotion launch. Active PostgreSQL database connections reached 100/100 limit.",
+  "affected_service": "checkout-service",
+  "timeline": "2026-08-16T08:30:00Z",
+  "evidence": [
+    {
+      "evidence_id": "EVD-LOG-SHOP-1",
+      "source_type": "log",
+      "source_name": "checkout_db_pool.log",
+      "content": "ERROR [HikariCP] Connection acquisition timeout after 30000ms. Active connections 100/100, idle 0, waiting 142 threads."
+    },
+    {
+      "evidence_id": "EVD-LOG-SHOP-2",
+      "source_type": "log",
+      "source_name": "postgres_slow_queries.log",
+      "content": "LOG: duration: 11420.50 ms statement: SELECT * FROM orders WHERE customer_id = 48291 ORDER BY created_at DESC. EXPLAIN ANALYZE: Seq Scan on orders (cost=0.00..84512.00 rows=2847921)."
+    },
+    {
+      "evidence_id": "EVD-DOC-SHOP-3",
+      "source_type": "document",
+      "source_name": "PostgreSQL Schema Audit.pdf",
+      "content": "PostgreSQL Schema Audit: Foreign key orders.customer_id is missing an index, resulting in full table scans on 2.8M rows during customer order lookups."
+    }
+  ]
+}

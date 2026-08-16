@@ -111,6 +111,8 @@ class FinalInvestigationReport(BaseModel):
     historical_incidents_summary: List[str] = Field(default_factory=list, description="Correlated past incidents.")
     root_cause: str = Field(description="Definitive primary root cause statement.")
     confidence: float = Field(ge=0.0, le=100.0, description="Final overall confidence score.")
+    confidence_source: str = Field(default="llm", description="Source of confidence score: 'llm', 'fallback', 'unavailable'.")
+    analysis_status: str = Field(default="success", description="Status of LLM analysis: 'success', 'degraded', 'failed'.")
     supporting_evidence: List[str] = Field(default_factory=list, description="Evidence supporting final root cause.")
     contradictory_evidence: List[str] = Field(default_factory=list, description="Contradictions if any.")
     recommended_verification: str = Field(description="Immediate steps to verify fix.")

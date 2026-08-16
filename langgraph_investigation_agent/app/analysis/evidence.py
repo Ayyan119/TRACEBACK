@@ -1,8 +1,8 @@
 import logging
 from typing import List, Dict, Any
-from app.models.structured_models import DocumentAnalysis
-from app.models.llm import get_structured_llm
-from app.prompts.document_prompts import DOCUMENT_ANALYSIS_SYSTEM_PROMPT, DOCUMENT_ANALYSIS_USER_PROMPT
+from langgraph_investigation_agent.app.models.structured_models import DocumentAnalysis
+from langgraph_investigation_agent.app.models.llm import get_structured_llm
+from langgraph_investigation_agent.app.prompts.document_prompts import DOCUMENT_ANALYSIS_SYSTEM_PROMPT, DOCUMENT_ANALYSIS_USER_PROMPT
 
 logger = logging.getLogger("langgraph_agent.analysis.evidence")
 

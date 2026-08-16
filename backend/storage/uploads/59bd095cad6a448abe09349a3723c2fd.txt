@@ -1,0 +1,7 @@
+PostgreSQL max_connections = 100
+Active connections = 100
+Idle connections = 0
+Connection acquisition wait time = 8.7 seconds
+Average checkout query latency increased from 120ms to 11.4s
+CPU = 48%
+Memory = 61%

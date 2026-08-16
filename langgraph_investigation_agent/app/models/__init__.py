@@ -1,4 +1,4 @@
-from app.models.structured_models import (
+from .structured_models import (
     ImageAnalysis,
     DocumentAnalysis,
     LogQueryInput,

@@ -97,6 +97,8 @@ export interface Investigation {
   status: InvestigationStatus;
   severity: 'Critical' | 'High' | 'Medium' | 'Low';
   confidence: number;
+  confidenceSource?: 'llm' | 'fallback' | 'unavailable';
+  analysisStatus?: 'success' | 'degraded' | 'failed';
   summary: string;
   currentStep?: string;
   progress?: number;

@@ -60,9 +60,11 @@ export const InvestigationHeader: React.FC<InvestigationHeaderProps> = ({
         <div className="flex items-center gap-4">
           {investigation.confidence !== undefined && (
             <div className="text-right border-r border-borderColor pr-4">
-              <p className="text-[10px] text-textMuted uppercase font-mono tracking-wider">AI Confidence</p>
-              <p className="text-lg font-bold font-mono text-accentPrimary">
-                {investigation.confidence}%
+              <p className="text-[10px] text-textMuted uppercase font-mono tracking-wider">
+                {investigation.confidenceSource === 'fallback' ? 'Fallback Status' : 'AI Confidence'}
+              </p>
+              <p className={`text-lg font-bold font-mono ${investigation.confidenceSource === 'fallback' ? 'text-amber-400' : 'text-accentPrimary'}`}>
+                {investigation.confidenceSource === 'fallback' ? 'Degraded' : `${investigation.confidence}%`}
               </p>
             </div>
           )}

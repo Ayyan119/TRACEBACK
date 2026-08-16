@@ -1,0 +1,58 @@
+{
+  "incident_id": "INC-SHOP-001",
+  "project_id": "ShopFlow E-Commerce",
+  "title": "Checkout requests intermittently fail with HTTP 504 timeouts",
+  "description": "From 16 August 2026 14:05 UTC to 14:42 UTC, the ShopFlow checkout service experienced intermittent failures during order placement. Customers reported that checkout requests were taking 10-30 seconds and eventually returning HTTP 504 Gateway Timeout errors. Existing orders were also taking longer than normal to complete. Product browsing and shopping-cart functionality remained operational. The issue was concentrated in checkout-service.",
+  "affected_service": "checkout-service",
+  "timeline": "16 August 2026 14:05 UTC to 14:42 UTC",
+  "evidence": [
+    {
+      "evidence_id": "KB-001",
+      "source_type": "document",
+      "source_name": "KB-001 Checkout Database Architecture",
+      "content": "The checkout-service stores orders in PostgreSQL. Relationship: orders.customer_id -> customers.id. Checkout queries frequently filter or join using orders.customer_id. The orders table contains several million records. Indexes on frequently queried foreign-key columns are important for preventing expensive sequential scans."
+    },
+    {
+      "evidence_id": "KB-002",
+      "source_type": "document",
+      "source_name": "KB-002 Database Connection Pool Runbook",
+      "content": "Long-running database queries can hold connections for extended periods. When enough connections remain occupied: Long queries -> connections remain busy -> pool utilization increases -> connection acquisition waits -> requests timeout. Connection pool exhaustion can therefore be a consequence of expensive database queries rather than the original root cause."
+    },
+    {
+      "evidence_id": "KB-003",
+      "source_type": "document",
+      "source_name": "KB-003 Normal Checkout Baseline",
+      "content": "Normal Checkout Baseline: Checkout query latency <200ms, Database connection utilization <70%, HTTP 504 rate <0.1%, PostgreSQL CPU <70%."
+    },
+    {
+      "evidence_id": "E-001",
+      "source_type": "log",
+      "source_name": "Checkout Logs",
+      "content": "14:05:12 checkout-service INFO Starting checkout request order=ORD-1001\n14:05:13 checkout-service INFO Waiting for database connection\n14:05:18 checkout-service WARN Database connection acquisition timeout\n14:05:20 checkout-service ERROR Query execution timeout\n14:05:20 checkout-service ERROR HTTP 504 Gateway Timeout\n14:08:31 checkout-service WARN Database connection pool exhausted\n14:08:32 checkout-service WARN Active connections: 100/100\n14:08:35 checkout-service ERROR Unable to acquire database connection\n14:15:02 checkout-service ERROR HTTP 504 Gateway Timeout\n14:15:03 checkout-service WARN Connection acquisition timeout\n14:25:44 checkout-service WARN Active connections: 100/100\n14:25:45 checkout-service ERROR Database query timeout"
+    },
+    {
+      "evidence_id": "E-002",
+      "source_type": "telemetry",
+      "source_name": "Database Metrics",
+      "content": "PostgreSQL max_connections: 100, Active connections: 100, Idle connections: 0, Connection acquisition wait time: 8.7 seconds, Average checkout query latency: 11.4 seconds, Normal checkout query latency: 120ms"
+    },
+    {
+      "evidence_id": "E-003",
+      "source_type": "telemetry",
+      "source_name": "Query Analysis",
+      "content": "EXPLAIN ANALYZE statement: SELECT * FROM orders WHERE customer_id = 48291. Seq Scan on orders, Rows Removed by Filter: 2,847,921, Execution Time: 10,842 ms"
+    },
+    {
+      "evidence_id": "E-004",
+      "source_type": "document",
+      "source_name": "Schema Evidence",
+      "content": "Foreign key: orders.customer_id -> customers.id. Index on orders.customer_id: NOT FOUND"
+    },
+    {
+      "evidence_id": "E-005",
+      "source_type": "telemetry",
+      "source_name": "Resource Metrics",
+      "content": "PostgreSQL CPU: 48%, PostgreSQL memory: 61%, Network packet loss: 0.0%, Checkout API health endpoint: healthy"
+    }
+  ]
+}

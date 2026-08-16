@@ -2,19 +2,19 @@ import logging
 import time
 from typing import Dict, Any, List
 
-from app.config import config
-from app.graph.state import InvestigationState, EvidenceItem
-from app.models.vision import analyze_image_with_vision
-from app.analysis.evidence import analyze_incident_document
-from app.tools.log_tools import query_incident_logs
-from app.analysis.incident import analyze_incident_needs
-from app.retrieval.qdrant_retriever import retrieve_knowledge_chunks
-from app.retrieval.previous_incidents import retrieve_previous_incidents
-from app.retrieval.reranker import rerank_retrieved_items
-from app.analysis.hypotheses import generate_ranked_hypotheses
-from app.models.structured_models import EvidenceAnalysis, HypothesisEvaluation, FinalInvestigationReport
-from app.models.llm import get_structured_llm, get_reasoning_llm
-from app.prompts.evidence_prompts import EVIDENCE_ANALYSIS_SYSTEM_PROMPT, FINAL_REPORT_SYSTEM_PROMPT
+from langgraph_investigation_agent.app.config import config
+from langgraph_investigation_agent.app.graph.state import InvestigationState, EvidenceItem
+from langgraph_investigation_agent.app.models.vision import analyze_image_with_vision
+from langgraph_investigation_agent.app.analysis.evidence import analyze_incident_document
+from langgraph_investigation_agent.app.tools.log_tools import query_incident_logs
+from langgraph_investigation_agent.app.analysis.incident import analyze_incident_needs
+from langgraph_investigation_agent.app.retrieval.qdrant_retriever import retrieve_knowledge_chunks
+from langgraph_investigation_agent.app.retrieval.previous_incidents import retrieve_previous_incidents
+from langgraph_investigation_agent.app.retrieval.reranker import rerank_retrieved_items
+from langgraph_investigation_agent.app.analysis.hypotheses import generate_ranked_hypotheses
+from langgraph_investigation_agent.app.models.structured_models import EvidenceAnalysis, HypothesisEvaluation, FinalInvestigationReport
+from langgraph_investigation_agent.app.models.llm import safe_invoke_structured_llm, safe_invoke_reasoning_llm
+from langgraph_investigation_agent.app.prompts.evidence_prompts import EVIDENCE_ANALYSIS_SYSTEM_PROMPT, FINAL_REPORT_SYSTEM_PROMPT
 
 logger = logging.getLogger("langgraph_agent.graph.nodes")
 
@@ -51,6 +51,9 @@ async def initialize_state_node(state: InvestigationState) -> Dict[str, Any]:
         "retrieved_knowledge_documents": [],
         "retrieved_previous_incidents": [],
         "reranked_documents": [],
+        "confidence_source": "llm",
+        "analysis_status": "success",
+        "failed_llm_nodes": [],
         "errors": state.get("errors", []),
         "warnings": state.get("warnings", []),
         "execution_trace": state.get("execution_trace", []),
@@ -183,18 +186,14 @@ async def reason_with_tools_node(state: InvestigationState) -> Dict[str, Any]:
 
     # Attempt LLM decision if not yet queried
     if len(retrieved_logs) == 0 and tool_iterations == 0:
-        llm = get_reasoning_llm()
-        if llm is not None:
-            try:
-                prompt = f"Given incident description '{desc}' and {len(accepted)} evidence items, should we query database telemetry log records for errors? Respond with 'YES' or 'NO' and brief reason."
-                res = await llm.ainvoke(prompt)
-                content = str(res.content).upper()
-                if "NO" in content and "YES" not in content:
-                    updates = {"tool_decision": "no_tool"}
-                    _add_trace(updates, "reason_with_tools", (time.time() - start_time) * 1000, "LLM Decision: no_tool")
-                    return updates
-            except Exception as e:
-                logger.warning(f"LLM tool reasoning failed: {e}")
+        prompt = f"Given incident description '{desc}' and {len(accepted)} evidence items, should we query database telemetry log records for errors? Respond with 'YES' or 'NO' and brief reason."
+        res = await safe_invoke_reasoning_llm(prompt, node_name="reason_with_tools")
+        if res is not None:
+            content = str(res.content).upper()
+            if "NO" in content and "YES" not in content:
+                updates = {"tool_decision": "no_tool"}
+                _add_trace(updates, "reason_with_tools", (time.time() - start_time) * 1000, "LLM Decision: no_tool")
+                return updates
 
         updates = {
             "tool_decision": "query_logs",
@@ -315,29 +314,29 @@ async def analyze_evidence_node(state: InvestigationState) -> Dict[str, Any]:
     services = state.get("services", ["target-service"])
     primary_service = services[0] if services else "target-service"
     
-    # 1. Attempt dynamic structured LLM call
-    structured_llm = get_structured_llm(EvidenceAnalysis)
-    if structured_llm is not None:
-        try:
-            prompt = (
-                f"{EVIDENCE_ANALYSIS_SYSTEM_PROMPT}\n\n"
-                f"INCIDENT CONTEXT:\n"
-                f"- Description: {desc}\n"
-                f"- Primary Service: {primary_service}\n"
-                f"- Accepted Evidence: {[e.get('source_name') + ': ' + str(e.get('content')) for e in accepted]}\n"
-                f"- Log Records: {[l.get('service', '') + ': ' + l.get('message', '') for l in logs[:10]]}\n"
-                f"- Reranked Runbooks: {[r.get('title', '') + ': ' + r.get('content', '')[:100] for r in reranked[:5]]}\n\n"
-                f"Synthesize structured evidence analysis."
-            )
-            synthesis = await structured_llm.ainvoke(prompt)
-            if synthesis:
-                updates: Dict[str, Any] = {"evidence_analysis": synthesis.model_dump()}
-                _add_trace(updates, "analyze_evidence", (time.time() - start_time) * 1000, f"Synthesized LLM evidence analysis for {primary_service}")
-                return updates
-        except Exception as e:
-            logger.warning(f"LLM evidence analysis failed: {e}")
+    prompt = (
+        f"{EVIDENCE_ANALYSIS_SYSTEM_PROMPT}\n\n"
+        f"INCIDENT CONTEXT:\n"
+        f"- Description: {desc}\n"
+        f"- Primary Service: {primary_service}\n"
+        f"- Accepted Evidence: {[e.get('source_name') + ': ' + str(e.get('content')) for e in accepted]}\n"
+        f"- Log Records: {[l.get('service', '') + ': ' + l.get('message', '') for l in logs[:10]]}\n"
+        f"- Reranked Runbooks: {[r.get('title', '') + ': ' + r.get('content', '')[:100] for r in reranked[:5]]}\n\n"
+        f"Synthesize structured evidence analysis."
+    )
+    
+    synthesis = await safe_invoke_structured_llm(
+        EvidenceAnalysis,
+        prompt,
+        node_name="analyze_evidence",
+    )
+    
+    if synthesis:
+        updates: Dict[str, Any] = {"evidence_analysis": synthesis.model_dump()}
+        _add_trace(updates, "analyze_evidence", (time.time() - start_time) * 1000, f"Synthesized LLM evidence analysis for {primary_service}")
+        return updates
 
-    # 2. Dynamic Evidence-Based Fallback (No static PostgreSQL/checkout 504 strings)
+    # 2. Dynamic Evidence-Based Fallback
     symptoms = [desc] if desc else ["Service anomaly observed"]
     if logs:
         symptoms.append(f"Log message: {logs[0].get('message', '')}")
@@ -356,7 +355,10 @@ async def analyze_evidence_node(state: InvestigationState) -> Dict[str, Any]:
         missing_information=[],
     )
     
-    updates: Dict[str, Any] = {"evidence_analysis": synthesis.model_dump()}
+    updates: Dict[str, Any] = {
+        "evidence_analysis": synthesis.model_dump(),
+        "failed_llm_nodes": ["analyze_evidence"],
+    }
     _add_trace(updates, "analyze_evidence", (time.time() - start_time) * 1000, f"Synthesized fallback evidence analysis for {primary_service}")
     return updates
 
@@ -367,18 +369,26 @@ async def generate_hypotheses_node(state: InvestigationState) -> Dict[str, Any]:
     ev_analysis = state.get("evidence_analysis", {})
     accepted = state.get("accepted_evidence", [])
     
-    ranking = await generate_ranked_hypotheses(ev_analysis, accepted)
+    ranking, is_fallback = await generate_ranked_hypotheses(ev_analysis, accepted)
     
     hypotheses_dicts = [h.model_dump() for h in ranking.hypotheses]
     primary_h = hypotheses_dicts[0] if hypotheses_dicts else None
+    
+    confidence_source = "fallback" if is_fallback else "llm"
+    analysis_status = "degraded" if is_fallback else "success"
     
     updates: Dict[str, Any] = {
         "hypotheses": hypotheses_dicts,
         "selected_hypothesis": primary_h,
         "confidence": primary_h["confidence"] if primary_h else 0.0,
+        "confidence_source": confidence_source,
+        "analysis_status": analysis_status,
         "investigation_summary": f"Hypotheses generated for {state.get('incident_id', 'incident')}. Primary candidate: {primary_h['title'] if primary_h else 'Unknown'}.",
     }
-    _add_trace(updates, "generate_hypotheses", (time.time() - start_time) * 1000, f"Generated {len(hypotheses_dicts)} hypotheses (Primary confidence: {primary_h['confidence'] if primary_h else 0}%)")
+    if is_fallback:
+        updates["failed_llm_nodes"] = ["generate_hypotheses"]
+        
+    _add_trace(updates, "generate_hypotheses", (time.time() - start_time) * 1000, f"Generated {len(hypotheses_dicts)} hypotheses (Confidence: {primary_h['confidence'] if primary_h else 0}%, Source: {confidence_source})")
     return updates
 
 
@@ -422,33 +432,36 @@ async def generate_final_report_node(state: InvestigationState) -> Dict[str, Any
     reranked = state.get("reranked_documents", [])
     prev_incidents = state.get("retrieved_previous_incidents", [])
     
-    # 1. Attempt dynamic structured LLM call
-    structured_llm = get_structured_llm(FinalInvestigationReport)
-    if structured_llm is not None:
-        try:
-            prompt = (
-                f"{FINAL_REPORT_SYSTEM_PROMPT}\n\n"
-                f"INCIDENT DETAILS:\n"
-                f"- Description: {state.get('incident_description')}\n"
-                f"- Primary Service: {state.get('services', ['target-service'])[0] if state.get('services') else 'target-service'}\n"
-                f"- Primary Hypothesis: {primary_h.get('title')} (Root Cause: {primary_h.get('likely_root_cause')}, Confidence: {state.get('confidence')}%)\n"
-                f"- Observed Symptoms: {ev_analysis.get('symptoms')}\n"
-                f"- Verification Check: {primary_h.get('recommended_next_check')}\n"
-                f"- Accepted Evidence: {[e.get('source_name') for e in accepted]}\n\n"
-                f"Synthesize the final RCA report."
-            )
-            report = await structured_llm.ainvoke(prompt)
-            if report:
-                updates: Dict[str, Any] = {
-                    "final_report": report.model_dump(),
-                    "investigation_summary": f"FINAL RCA COMPLETE for {state.get('incident_id')}: {report.root_cause} (Confidence: {report.confidence}%)",
-                }
-                _add_trace(updates, "generate_final_report", (time.time() - start_time) * 1000, f"Generated LLM final RCA report with {report.confidence}% confidence")
-                return updates
-        except Exception as e:
-            logger.warning(f"LLM final report generation failed: {e}")
+    prompt = (
+        f"{FINAL_REPORT_SYSTEM_PROMPT}\n\n"
+        f"INCIDENT DETAILS:\n"
+        f"- Description: {state.get('incident_description')}\n"
+        f"- Primary Service: {state.get('services', ['target-service'])[0] if state.get('services') else 'target-service'}\n"
+        f"- Primary Hypothesis: {primary_h.get('title')} (Root Cause: {primary_h.get('likely_root_cause')}, Confidence: {state.get('confidence')}%)\n"
+        f"- Observed Symptoms: {ev_analysis.get('symptoms')}\n"
+        f"- Verification Check: {primary_h.get('recommended_next_check')}\n"
+        f"- Accepted Evidence: {[e.get('source_name') for e in accepted]}\n\n"
+        f"Synthesize the final RCA report."
+    )
+    
+    report = await safe_invoke_structured_llm(
+        FinalInvestigationReport,
+        prompt,
+        node_name="generate_final_report",
+    )
+    
+    if report:
+        report.confidence_source = state.get("confidence_source", "llm")
+        report.analysis_status = state.get("analysis_status", "success")
+        updates: Dict[str, Any] = {
+            "final_report": report.model_dump(),
+            "investigation_summary": f"FINAL RCA COMPLETE for {state.get('incident_id')}: {report.root_cause} (Confidence: {report.confidence}%)",
+        }
+        _add_trace(updates, "generate_final_report", (time.time() - start_time) * 1000, f"Generated LLM final RCA report with {report.confidence}% confidence")
+        return updates
 
-    # 2. Dynamic Evidence-Based Fallback
+    # 2. Dynamic Evidence-Based Fallback (when LLM fails)
+    conf_src = "fallback"
     report = FinalInvestigationReport(
         incident_summary=state.get("incident_description", "Production anomaly"),
         affected_services=state.get("services", ["target-service"]),
@@ -458,17 +471,22 @@ async def generate_final_report_node(state: InvestigationState) -> Dict[str, Any
         retrieved_knowledge_summary=[r.get("title", "") for r in reranked if r.get("source_type") == "knowledge_document"],
         historical_incidents_summary=[r.get("title", "") for r in reranked if r.get("source_type") == "incident_history"],
         root_cause=primary_h.get("likely_root_cause", "Unidentified service degradation"),
-        confidence=state.get("confidence", 50.0),
+        confidence=state.get("confidence", 0.0),
+        confidence_source=conf_src,
+        analysis_status="degraded",
         supporting_evidence=[f"Evidence ID: {eid}" for eid in primary_h.get("supporting_evidence_ids", [])],
         contradictory_evidence=primary_h.get("contradicting_evidence_ids", []),
         recommended_verification=primary_h.get("recommended_next_check", "Verify active service telemetry metrics."),
         recommended_remediation="Inspect active service logs, check resource limits, and monitor error rates.",
-        investigation_limitations=["Investigation performed using available telemetry and evidence."]
+        investigation_limitations=["Investigation completed using evidence-aware fallback due to LLM rate limits or unavailability."]
     )
     
     updates: Dict[str, Any] = {
         "final_report": report.model_dump(),
-        "investigation_summary": f"FINAL RCA COMPLETE for {state.get('incident_id')}: {report.root_cause} (Confidence: {report.confidence}%)",
+        "confidence_source": conf_src,
+        "analysis_status": "degraded",
+        "failed_llm_nodes": ["generate_final_report"],
+        "investigation_summary": f"FINAL RCA COMPLETE (DEGRADED) for {state.get('incident_id')}: {report.root_cause}",
     }
-    _add_trace(updates, "generate_final_report", (time.time() - start_time) * 1000, f"Generated final RCA report with {report.confidence}% confidence")
+    _add_trace(updates, "generate_final_report", (time.time() - start_time) * 1000, f"Generated fallback final RCA report (Confidence: {report.confidence}%, Source: fallback)")
     return updates

@@ -68,6 +68,8 @@ class InvestigationState(TypedDict, total=False):
     hypotheses: List[Dict[str, Any]]
     selected_hypothesis: Optional[Dict[str, Any]]
     confidence: float
+    confidence_source: str  # "llm", "fallback", "unavailable"
+    analysis_status: str    # "success", "degraded", "failed"
     investigation_summary: Optional[str]
     
     # Hypothesis Evaluation & Investigation Loop Controls
@@ -76,6 +78,7 @@ class InvestigationState(TypedDict, total=False):
     final_report: Optional[Dict[str, Any]]
     
     # Observability & Safety (Annotated for parallel updates)
+    failed_llm_nodes: Annotated[List[str], add_lists]
     errors: Annotated[List[str], add_lists]
     warnings: Annotated[List[str], add_lists]
     execution_trace: Annotated[List[Dict[str, Any]], add_lists]

@@ -1,6 +1,6 @@
-from app.analysis.evidence import analyze_incident_document
-from app.analysis.incident import analyze_incident_needs
-from app.analysis.hypotheses import generate_ranked_hypotheses
+from .evidence import analyze_incident_document
+from .incident import analyze_incident_needs
+from .hypotheses import generate_ranked_hypotheses
 
 __all__ = [
     "analyze_incident_document",

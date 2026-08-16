@@ -1,6 +1,6 @@
 import logging
-from app.config import config
-from app.graph.state import InvestigationState
+from langgraph_investigation_agent.app.config import config
+from langgraph_investigation_agent.app.graph.state import InvestigationState
 
 logger = logging.getLogger("langgraph_agent.graph.routers")
 
