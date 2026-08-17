@@ -55,6 +55,16 @@ class IncidentService:
         db.add(project)
         await db.flush()
 
+        # Store newly created incident into Qdrant & PostgreSQL historical memory
+        try:
+            from app.services.incident_history_service import incident_history_service
+            await incident_history_service.index_incident_history(db, new_incident)
+            import logging
+            logging.getLogger(__name__).info(f"Automatically stored new incident '{new_incident.code}' into historical vector memory.")
+        except Exception as hist_err:
+            import logging
+            logging.getLogger(__name__).warning(f"Failed to index newly created incident '{new_incident.code}' into Qdrant history (continuing): {hist_err}")
+
         return new_incident
 
     async def update_incident(
