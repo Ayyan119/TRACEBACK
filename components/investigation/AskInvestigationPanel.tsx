@@ -15,7 +15,7 @@ export const AskInvestigationPanel: React.FC<AskInvestigationPanelProps> = ({ in
   const [isOpen, setIsOpen] = useState(true);
   const [question, setQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const [messages, setMessages] = useState<{ sender: 'user' | 'assistant'; text: string }[]>([
     {
@@ -32,14 +32,17 @@ export const AskInvestigationPanel: React.FC<AskInvestigationPanelProps> = ({ in
   ];
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
-    if (isOpen) {
+    // Only scroll internal chat box when user actively chats
+    if (messages.length > 1) {
       scrollToBottom();
     }
-  }, [messages, isLoading, isOpen]);
+  }, [messages, isLoading]);
 
   const handleSend = async (queryText?: string) => {
     const q = queryText || question;
@@ -173,7 +176,7 @@ export const AskInvestigationPanel: React.FC<AskInvestigationPanelProps> = ({ in
           </div>
 
           {/* Large Scrollable Chat Messages Container */}
-          <div className="flex-1 min-h-[310px] max-h-[420px] overflow-y-auto space-y-3.5 text-xs font-sans p-3 border border-borderColor/80 bg-bgApp/60 rounded-xl shadow-inner">
+          <div ref={chatContainerRef} className="flex-1 min-h-[310px] max-h-[420px] overflow-y-auto space-y-3.5 text-xs font-sans p-3 border border-borderColor/80 bg-bgApp/60 rounded-xl shadow-inner">
             {messages.map((m, idx) => (
               <div key={idx} className={`flex items-start gap-2.5 ${m.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {m.sender === 'assistant' && (
@@ -203,7 +206,6 @@ export const AskInvestigationPanel: React.FC<AskInvestigationPanelProps> = ({ in
                 <span>AI SRE Assistant is thinking...</span>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
 
           {/* Input Box */}
