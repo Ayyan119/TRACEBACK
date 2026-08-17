@@ -16,7 +16,7 @@ JITTER_RANGE = (0.1, 0.5)
 async def invoke_llm_with_orchestration(
     invoker_fn: Callable[..., Any],
     *args: Any,
-    provider_name: str = "gemini",
+    provider_name: str = "openai",
     node_name: str = "unknown_node",
     **kwargs: Any,
 ) -> Optional[Any]:

@@ -2,14 +2,10 @@ import logging
 from typing import Type, Any, Optional
 from pydantic import BaseModel
 from langchain_core.language_models import BaseChatModel
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langgraph_investigation_agent.app.config import config
 
 logger = logging.getLogger("langgraph_agent.models.llm")
-
-
-from langchain_openai import ChatOpenAI
 
 
 def get_extraction_llm() -> Optional[BaseChatModel]:
