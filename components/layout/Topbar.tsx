@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ProjectSelector } from './ProjectSelector';
 import { GlobalSearch } from './GlobalSearch';
 import { ThemeToggle } from './ThemeToggle';
-import { Bell, Search, Edit2 } from 'lucide-react';
+import { Search, Edit2 } from 'lucide-react';
 import {
   UserProfile,
   DEFAULT_USER_PROFILE,
@@ -92,14 +92,6 @@ export const Topbar: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-3">
-        <button
-          aria-label="Notifications"
-          className="p-1.5 text-textSecondary hover:text-textPrimary hover:bg-bgSurfaceHover rounded-md transition-colors relative border border-borderColor"
-        >
-          <Bell className="w-3.5 h-3.5" />
-          <span className="w-1.5 h-1.5 rounded-full bg-accentPrimary absolute top-1 right-1" />
-        </button>
-
         <ThemeToggle />
 
         <div className="h-4 w-px bg-borderColor mx-0.5" />
