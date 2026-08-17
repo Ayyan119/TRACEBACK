@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ProjectSelector } from './ProjectSelector';
 import { GlobalSearch } from './GlobalSearch';
 import { ThemeToggle } from './ThemeToggle';
-import { Search, Edit2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 import {
   UserProfile,
   DEFAULT_USER_PROFILE,
@@ -67,8 +67,6 @@ export const Topbar: React.FC = () => {
     };
   }, []);
 
-  const initials = getInitials(userProfile.name);
-
   return (
     <header className="h-14 bg-bgSurface border-b border-borderColor px-6 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-4">
@@ -93,37 +91,6 @@ export const Topbar: React.FC = () => {
 
       <div className="flex items-center gap-3">
         <ThemeToggle />
-
-        <div className="h-4 w-px bg-borderColor mx-0.5" />
-
-        {/* Profile Button (Click to edit) */}
-        <button
-          onClick={() => {
-            setIsFirstTime(false);
-            setIsProfileModalOpen(true);
-          }}
-          title="Click to edit engineer profile"
-          className="flex items-center gap-2.5 px-2.5 py-1 rounded-lg bg-bgApp hover:bg-bgSurfaceHover border border-borderColor hover:border-accentPrimary/50 transition-all cursor-pointer group shadow-2xs"
-        >
-          <div className="relative">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-accentPrimary/30 to-accentPrimary/10 border border-accentPrimary/40 flex items-center justify-center text-accentPrimary font-mono text-xs font-bold shadow-xs group-hover:scale-105 transition-transform">
-              {initials}
-            </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-bgSurface" />
-          </div>
-
-          <div className="text-left hidden lg:block">
-            <div className="flex items-center gap-1.5 leading-none">
-              <span className="font-semibold text-textPrimary text-xs group-hover:text-accentPrimary transition-colors">
-                {userProfile.name}
-              </span>
-              <Edit2 className="w-2.5 h-2.5 text-textMuted opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <p className="text-[10px] text-textMuted font-mono leading-none mt-1 tracking-tight">
-              {userProfile.role}
-            </p>
-          </div>
-        </button>
 
         {/* Profile & Create Project Modals */}
         {mounted && (
