@@ -52,47 +52,47 @@
 }
 
 [data-theme='light'] {
-  /* REFINED LIGHT THEME */
-  --bg-app: #F6F7F9;
-  --bg-secondary: #F1F3F6;
+  /* VIBRANT & ATTRACTIVE MODERN LIGHT THEME */
+  --bg-app: #EBEEF3;
+  --bg-secondary: #E2E7F0;
   --bg-surface: #FFFFFF;
-  --bg-surface-hover: #F4F6F9;
+  --bg-surface-hover: #F8FAFC;
   --bg-elevated: #FFFFFF;
-  --border-color: #DDE1E7;
+  --border-color: #CBD5E1;
   
-  --text-primary: #171A21;
-  --text-secondary: #667085;
-  --text-muted: #8A94A4;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
   
-  --accent-primary: #356AE6;
-  --accent-hover: #2858C7;
-  --accent-subtle: rgba(53, 106, 230, 0.08);
+  --accent-primary: #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-subtle: rgba(37, 99, 235, 0.1);
   
-  --status-success: #218739;
-  --status-warning: #A66B00;
-  --status-danger: #D1242F;
+  --status-success: #16A34A;
+  --status-warning: #D97706;
+  --status-danger: #DC2626;
   --status-info: #2563EB;
 
-  /* STATUS & CONFIDENCE BADGE TOKENS (LIGHT THEME - RESTRAINED & OPERATIONAL) */
-  --badge-critical-bg: #FEF2F2;
+  /* STATUS & CONFIDENCE BADGE TOKENS (LIGHT THEME - RICH & VIBRANT) */
+  --badge-critical-bg: #FEE2E2;
   --badge-critical-text: #991B1B;
-  --badge-critical-border: #FCA5A5;
+  --badge-critical-border: #F87171;
 
-  --badge-warning-bg: #FFFBEB;
+  --badge-warning-bg: #FEF3C7;
   --badge-warning-text: #92400E;
-  --badge-warning-border: #FCD34D;
+  --badge-warning-border: #FBBF24;
 
-  --badge-healthy-bg: #F0FDF4;
+  --badge-healthy-bg: #DCFCE7;
   --badge-healthy-text: #166534;
-  --badge-healthy-border: #86EFAC;
+  --badge-healthy-border: #4ADE80;
 
-  --badge-info-bg: #EFF6FF;
+  --badge-info-bg: #DBEAFE;
   --badge-info-text: #1E40AF;
-  --badge-info-border: #93C5FD;
+  --badge-info-border: #60A5FA;
 
-  --badge-confidence-bg: #F8FAFC;
-  --badge-confidence-text: #334155;
-  --badge-confidence-border: #CBD5E1;
+  --badge-confidence-bg: #EEF2FF;
+  --badge-confidence-text: #3730A3;
+  --badge-confidence-border: #818CF8;
 }
 
 body {
