@@ -24,6 +24,7 @@ class IncidentLogInput(BaseModel):
 
 class InvestigationInput(BaseModel):
     """Clean API input payload passed into the Investigation Adapter."""
+    investigation_id: Optional[str] = Field(None, description="Unique investigation run UUID")
     incident_id: str = Field(..., description="Unique incident ticket UUID")
     project_id: str = Field(..., description="Parent workspace project UUID")
     incident_description: str = Field(..., description="Detailed problem statement or report (max 2,000 words)")

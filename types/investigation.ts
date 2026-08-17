@@ -93,6 +93,8 @@ export interface FollowUpQuestion {
 export interface Investigation {
   id: string;
   incidentId: string;
+  runId?: string;
+  investigationNumber?: number;
   title: string;
   status: InvestigationStatus;
   severity: 'Critical' | 'High' | 'Medium' | 'Low';

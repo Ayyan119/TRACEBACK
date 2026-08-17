@@ -120,6 +120,7 @@ class AIInvestigationService:
             services = incident.affected_services or ([incident.affected_service] if incident.affected_service else ["checkout-service"])
 
             input_data = InvestigationInput(
+                investigation_id=inv_record.id,
                 incident_id=incident.id,
                 project_id=incident.project_id,
                 incident_description=incident.description,
@@ -138,6 +139,8 @@ class AIInvestigationService:
 
             duration_ms = (time.time() - start_time) * 1000.0
             result_dict = result.model_dump()
+            result_dict["investigation_run_id"] = inv_record.id
+            result_dict["investigation_number"] = inv_record.investigation_number
 
             # 6. Complete Investigation Record in PostgreSQL (status = COMPLETED)
             await investigation_repository.mark_completed(

@@ -430,9 +430,14 @@ export class FastApiClient implements ApiClient {
     const finalAffectedServices = investigatedAffectedServices.length > 0 ? investigatedAffectedServices : ['Backend Services'];
     const finalAffectedFunctionality = finalAffectedServices.join(', ');
 
+    const runId = parsedResult?.investigation_run_id || parsedResult?.investigation_id || `inv-${incident.id}-${Date.now()}`;
+    const invNumber = parsedResult?.investigation_number || 1;
+
     return {
-      id: `inv-${incident.id}`,
+      id: runId,
       incidentId: incident.id,
+      runId: runId,
+      investigationNumber: invNumber,
       title: `AI Root-Cause Analysis: ${incident.title}`,
       status: 'completed',
       severity: incident.severity,

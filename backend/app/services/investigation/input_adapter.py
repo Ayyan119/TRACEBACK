@@ -39,6 +39,7 @@ class InputAdapter:
         services = list(input_data.services) if input_data.services else ["default-service"]
 
         investigation_state: Dict[str, Any] = {
+            "investigation_id": input_data.investigation_id or "unknown-investigation",
             "incident_id": input_data.incident_id,
             "project_id": input_data.project_id,
             "incident_description": input_data.incident_description,
