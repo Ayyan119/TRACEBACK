@@ -6,7 +6,7 @@ import { Incident } from '@/types';
 import { SeverityBadge } from './SeverityBadge';
 import { StatusBadge } from './StatusBadge';
 import { Badge } from '@/components/ui/Badge';
-import { Sparkles, ExternalLink, Trash2, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ExternalLink, Trash2, CheckCircle2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { DeleteIncidentModal } from './DeleteIncidentModal';
 import { api } from '@/lib/api';
@@ -80,7 +80,11 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents, isLoadi
         <table className="w-full text-left text-xs text-textSecondary">
           <thead className="bg-bgSecondary text-textMuted uppercase font-mono border-b border-borderColor text-[10px] tracking-wider">
             <tr>
-              <th className="px-3 py-2.5">Mark Status</th>
+              <th className="px-3 py-2.5">
+                <span className="inline-flex items-center gap-1">
+                  Status <ChevronDown className="w-3 h-3 text-accentPrimary" />
+                </span>
+              </th>
               <th className="px-3 py-2.5">Incident</th>
               <th className="px-3 py-2.5">Severity</th>
               <th className="px-3 py-2.5">Affected Service</th>
@@ -99,24 +103,30 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents, isLoadi
 
               return (
                 <tr key={incident.id} className="hover:bg-bgSurfaceHover/60 transition-colors">
+                  {/* Left Side Interactive Status Badge Dropdown */}
                   <td className="px-3 py-3">
-                    <select
-                      value={incident.status}
-                      disabled={isUpdating}
-                      onChange={(e) => handleStatusChange(incident.id, e.target.value)}
-                      className={`font-mono text-[11px] font-bold rounded px-2 py-1 border cursor-pointer focus:outline-none transition-colors ${
-                        isResolved
-                          ? 'bg-statusSuccess/15 text-statusSuccess border-statusSuccess/30'
-                          : incident.status === 'Investigating'
-                          ? 'bg-accentPrimary/15 text-accentPrimary border-accentPrimary/30'
-                          : 'bg-statusWarning/15 text-statusWarning border-statusWarning/30'
-                      }`}
-                    >
-                      <option value="Investigating" className="bg-bgSurface text-textPrimary">Investigating</option>
-                      <option value="Identified" className="bg-bgSurface text-textPrimary">Identified</option>
-                      <option value="Monitoring" className="bg-bgSurface text-textPrimary">Monitoring</option>
-                      <option value="Resolved" className="bg-bgSurface text-statusSuccess font-bold">✓ Resolved</option>
-                    </select>
+                    <div className="relative inline-flex items-center">
+                      <select
+                        value={incident.status}
+                        disabled={isUpdating}
+                        onChange={(e) => handleStatusChange(incident.id, e.target.value)}
+                        className={`font-mono text-[11px] font-bold rounded px-2.5 py-1 border cursor-pointer focus:outline-none appearance-none pr-6 transition-all ${
+                          isResolved
+                            ? 'bg-statusSuccess/15 text-statusSuccess border-statusSuccess/30 hover:bg-statusSuccess/25'
+                            : incident.status === 'Identified'
+                            ? 'bg-statusWarning/15 text-statusWarning border-statusWarning/30 hover:bg-statusWarning/25'
+                            : incident.status === 'Investigating'
+                            ? 'bg-accentPrimary/15 text-accentPrimary border-accentPrimary/30 hover:bg-accentPrimary/25'
+                            : 'bg-statusInfo/15 text-statusInfo border-statusInfo/30 hover:bg-statusInfo/25'
+                        }`}
+                      >
+                        <option value="Investigating" className="bg-bgSurface text-textPrimary">Investigating</option>
+                        <option value="Identified" className="bg-bgSurface text-textPrimary">Identified</option>
+                        <option value="Monitoring" className="bg-bgSurface text-textPrimary">Monitoring</option>
+                        <option value="Resolved" className="bg-bgSurface text-statusSuccess font-bold">✓ Resolved</option>
+                      </select>
+                      <ChevronDown className="w-3 h-3 absolute right-1.5 top-2 pointer-events-none text-current opacity-70" />
+                    </div>
                   </td>
                   <td className="px-3 py-3">
                     <Link
@@ -144,23 +154,30 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents, isLoadi
                   <td className="px-3 py-3 font-mono text-[11px] text-textMuted">{incident.updatedAt}</td>
                   <td className="px-3 py-3 text-right">
                     <div className="flex items-center justify-end gap-1.5">
-                      {!isResolved ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          isLoading={isUpdating}
-                          onClick={() => handleStatusChange(incident.id, 'Resolved')}
-                          className="gap-1 text-[11px] h-7 px-2 font-mono text-statusSuccess border-statusSuccess/30 hover:bg-statusSuccess/10"
-                          title="Mark Incident as Resolved"
+                      {/* Dynamic Right Side Action Button displaying Current Status */}
+                      <div className="relative inline-flex items-center">
+                        <select
+                          value={incident.status}
+                          disabled={isUpdating}
+                          onChange={(e) => handleStatusChange(incident.id, e.target.value)}
+                          className={`font-mono text-[11px] font-semibold rounded px-2 py-1 border cursor-pointer focus:outline-none appearance-none pr-5.5 transition-all ${
+                            isResolved
+                              ? 'bg-statusSuccess/20 text-statusSuccess border-statusSuccess/40 hover:bg-statusSuccess/30 font-bold'
+                              : incident.status === 'Identified'
+                              ? 'bg-statusWarning/20 text-statusWarning border-statusWarning/40 hover:bg-statusWarning/30 font-bold'
+                              : incident.status === 'Investigating'
+                              ? 'bg-accentPrimary/20 text-accentPrimary border-accentPrimary/40 hover:bg-accentPrimary/30 font-bold'
+                              : 'bg-statusInfo/20 text-statusInfo border-statusInfo/40 hover:bg-statusInfo/30'
+                          }`}
+                          title="Click to update incident status"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>Resolve</span>
-                        </Button>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded bg-statusSuccess/15 text-statusSuccess font-mono text-[10px] font-bold">
-                          ✓ Resolved
-                        </span>
-                      )}
+                          <option value="Investigating" className="bg-bgSurface text-textPrimary">Investigating</option>
+                          <option value="Identified" className="bg-bgSurface text-textPrimary">Identified</option>
+                          <option value="Monitoring" className="bg-bgSurface text-textPrimary">Monitoring</option>
+                          <option value="Resolved" className="bg-bgSurface text-statusSuccess font-bold">✓ Resolved</option>
+                        </select>
+                        <ChevronDown className="w-3 h-3 absolute right-1.5 top-1.5 pointer-events-none text-current opacity-80" />
+                      </div>
                       <Link href={`/projects/${pid}/incidents/${incident.id}/investigation`}>
                         <Button size="sm" variant="outline" className="gap-1 text-[11px] h-7 px-2">
                           <Sparkles className="w-3 h-3 text-accentPrimary" />
