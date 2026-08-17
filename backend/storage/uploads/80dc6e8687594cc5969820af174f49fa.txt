@@ -1,0 +1,5 @@
+Service: playback-service
+Time: 15:46 UTC
+Request: GET /videos/nv-8842/manifest.m3u8
+Response: HTTP 503
+Reason: manifest_not_found

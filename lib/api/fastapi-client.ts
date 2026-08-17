@@ -28,11 +28,11 @@ export class FastApiClient implements ApiClient {
 
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const res = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...options?.headers,
+        ...(options?.headers || {}),
       },
-      ...options,
     });
 
     if (!res.ok) {

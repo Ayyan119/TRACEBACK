@@ -1,0 +1,5 @@
+Service: video-transcoding-service
+Deployment: v6.1.0
+Time: 15:37 UTC
+Change: temporary FFmpeg workspace reduced from 40 GiB to 10 GiB.
+Additional change: failed-job retry artifacts are retained for 2 hours.
