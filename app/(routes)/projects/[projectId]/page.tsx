@@ -255,8 +255,8 @@ export default function ProjectDashboardPage() {
 
                 <div className="space-y-1 font-mono text-[11px] text-textMuted pt-1 border-t border-borderColor">
                   <div className="flex justify-between">
-                    <span>P95 Latency:</span>
-                    <span className="text-textSecondary">{srv.latencyMs} ms</span>
+                    <span>Environment:</span>
+                    <span className="text-textSecondary">{srv.environment || 'Production'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Error Rate:</span>

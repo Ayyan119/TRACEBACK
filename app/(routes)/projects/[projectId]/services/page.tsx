@@ -81,7 +81,7 @@ export default function ProjectServicesPage() {
             {projectName} — Monitored Services Catalog
           </h1>
           <p className="text-xs text-textSecondary mt-0.5">
-            Microservices topology, latency, dependencies, and release history isolated to project <span className="font-mono text-accentPrimary">{projectName}</span>.
+            Microservices topology, dependencies, and release history isolated to project <span className="font-mono text-accentPrimary">{projectName}</span>.
           </p>
         </div>
 
@@ -141,11 +141,7 @@ export default function ProjectServicesPage() {
                     </div>
 
                     <div className="flex items-center justify-between font-mono text-[11px] text-textMuted">
-                      {srv.latencyMs && srv.latencyMs > 0 ? (
-                        <span>Latency: {srv.latencyMs}ms</span>
-                      ) : (
-                        <span>Environment: {srv.environment || 'Production'}</span>
-                      )}
+                      <span>Env: {srv.environment || 'Production'}</span>
                       <span className={srv.errorRatePercent > 1 ? 'text-statusDanger font-bold' : ''}>
                         Err: {srv.errorRatePercent}%
                       </span>
@@ -198,13 +194,7 @@ export default function ProjectServicesPage() {
                   <p className="text-xs text-textSecondary leading-relaxed">{selectedService.description}</p>
                 )}
 
-                <div className={`grid ${selectedService.latencyMs && selectedService.latencyMs > 0 ? 'grid-cols-3' : 'grid-cols-2'} gap-3 font-mono text-xs`}>
-                  {selectedService.latencyMs && selectedService.latencyMs > 0 && (
-                    <div className="p-3 bg-bgApp border border-borderColor rounded">
-                      <span className="text-[10px] text-textMuted block">P95 Latency</span>
-                      <span className="text-base font-bold text-textPrimary">{selectedService.latencyMs} ms</span>
-                    </div>
-                  )}
+                <div className="grid grid-cols-2 gap-3 font-mono text-xs">
                   <div className="p-3 bg-bgApp border border-borderColor rounded">
                     <span className="text-[10px] text-textMuted block">Error Rate</span>
                     <span
