@@ -139,8 +139,8 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Active Workspaces List */}
-      <div className="px-3 pt-3 space-y-1">
-        <div className="flex items-center justify-between px-2.5 py-1">
+      <div className="px-3 pt-3 space-y-1 flex-1 flex flex-col min-h-0">
+        <div className="flex items-center justify-between px-2.5 py-1 shrink-0">
           <span className="text-[10px] uppercase font-mono font-semibold text-textMuted tracking-wider">
             Active Workspace
           </span>
@@ -153,7 +153,7 @@ export const Sidebar: React.FC = () => {
           </button>
         </div>
 
-        <div className="space-y-0.5 max-h-40 overflow-y-auto pr-1">
+        <div className="space-y-0.5 flex-1 overflow-y-auto pr-1 min-h-0">
           {projects.map((p) => {
             const isSelected = p.id === currentProjectId || p.slug === currentProjectId;
             return (
