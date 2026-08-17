@@ -68,20 +68,20 @@ export const Topbar: React.FC = () => {
   }, []);
 
   return (
-    <header className="h-14 bg-bgSurface border-b border-borderColor px-6 flex items-center justify-between sticky top-0 z-30">
-      <div className="flex items-center gap-4">
+    <header className="h-14 bg-bgSurface/80 backdrop-blur-md border-b border-borderColor px-3 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+      <div className="flex items-center gap-2 sm:gap-4">
         <ProjectSelector />
 
         {/* Global Search Bar trigger button */}
         <button
           onClick={() => setIsSearchOpen(true)}
-          className="flex items-center gap-3 px-3 py-1.5 rounded-md bg-bgApp hover:bg-bgSurfaceHover border border-borderColor text-xs text-textMuted transition-colors w-64 justify-between"
+          className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-md bg-bgApp hover:bg-bgSurfaceHover/80 border border-borderColor hover:border-accentPrimary/40 text-xs text-textMuted transition-all w-36 sm:w-64 justify-between shadow-xs"
         >
-          <div className="flex items-center gap-2">
-            <Search className="w-3.5 h-3.5 text-accentPrimary" />
-            <span className="font-sans text-[11px]">Search workspace...</span>
+          <div className="flex items-center gap-2 truncate">
+            <Search className="w-3.5 h-3.5 text-accentPrimary shrink-0" />
+            <span className="font-sans text-[11px] truncate">Search workspace...</span>
           </div>
-          <kbd className="px-1.5 py-0.5 rounded bg-bgSurface border border-borderColor text-[10px] font-mono text-textMuted">
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-bgSurface border border-borderColor text-[10px] font-mono text-textMuted shadow-2xs">
             ⌘K
           </kbd>
         </button>
@@ -99,10 +99,10 @@ export const Topbar: React.FC = () => {
               setIsFirstTime(false);
               setIsProfileModalOpen(true);
             }}
-            className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-bgApp hover:bg-bgSurfaceHover border border-borderColor text-xs transition-colors"
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-md bg-bgApp hover:bg-bgSurfaceHover/80 border border-borderColor hover:border-accentPrimary/40 text-xs transition-all shadow-xs"
             title="Manage User Identity & OpenAI API Key"
           >
-            <div className="w-5 h-5 rounded-full bg-accentPrimary/20 text-accentPrimary font-bold text-[10px] flex items-center justify-center font-mono">
+            <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-bold text-[10px] flex items-center justify-center font-mono shadow-xs">
               {getInitials(userProfile.name)}
             </div>
             <div className="text-left hidden sm:block">

@@ -1,0 +1,44 @@
+# ==============================================================================
+# TRACEBACK AI — Backend Service Docker Ignore Configuration
+# ==============================================================================
+
+# Testing & Coverage
+tests/
+test_*.py
+*_test.py
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Secrets & Environment
+.env
+.env.*
+*.env
+
+# Virtual Environment & Python Caches
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Docs, Git & IDEs
+.git/
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+docs/
+.vscode/
+.idea/
+.DS_Store
+
+# Local Storage & Logs
+storage/
+*.log
+*.sqlite
+*.db

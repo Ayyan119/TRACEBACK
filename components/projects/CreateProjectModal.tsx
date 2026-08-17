@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { EnvironmentTier, CreateServiceInput, ServiceType } from '@/types';
@@ -19,6 +20,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   onSuccess,
 }) => {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [name, setName] = useState('');
   const [environment, setEnvironment] = useState<EnvironmentTier>('production');
   const [description, setDescription] = useState('');
@@ -30,7 +32,22 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  if (!isOpen) return null;
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const showModal = isOpen || internalIsOpen;
+
+  useEffect(() => {
+    setMounted(true);
+    const handleOpen = () => setInternalIsOpen(true);
+    window.addEventListener('tb_open_create_project_modal', handleOpen);
+    return () => window.removeEventListener('tb_open_create_project_modal', handleOpen);
+  }, []);
+
+  const handleCloseModal = () => {
+    setInternalIsOpen(false);
+    onClose();
+  };
+
+  if (!showModal || !mounted) return null;
 
   const handleAddServiceRow = () => {
     setInitialServices((prev) => [
@@ -74,7 +91,8 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         initialServices: validInitialServices.length > 0 ? validInitialServices : undefined,
       });
 
-      onClose();
+      handleCloseModal();
+      window.dispatchEvent(new Event('tb_user_profile_updated'));
       if (onSuccess) {
         onSuccess(created.id);
       } else {
@@ -88,15 +106,15 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-      <div className="bg-bgSurface border border-borderColor rounded-lg w-full max-w-xl p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+  const modalContent = (
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-bgSurface border border-borderColor rounded-xl w-full max-w-xl p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto font-mono text-xs z-[10000]">
         <div className="flex items-center justify-between border-b border-borderColor pb-3">
           <div className="flex items-center gap-2">
             <FolderPlus className="w-4 h-4 text-accentPrimary" />
             <h3 className="text-sm font-bold text-textPrimary font-mono">Create New Workspace Project</h3>
           </div>
-          <button onClick={onClose} className="text-textMuted hover:text-textPrimary p-1">
+          <button onClick={handleCloseModal} className="text-textMuted hover:text-textPrimary p-1">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -277,7 +295,7 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           )}
 
           <div className="flex justify-end gap-2 pt-3 border-t border-borderColor">
-            <Button type="button" variant="ghost" onClick={onClose}>
+            <Button type="button" variant="ghost" onClick={handleCloseModal}>
               Cancel
             </Button>
             <Button type="submit" variant="primary" isLoading={isSubmitting} disabled={!name.trim()}>
@@ -288,4 +306,6 @@ export const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 };

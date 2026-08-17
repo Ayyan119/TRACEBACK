@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 load_dotenv()
-load_dotenv("/home/jiggra/Traceback/.env")
 
 from contextlib import asynccontextmanager
 from fastapi import FastAPI

@@ -17,9 +17,7 @@ async def get_current_user(
     Reads X-User-ID header. If missing/invalid, falls back gracefully to default initial user.
     """
     if x_user_id and x_user_id.strip() not in ("", "null", "undefined"):
-        user = await user_service.get_user_by_id(db, x_user_id.strip())
-        if user:
-            return user
+        return await user_service.get_user_by_id(db, x_user_id.strip(), name=x_user_name, role=x_user_role)
 
     # If X-User-Name is provided, attempt lookup or default
     if x_user_name and x_user_name.strip():

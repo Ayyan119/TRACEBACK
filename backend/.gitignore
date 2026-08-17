@@ -47,5 +47,9 @@ env/
 .coverage
 htmlcov/
 
-# Logs
+# Storage & Uploads
+storage/
+logs/
 *.log
+*.sqlite
+*.db

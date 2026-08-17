@@ -9,8 +9,8 @@ export interface UserProfile {
 export const DEFAULT_USER_PROFILE: UserProfile = {
   id: 'usr_default_ayyan',
   name: 'Ayyan Shahid',
-  role: 'Senior Software Engineer',
-  hasOpenAiApiKey: false,
+  role: 'AI Engineer',
+  hasOpenAiApiKey: true,
 };
 
 export const TECH_ROLES = [

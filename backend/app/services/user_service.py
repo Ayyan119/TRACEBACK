@@ -29,26 +29,56 @@ class UserService:
         )
 
     async def get_or_create_default_user(self, db: AsyncSession) -> UserModel:
-        """Ensures the primary default user exists in PostgreSQL."""
+        """Ensures default preset users exist in PostgreSQL."""
         user = await user_repository.get_by_id(db, DEFAULT_USER_ID)
         if not user:
             user = await user_repository.get_by_name(db, "Ayyan Shahid")
         if not user:
             user_in = UserCreate(
                 name="Ayyan Shahid",
-                role="Senior Software Engineer",
+                role="AI Engineer",
             )
             user = await user_repository.create(db, user_in)
+
+        # Ensure Guest Tester account exists for instant testing
+        guest = await user_repository.get_by_name(db, "Guest Tester")
+        if not guest:
+            await user_repository.create(
+                db, UserCreate(name="Guest Tester", role="Guest Tester")
+            )
+
         return user
 
-    async def get_user_by_id(self, db: AsyncSession, user_id: str) -> Optional[UserModel]:
-        """Fetches a user by ID with default fallback."""
+    async def get_user_by_id(
+        self, db: AsyncSession, user_id: str, name: Optional[str] = None, role: Optional[str] = None
+    ) -> UserModel:
+        """Fetches a user by ID. If user doesn't exist yet, creates isolated record for this user_id."""
         if not user_id or user_id.strip() in ("", "null", "undefined"):
             return await self.get_or_create_default_user(db)
+
         user = await user_repository.get_by_id(db, user_id)
-        if not user:
-            return await self.get_or_create_default_user(db)
-        return user
+        if user:
+            return user
+
+        # Check by name to avoid duplicates
+        if name and name.strip():
+            user = await user_repository.get_by_name(db, name.strip())
+            if user:
+                return user
+
+        # Create an isolated user record for this new/guest user_id
+        user_name = name.strip() if name and name.strip() else f"User-{user_id[-6:]}"
+        user_role = role.strip() if role and role.strip() else "Guest Tester"
+
+        new_user = UserModel(
+            id=user_id,
+            name=user_name,
+            role=user_role,
+        )
+        db.add(new_user)
+        await db.flush()
+        await db.refresh(new_user)
+        return new_user
 
     async def get_all_users(self, db: AsyncSession) -> List[UserResponse]:
         """Returns all registered users."""

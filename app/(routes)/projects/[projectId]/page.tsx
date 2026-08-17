@@ -39,26 +39,28 @@ export default function ProjectDashboardPage() {
 
   const loadProjectData = async () => {
     setIsLoading(true);
-    const [proj, srvList, incList, docList] = await Promise.all([
+    
+    // Non-blocking fetch all project data in parallel
+    Promise.all([
       api.getProject(projectId).catch(() => null),
       api.getServices({ projectId }).catch(() => []),
       api.getIncidents({ projectId }).catch(() => []),
       api.getKnowledge({ projectId }).catch(() => []),
-    ]);
+    ]).then(([proj, srvList, incList, docList]) => {
+      setProject(proj);
+      setServices(srvList || []);
+      setIncidents(incList || []);
+      setDocs(docList || []);
+      setIsLoading(false);
 
-    setProject(proj);
-    setServices(srvList || []);
-    setIncidents(incList || []);
-    setDocs(docList || []);
-    setIsLoading(false);
-
-    if (incList && incList.length > 0) {
-      api.getInvestigation(incList[0].id, projectId)
-        .then((inv) => setInvestigation(inv))
-        .catch(() => setInvestigation(null));
-    } else {
-      setInvestigation(null);
-    }
+      if (incList && incList.length > 0) {
+        api.getInvestigation(incList[0].id, projectId)
+          .then((inv) => setInvestigation(inv))
+          .catch(() => setInvestigation(null));
+      } else {
+        setInvestigation(null);
+      }
+    });
   };
 
   useEffect(() => {
@@ -69,9 +71,7 @@ export default function ProjectDashboardPage() {
     loadProjectData();
   }, [projectId]);
 
-  if (isLoading) return <Skeleton className="h-96" />;
-
-  if (!project) {
+  if (!project && !isLoading) {
     return (
       <div className="p-8 text-center space-y-4 max-w-md mx-auto my-12 bg-bgSurface border border-borderColor rounded-lg">
         <div className="w-12 h-12 rounded-full bg-accentSubtle text-accentPrimary flex items-center justify-center mx-auto">
@@ -88,7 +88,16 @@ export default function ProjectDashboardPage() {
     );
   }
 
-  const p = project;
+  const p = project || {
+    id: projectId,
+    name: projectId.replace(/-/g, ' ').toUpperCase(),
+    slug: projectId,
+    description: 'Workspace telemetry dashboard',
+    environment: 'production',
+    serviceCount: services.length,
+    incidentCount: incidents.length,
+    updatedAt: new Date().toISOString(),
+  };
 
   const activeIncidents = incidents.filter((i) => i.status !== 'Resolved');
   const criticalServices = services.filter((s) => s.health !== 'Healthy');

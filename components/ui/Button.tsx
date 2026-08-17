@@ -17,13 +17,13 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-accentPrimary disabled:opacity-50 disabled:cursor-not-allowed';
+    'inline-flex items-center justify-center font-medium rounded-md transition-all duration-150 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-accentPrimary/50 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs';
 
   const variants = {
-    primary: 'bg-accentPrimary text-white hover:bg-accentHover',
-    secondary: 'bg-bgSurface text-textPrimary hover:bg-bgSurfaceHover border border-borderColor',
-    outline: 'border border-borderColor text-textPrimary hover:bg-bgSurfaceHover',
-    danger: 'bg-statusDanger text-white hover:opacity-90',
+    primary: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold shadow-md shadow-blue-500/20 border border-blue-500/30',
+    secondary: 'bg-bgSurface text-textPrimary hover:bg-bgSurfaceHover border border-borderColor hover:border-textMuted/40',
+    outline: 'border border-borderColor text-textPrimary hover:bg-bgSurfaceHover hover:border-accentPrimary/50',
+    danger: 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white shadow-md shadow-red-500/20 border border-red-500/30 font-semibold',
     ghost: 'text-textSecondary hover:text-textPrimary hover:bg-bgSurfaceHover',
   };
 

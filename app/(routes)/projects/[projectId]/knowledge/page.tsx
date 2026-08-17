@@ -46,7 +46,9 @@ export default function ProjectKnowledgePage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchDocs = async () => {
-    setIsLoading(true);
+    if (documents.length === 0) {
+      setIsLoading(true);
+    }
     const [proj, data] = await Promise.all([
       api.getProject(projectId).catch(() => null),
       api.getKnowledge({

@@ -88,8 +88,8 @@ export const ServiceFormModal: React.FC<ServiceFormModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/75 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-      <div className="bg-bgSurface border border-borderColor rounded-lg w-full max-w-md p-5 space-y-4 shadow-2xl">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-bgSurface border border-borderColor rounded-xl w-full max-w-md p-5 space-y-4 shadow-2xl max-h-[85vh] overflow-y-auto font-mono text-xs z-50">
         <div className="flex items-center justify-between border-b border-borderColor pb-3">
           <div className="flex items-center gap-2">
             <Server className="w-4 h-4 text-accentPrimary" />

@@ -63,6 +63,27 @@ export default function ProjectsDirectoryPage() {
 
       {isLoading ? (
         <Skeleton className="h-64" />
+      ) : projects.length === 0 ? (
+        <div className="p-8 border border-dashed border-borderColor rounded-xl bg-bgSurface/40 text-center space-y-4 max-w-lg mx-auto my-12 shadow-sm">
+          <div className="w-12 h-12 rounded-2xl bg-accentSubtle border border-accentPrimary/30 flex items-center justify-center text-accentPrimary mx-auto">
+            <FolderGit2 className="w-6 h-6" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-textPrimary font-mono">No Workspace Projects Yet</h3>
+            <p className="text-xs text-textSecondary leading-relaxed font-sans">
+              Your workspace is currently clean and empty. Create your first isolated microservice project to start tracking telemetry, deployments, and incidents.
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            size="md"
+            onClick={() => window.dispatchEvent(new Event('tb_open_create_project_modal'))}
+            className="gap-2 font-mono font-semibold mx-auto shadow-md"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Create Your First Project</span>
+          </Button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {projects.map((p) => (

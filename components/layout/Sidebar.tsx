@@ -21,6 +21,7 @@ import {
   Settings,
   FolderGit2,
   Plus,
+  ArrowRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -29,9 +30,7 @@ export const Sidebar: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   // Current active project ID
@@ -48,8 +47,12 @@ export const Sidebar: React.FC = () => {
   }
 
   const fetchProjects = async () => {
-    const data = await api.getProjects().catch(() => []);
-    setProjects(data);
+    try {
+      const data = await api.getProjects();
+      setProjects(data || []);
+    } catch {
+      setProjects([]);
+    }
   };
 
   const syncProfile = () => {
@@ -61,10 +64,13 @@ export const Sidebar: React.FC = () => {
     fetchProjects();
     syncProfile();
 
-    const handleProfileUpdate = () => syncProfile();
-    window.addEventListener('tb_user_profile_updated', handleProfileUpdate);
-    return () => window.removeEventListener('tb_user_profile_updated', handleProfileUpdate);
-  }, [currentProjectId]);
+    const handleUpdate = () => {
+      syncProfile();
+      fetchProjects();
+    };
+    window.addEventListener('tb_user_profile_updated', handleUpdate);
+    return () => window.removeEventListener('tb_user_profile_updated', handleUpdate);
+  }, []);
 
   const navItems = [
     {
@@ -97,15 +103,15 @@ export const Sidebar: React.FC = () => {
   const initials = getInitials(userProfile.name);
 
   return (
-    <aside className="w-60 bg-bgSurface border-r border-borderColor flex flex-col h-screen sticky top-0 z-40 select-none">
+    <aside className="w-60 bg-bgSurface/90 backdrop-blur-md border-r border-borderColor flex flex-col h-screen sticky top-0 z-40 select-none">
       {/* Brand Header */}
       <div className="h-14 px-4 flex items-center justify-between border-b border-borderColor">
         <Link href={`/projects/${currentProjectId}`} className="flex items-center gap-2.5 group">
-          <div className="w-7 h-7 rounded bg-accentPrimary flex items-center justify-center text-white font-mono font-bold text-sm shadow-md group-hover:scale-105 transition-transform">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white font-mono font-extrabold text-sm shadow-md shadow-blue-500/25 group-hover:scale-105 transition-transform">
             T
           </div>
           <div>
-            <span className="font-bold text-textPrimary font-mono tracking-tight text-sm">TRACEBACK</span>
+            <span className="font-bold text-textPrimary font-mono tracking-tight text-sm bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">TRACEBACK</span>
             <span className="text-[9px] text-textMuted font-mono block leading-none">v1.0.4 • SRE Engine</span>
           </div>
         </Link>
@@ -124,13 +130,13 @@ export const Sidebar: React.FC = () => {
               key={item.name}
               href={item.href}
               className={cn(
-                'flex items-center gap-2.5 px-2.5 py-2 rounded text-xs transition-colors font-sans',
+                'flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-all duration-150 font-sans',
                 isActive
-                  ? 'bg-accentSubtle text-accentPrimary font-semibold'
-                  : 'text-textSecondary hover:text-textPrimary hover:bg-bgSurfaceHover'
+                  ? 'bg-accentSubtle/80 text-accentPrimary font-semibold border-l-2 border-accentPrimary shadow-xs'
+                  : 'text-textSecondary hover:text-textPrimary hover:bg-bgSurfaceHover/80'
               )}
             >
-              <Icon className="w-4 h-4 shrink-0" />
+              <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-accentPrimary' : 'text-textMuted')} />
               <span>{item.name}</span>
             </Link>
           );
@@ -145,14 +151,14 @@ export const Sidebar: React.FC = () => {
           </span>
           <button
             onClick={() => window.dispatchEvent(new Event('tb_open_create_project_modal'))}
-            className="text-accentPrimary hover:text-accentPrimary/80 p-0.5"
+            className="text-accentPrimary hover:text-accentHover p-1 rounded hover:bg-accentSubtle transition-colors"
             title="Create New Project"
           >
             <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div className="space-y-0.5 flex-1 overflow-y-auto pr-1 min-h-0">
+        <div className="space-y-1 flex-1 overflow-y-auto pr-1 min-h-0">
           {projects.map((p) => {
             const isSelected = p.id === currentProjectId || p.slug === currentProjectId;
             return (
@@ -160,23 +166,41 @@ export const Sidebar: React.FC = () => {
                 key={p.id}
                 href={`/projects/${p.slug || p.id}`}
                 className={cn(
-                  'flex items-center justify-between px-2.5 py-1.5 rounded text-xs transition-colors font-mono',
+                  'flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs transition-all font-mono',
                   isSelected
-                    ? 'bg-bgSurface border border-borderColor font-bold text-textPrimary'
-                    : 'text-textMuted hover:text-textSecondary hover:bg-bgSurfaceHover/40'
+                    ? 'bg-bgApp border border-borderColor font-bold text-textPrimary shadow-xs'
+                    : 'text-textMuted hover:text-textSecondary hover:bg-bgSurfaceHover/50'
                 )}
               >
                 <div className="flex items-center gap-2 truncate">
-                  <span className={cn('w-2 h-2 rounded-full shrink-0', isSelected ? 'bg-statusSuccess' : 'bg-borderColor')} />
+                  <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', isSelected ? 'bg-statusSuccess shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-borderColor')} />
                   <span className="truncate">{p.name}</span>
                 </div>
-                <span className="text-[10px] text-textMuted font-sans shrink-0">{p.environment}</span>
+                <span className="text-[9px] text-textMuted font-sans shrink-0 uppercase tracking-tight">{p.environment}</span>
               </Link>
             );
           })}
         </div>
       </div>
 
+      {/* Bottom Footer Section: Projects Directory Button */}
+      <div className="p-3 border-t border-borderColor shrink-0">
+        <Link
+          href="/projects"
+          className={cn(
+            'flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-mono transition-all border shadow-xs',
+            pathname === '/projects'
+              ? 'bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-500/20 font-bold'
+              : 'bg-bgApp text-textSecondary border-borderColor hover:text-textPrimary hover:bg-bgSurfaceHover/80'
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <FolderGit2 className="w-4 h-4 text-accentPrimary" />
+            <span>Projects Directory</span>
+          </div>
+          <ArrowRight className="w-3.5 h-3.5 opacity-70" />
+        </Link>
+      </div>
     </aside>
   );
 };

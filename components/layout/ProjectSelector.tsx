@@ -13,36 +13,39 @@ export const ProjectSelector: React.FC = () => {
   const params = useParams();
   const [projects, setProjects] = useState<Project[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  let currentProjectId = (params?.projectId as string) || (projects.length > 0 ? (projects[0].slug || projects[0].id) : '');
-  if (!params?.projectId && pathname) {
+  let currentProjectId = (params?.projectId as string) || '';
+  if (!currentProjectId && pathname) {
     const match = pathname.match(/\/projects\/([^\/]+)/);
     if (match) currentProjectId = match[1];
   }
 
   const fetchProjects = async () => {
-    const data = await api.getProjects().catch(() => []);
-    setProjects(data);
+    try {
+      const data = await api.getProjects();
+      setProjects(data || []);
+    } catch {
+      setProjects([]);
+    }
   };
 
   useEffect(() => {
     setMounted(true);
     fetchProjects();
-  }, [currentProjectId]);
 
-  const activeProject = projects.find((p) => p.id === currentProjectId || p.slug === currentProjectId) || projects[0] || {
-    id: currentProjectId,
-    name: currentProjectId.toUpperCase(),
-    environment: 'production',
-  };
+    const handleUpdate = () => fetchProjects();
+    window.addEventListener('tb_user_profile_updated', handleUpdate);
+    return () => window.removeEventListener('tb_user_profile_updated', handleUpdate);
+  }, []);
+
+  const activeProject = projects.find((p) => p.id === currentProjectId || p.slug === currentProjectId) || projects[0] || null;
 
   const handleSelectProject = (projectId: string) => {
     setIsOpen(false);
     if (projectId === currentProjectId) return;
 
-    if (pathname.includes(`/projects/${currentProjectId}`)) {
+    if (currentProjectId && pathname.includes(`/projects/${currentProjectId}`)) {
       const newPath = pathname.replace(`/projects/${currentProjectId}`, `/projects/${projectId}`);
       router.push(newPath);
     } else {
@@ -54,10 +57,10 @@ export const ProjectSelector: React.FC = () => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-bgApp hover:bg-bgSurfaceHover border border-borderColor text-xs font-semibold text-textPrimary transition-colors"
+        className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-bgApp hover:bg-bgSurfaceHover border border-borderColor text-xs font-semibold text-textPrimary transition-colors shadow-xs"
       >
         <FolderGit2 className="w-3.5 h-3.5 text-accentPrimary" />
-        <span className="font-mono">{activeProject.name}</span>
+        <span className="font-mono">{activeProject ? activeProject.name : 'No Active Workspace'}</span>
         <ChevronDown className="w-3 h-3 text-textMuted" />
       </button>
 

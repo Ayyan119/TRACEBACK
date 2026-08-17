@@ -28,7 +28,9 @@ export default function ProjectServicesPage() {
   const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
 
   const fetchServices = async () => {
-    setIsLoading(true);
+    if (services.length === 0) {
+      setIsLoading(true);
+    }
     const [proj, data] = await Promise.all([
       api.getProject(projectId).catch(() => null),
       api.getServices({ projectId }).catch(() => []),

@@ -1,0 +1,88 @@
+# ==============================================================================
+# TRACEBACK AI — Root Docker Ignore Configuration
+# Ignore all unnecessary build contexts (tests, envs, caches, docs) to optimize image build size
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Testing, Coverage & Quality Tools
+# ------------------------------------------------------------------------------
+tests/
+**/tests/
+**/*_test.py
+**/test_*.py
+.pytest_cache/
+.coverage
+htmlcov/
+.coverage.*
+coverage/
+
+# ------------------------------------------------------------------------------
+# Environment & Sensitive Credential Files
+# ------------------------------------------------------------------------------
+.env
+.env.*
+*.env
+backend/.env
+langgraph_investigation_agent/.env
+
+# ------------------------------------------------------------------------------
+# Node & Frontend Build Dependencies & Caches
+# ------------------------------------------------------------------------------
+node_modules
+**/node_modules
+.next
+**/out
+**/build
+**/dist
+.npm
+tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# ------------------------------------------------------------------------------
+# Python Virtual Environments & Compiled Caches
+# ------------------------------------------------------------------------------
+.venv
+venv
+env
+**/ENV
+**/env
+backend/.venv
+langgraph_investigation_agent/.venv
+__pycache__
+/**/__pycache__
+*.pyc
+*.pyo
+*.pyd
+.ruff_cache
+.mypy_cache
+*.egg-info
+
+# ------------------------------------------------------------------------------
+# Git, IDEs, Container Configurations & Documentation
+# ------------------------------------------------------------------------------
+.git
+.gitignore
+.dockerignore
+**/Dockerfile*
+**/docker-compose*.yml
+README.md
+**/README.md
+docs/
+**/docs
+.vscode
+.idea
+.DS_Store
+
+# ------------------------------------------------------------------------------
+# Logs, Temporary Scratch & Local Storage Data
+# ------------------------------------------------------------------------------
+*.log
+**/logs
+storage/
+**/storage
+scratch/
+tmp/
+temp/
+*.sqlite
+*.sqlite3
+*.db
