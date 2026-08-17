@@ -25,8 +25,20 @@ class KnowledgeService:
         project_id: str,
         category: Optional[str] = None,
     ) -> List[KnowledgeDocumentModel]:
-        """Fetch all knowledge documents for a workspace project, validating project existence."""
+        """Fetch all knowledge documents for a workspace project, validating project existence and syncing incidents."""
         project = await project_service.get_project_by_id(db, project_id)
+
+        # Auto-sync project incidents into Knowledge Base Catalog
+        try:
+            from app.repositories.incident_repository import incident_repository
+            from app.services.incident_history_service import incident_history_service
+
+            incidents = await incident_repository.get_all_by_project(db, project.id)
+            for inc in incidents:
+                await incident_history_service.index_incident_history(db, inc)
+        except Exception as sync_err:
+            logger.warning(f"Failed to auto-sync project incidents into knowledge documents: {sync_err}")
+
         return await knowledge_repository.get_all_by_project(db, project.id, category=category)
 
     async def create_document(

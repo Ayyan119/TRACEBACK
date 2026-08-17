@@ -135,6 +135,40 @@ class IncidentHistoryService:
         )
         vector_store.upsert_chunks([point])
 
+        # Synchronize into Knowledge Base Catalog (knowledge_documents)
+        try:
+            from app.models.knowledge import KnowledgeDocumentModel
+            from sqlalchemy import select
+
+            kn_id = f"kn-inc-{incident.id}"
+            res = await db.execute(select(KnowledgeDocumentModel).where(KnowledgeDocumentModel.id == kn_id))
+            kn_doc = res.scalar_one_or_none()
+
+            title_str = f"Previous Incident {incident.code}: {incident.title}"
+            if not kn_doc:
+                kn_doc = KnowledgeDocumentModel(
+                    id=kn_id,
+                    project_id=incident.project_id,
+                    title=title_str,
+                    category="Previous Incident",
+                    status="INDEXED",
+                    chunk_count=1,
+                    content=embedding_text,
+                    metadata_json={"incident_id": incident.id, "code": incident.code, "severity": incident.severity},
+                )
+                db.add(kn_doc)
+            else:
+                kn_doc.title = title_str
+                kn_doc.status = "INDEXED"
+                kn_doc.content = embedding_text
+                kn_doc.metadata_json = {"incident_id": incident.id, "code": incident.code, "severity": incident.severity}
+                db.add(kn_doc)
+
+            await db.flush()
+            logger.info(f"Synchronized incident '{incident.code}' into Knowledge Base Catalog under category 'Previous Incident'")
+        except Exception as kn_err:
+            logger.warning(f"Failed to sync incident into Knowledge Base Catalog (continuing): {kn_err}")
+
         logger.info(
             f"[INCIDENT-HISTORY] Successfully indexed incident '{incident.code}' (ID: {incident.id}) "
             f"as 1 atomic point into Qdrant (Point ID: {point_uuid})."
