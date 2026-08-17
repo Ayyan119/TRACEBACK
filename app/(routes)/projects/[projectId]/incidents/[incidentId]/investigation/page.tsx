@@ -7,7 +7,6 @@ import { api } from '@/lib/api';
 import { Project, Incident, Investigation } from '@/types';
 import { ExecutiveSummary } from '@/components/investigation/ExecutiveSummary';
 import { ImpactPanel } from '@/components/investigation/ImpactPanel';
-import { DetectedChangesPanel } from '@/components/investigation/DetectedChangesPanel';
 import { HypothesisCard } from '@/components/investigation/HypothesisCard';
 import { EvidenceGroupedList } from '@/components/investigation/EvidenceGroupedList';
 import { RecommendationList } from '@/components/investigation/RecommendationList';
@@ -243,9 +242,6 @@ export default function ProjectInvestigationReportPage() {
 
       {/* 3. ACTIONABLE REMEDIATION RECOMMENDATIONS */}
       <RecommendationList recommendations={inv.recommendations} />
-
-      {/* 4. DETECTED CHANGES */}
-      <DetectedChangesPanel metrics={inv.detectedChanges} />
 
       {/* 5. ROOT CAUSE HYPOTHESES */}
       <Card className="p-4 space-y-3">
