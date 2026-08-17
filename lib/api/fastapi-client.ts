@@ -475,7 +475,7 @@ export class FastApiClient implements ApiClient {
       if (!incident) return null;
 
       if (!incident.rootCauseSummary) {
-        return await this.startInvestigation(incidentId, { projectId });
+        return null;
       }
 
       return this.formatInvestigationFromIncident(incident);

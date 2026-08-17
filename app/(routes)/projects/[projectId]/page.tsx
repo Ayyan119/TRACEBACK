@@ -50,15 +50,15 @@ export default function ProjectDashboardPage() {
     setServices(srvList || []);
     setIncidents(incList || []);
     setDocs(docList || []);
+    setIsLoading(false);
 
     if (incList && incList.length > 0) {
-      const inv = await api.getInvestigation(incList[0].id, projectId);
-      setInvestigation(inv);
+      api.getInvestigation(incList[0].id, projectId)
+        .then((inv) => setInvestigation(inv))
+        .catch(() => setInvestigation(null));
     } else {
       setInvestigation(null);
     }
-
-    setIsLoading(false);
   };
 
   useEffect(() => {
