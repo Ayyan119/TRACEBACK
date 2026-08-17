@@ -9,8 +9,6 @@ import { ExecutiveSummary } from '@/components/investigation/ExecutiveSummary';
 import { ImpactPanel } from '@/components/investigation/ImpactPanel';
 import { DetectedChangesPanel } from '@/components/investigation/DetectedChangesPanel';
 import { HypothesisCard } from '@/components/investigation/HypothesisCard';
-import { Timeline } from '@/components/investigation/Timeline';
-import { EvidenceChain } from '@/components/investigation/EvidenceChain';
 import { EvidenceGroupedList } from '@/components/investigation/EvidenceGroupedList';
 import { RecommendationList } from '@/components/investigation/RecommendationList';
 import { EvidenceGapPanel } from '@/components/investigation/EvidenceGapPanel';
@@ -280,12 +278,6 @@ export default function ProjectInvestigationReportPage() {
           )}
         </div>
       </Card>
-
-      {/* 6. TIMELINE */}
-      <Timeline events={inv.timeline} />
-
-      {/* 7. EVIDENCE CHAIN */}
-      <EvidenceChain chain={inv.evidenceChain} />
 
       {/* 8. EVIDENCE GROUPED LIST */}
       <EvidenceGroupedList />
