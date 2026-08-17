@@ -21,7 +21,6 @@ import {
   Settings,
   FolderGit2,
   Plus,
-  Edit2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 
@@ -178,30 +177,6 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom Profile Footer (Click to edit profile) */}
-      <div className="mt-auto p-3 border-t border-borderColor">
-        <button
-          onClick={() => window.dispatchEvent(new Event('tb_open_profile_modal'))}
-          title="Click to edit engineer profile"
-          className="w-full text-left flex items-center justify-between p-2 rounded-lg bg-bgApp hover:bg-bgSurfaceHover border border-borderColor hover:border-accentPrimary/50 transition-all cursor-pointer group"
-        >
-          <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="relative shrink-0">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accentPrimary/30 to-accentPrimary/10 border border-accentPrimary/40 flex items-center justify-center font-mono font-bold text-xs text-accentPrimary group-hover:scale-105 transition-transform shadow-xs">
-                {initials}
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 border border-bgSurface" />
-            </div>
-            <div className="truncate">
-              <p className="text-xs font-semibold text-textPrimary leading-none flex items-center gap-1 truncate group-hover:text-accentPrimary transition-colors">
-                <span className="truncate">{userProfile.name}</span>
-                <Edit2 className="w-2.5 h-2.5 text-textMuted opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
-              </p>
-              <p className="text-[10px] text-textMuted font-mono leading-none mt-1 truncate">{userProfile.role}</p>
-            </div>
-          </div>
-        </button>
-      </div>
     </aside>
   );
 };
