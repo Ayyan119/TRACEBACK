@@ -1,0 +1,6 @@
+Service: upload-service
+Time: 15:35-15:55 UTC
+Availability: 99.99%
+p95 latency: 390 ms
+Error rate: 0.01%
+Assessment: healthy during the incident window.

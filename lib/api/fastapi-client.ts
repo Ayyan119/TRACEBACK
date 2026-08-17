@@ -487,7 +487,6 @@ export class FastApiClient implements ApiClient {
         force_restart: options?.forceRestart ?? true,
         user_name: profile.name,
         user_role: profile.role,
-        ...(options || {}),
       }),
     });
 

@@ -133,10 +133,17 @@ async def update_incident(
     return IncidentResponse.model_validate(incident_orm)
 
 
+from pydantic import BaseModel, ConfigDict, Field
+
 class InvestigatePayload(BaseModel):
-    force_restart: bool = True
-    user_name: Optional[str] = None
-    user_role: Optional[str] = None
+    force_restart: bool = Field(default=True, alias="forceRestart")
+    user_name: Optional[str] = Field(default=None, alias="userName")
+    user_role: Optional[str] = Field(default=None, alias="userRole")
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        extra="ignore",
+    )
 
 @router.post(
     "/incidents/{incident_id}/investigate",

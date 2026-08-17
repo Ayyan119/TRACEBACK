@@ -1,0 +1,6 @@
+Service: metadata-db
+Time: 15:40-15:50 UTC
+CPU: 21%
+Connections: 72/300
+p95 latency: 14 ms
+Assessment: healthy during the incident window.

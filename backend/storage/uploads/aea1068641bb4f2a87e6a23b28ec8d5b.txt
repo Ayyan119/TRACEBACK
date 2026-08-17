@@ -1,0 +1,6 @@
+Service: cdn
+Time: 15:40-15:50 UTC
+p95 edge latency: 41 ms
+Packet loss: 0%
+5xx error rate: 0.02%
+Assessment: no significant degradation observed.

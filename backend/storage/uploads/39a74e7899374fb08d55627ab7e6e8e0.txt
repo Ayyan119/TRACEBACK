@@ -1,0 +1,5 @@
+Service: video-transcoding-service
+Time: 15:40-15:47 UTC
+Node disk utilization: 94%, 96%, 97%, 98%
+Alert threshold: 90%
+Assessment: sustained high disk utilization during the incident window.
