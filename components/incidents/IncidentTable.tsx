@@ -153,33 +153,12 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents, isLoadi
                   </td>
                   <td className="px-3 py-3 font-mono text-[11px] text-textMuted">{incident.updatedAt}</td>
                   <td className="px-3 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {/* Dynamic Right Side Action Button displaying Current Status */}
-                      <div className="relative inline-flex items-center">
-                        <select
-                          value={incident.status}
-                          disabled={isUpdating}
-                          onChange={(e) => handleStatusChange(incident.id, e.target.value)}
-                          className={`font-mono text-[11px] font-semibold rounded px-2 py-1 border cursor-pointer focus:outline-none appearance-none pr-5.5 transition-all ${
-                            isResolved
-                              ? 'bg-statusSuccess/20 text-statusSuccess border-statusSuccess/40 hover:bg-statusSuccess/30 font-bold'
-                              : incident.status === 'Identified'
-                              ? 'bg-statusWarning/20 text-statusWarning border-statusWarning/40 hover:bg-statusWarning/30 font-bold'
-                              : incident.status === 'Investigating'
-                              ? 'bg-accentPrimary/20 text-accentPrimary border-accentPrimary/40 hover:bg-accentPrimary/30 font-bold'
-                              : 'bg-statusInfo/20 text-statusInfo border-statusInfo/40 hover:bg-statusInfo/30'
-                          }`}
-                          title="Click to update incident status"
-                        >
-                          <option value="Investigating" className="bg-bgSurface text-textPrimary">Investigating</option>
-                          <option value="Identified" className="bg-bgSurface text-textPrimary">Identified</option>
-                          <option value="Monitoring" className="bg-bgSurface text-textPrimary">Monitoring</option>
-                          <option value="Resolved" className="bg-bgSurface text-statusSuccess font-bold">✓ Resolved</option>
-                        </select>
-                        <ChevronDown className="w-3 h-3 absolute right-1.5 top-1.5 pointer-events-none text-current opacity-80" />
-                      </div>
+                    <div className="flex items-center justify-end gap-2">
+                      {/* Right side: Beautiful text badge showing current status */}
+                      <StatusBadge status={incident.status} />
+
                       <Link href={`/projects/${pid}/incidents/${incident.id}/investigation`}>
-                        <Button size="sm" variant="outline" className="gap-1 text-[11px] h-7 px-2">
+                        <Button size="sm" variant="outline" className="gap-1 text-[11px] h-7 px-2 font-mono">
                           <Sparkles className="w-3 h-3 text-accentPrimary" />
                           <span>Report</span>
                         </Button>
