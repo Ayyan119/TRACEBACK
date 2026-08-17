@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.repositories.deployment_repository import deployment_repository

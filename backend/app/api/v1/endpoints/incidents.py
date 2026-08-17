@@ -1,5 +1,6 @@
 from typing import List, Optional
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Path, Query, UploadFile, status
+from pydantic import BaseModel
+from fastapi import APIRouter, Body, Depends, File, Form, Header, HTTPException, Path, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies.common import get_db
 from app.schemas.incident import IncidentCreate, IncidentResponse, IncidentUpdate
