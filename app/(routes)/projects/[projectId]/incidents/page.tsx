@@ -91,7 +91,7 @@ export default function ProjectIncidentsPage() {
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-1.5 text-xs text-textMuted">
             <Filter className="w-3.5 h-3.5" />
-            <span>Severity:</span>
+            <span>Filter Severity:</span>
           </div>
           <select
             value={filterSeverity}
@@ -106,7 +106,7 @@ export default function ProjectIncidentsPage() {
           </select>
 
           <div className="flex items-center gap-1.5 text-xs text-textMuted ml-2">
-            <span>Status:</span>
+            <span>Filter Status:</span>
           </div>
           <select
             value={filterStatus}
