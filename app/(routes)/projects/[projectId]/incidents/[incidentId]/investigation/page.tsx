@@ -71,6 +71,7 @@ export default function ProjectInvestigationReportPage() {
     try {
       const updated = await api.startInvestigation(incidentId, { forceRestart: true, projectId });
       setInvestigation(updated);
+      await fetchInvestigation();
     } catch (err: any) {
       console.error('Failed to trigger AI investigation:', err);
       setErrorMessage(err?.message || 'Investigation execution failed. Please check backend log references.');

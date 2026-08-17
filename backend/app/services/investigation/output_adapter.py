@@ -19,8 +19,15 @@ class OutputAdapter:
         investigation_id = final_state.get("investigation_id", "unknown-investigation")
         confidence = float(final_state.get("confidence", 0.0))
         
-        selected_hypothesis = final_state.get("selected_hypothesis", {}) or {}
-        root_cause_str = selected_hypothesis.get("likely_root_cause") or selected_hypothesis.get("title") or "Root cause cannot be conclusively determined from the supplied evidence."
+        final_report = final_state.get("final_report") or {}
+        selected_hypothesis = final_state.get("selected_hypothesis") or {}
+        
+        root_cause_str = (
+            final_report.get("root_cause")
+            or selected_hypothesis.get("title")
+            or selected_hypothesis.get("likely_root_cause")
+            or "Root cause cannot be conclusively determined from the supplied evidence."
+        )
         
         summary = final_state.get("investigation_summary")
         if not summary or "FINAL RCA COMPLETE" in summary:

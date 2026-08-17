@@ -303,7 +303,7 @@ export class FastApiClient implements ApiClient {
 
     const confidence = typeof parsedResult?.confidence === 'number' ? parsedResult.confidence : (typeof incident.confidence === 'number' ? incident.confidence : 0.0);
     const primaryH = parsedResult?.selected_hypothesis || parsedResult?.hypotheses?.[0];
-    const rootCauseTitle = primaryH?.title || primaryH?.likely_root_cause || "Root cause cannot be conclusively determined from the supplied evidence.";
+    const rootCauseTitle = parsedResult?.final_report?.root_cause || primaryH?.title || primaryH?.likely_root_cause || "Root cause cannot be conclusively determined from the supplied evidence.";
     
     const summaryText = parsedResult?.investigation_summary || 
       parsedResult?.final_report?.incident_summary || 
