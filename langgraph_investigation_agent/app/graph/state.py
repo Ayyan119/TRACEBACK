@@ -87,4 +87,3 @@ class InvestigationState(TypedDict, total=False):
 
 
 
-a = "Ali"
