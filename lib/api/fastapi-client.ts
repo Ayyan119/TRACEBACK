@@ -309,6 +309,10 @@ export class FastApiClient implements ApiClient {
       parsedResult?.final_report?.incident_summary || 
       `AI Root-Cause Investigation conducted for incident ${incident.code}. Primary Root Cause: ${rootCauseTitle}`;
 
+    const supportingEvList = (primaryH?.supporting_evidence_ids && primaryH.supporting_evidence_ids.length > 0)
+      ? primaryH.supporting_evidence_ids
+      : (parsedResult?.final_report?.supporting_evidence || []);
+
     const primaryHypothesis = primaryH
       ? {
           id: primaryH.hypothesis_id || `hyp-${incident.id}-1`,
@@ -318,9 +322,9 @@ export class FastApiClient implements ApiClient {
           confidenceLabel: (confidence >= 90 ? 'HIGH' : confidence >= 70 ? 'MEDIUM' : 'LOW') as 'HIGH' | 'MEDIUM' | 'LOW',
           probability: confidence,
           status: 'primary' as const,
-          evidenceItems: (primaryH.supporting_evidence_ids || []).map((eid: string, idx: number) => ({
+          evidenceItems: supportingEvList.map((eid: string, idx: number) => ({
             id: `ev-${idx}`,
-            text: `Supporting Evidence ID: ${eid}`,
+            text: typeof eid === 'string' && (eid.startsWith('Evidence ID') || eid.startsWith('Supporting')) ? eid : `Supporting Evidence: ${eid}`,
             isSupporting: true,
           })),
         }
@@ -372,6 +376,18 @@ export class FastApiClient implements ApiClient {
       impactLevel: 'Low' as const,
     }));
 
+    if (Array.isArray(parsedResult?.final_report?.investigation_limitations)) {
+      parsedResult.final_report.investigation_limitations.forEach((lim: string, idx: number) => {
+        evidenceGaps.push({
+          id: `lim-${idx}`,
+          gapDescription: `Investigation Limitation: ${lim}`,
+          recommendedNextEvidence: 'Attach supplementary system telemetry or detailed stack traces',
+          actionPrompt: 'Provide metrics graph or additional log exports',
+          impactLevel: 'Medium' as const,
+        });
+      });
+    }
+
     const recommendations: any[] = [];
     if (primaryH?.recommended_next_check) {
       recommendations.push({
@@ -380,6 +396,16 @@ export class FastApiClient implements ApiClient {
         action: primaryH.recommended_next_check,
         reason: 'Targeted root cause verification',
         expectedResult: 'Confirm or refute suspected failure mechanism',
+        risk: 'Low' as const,
+      });
+    }
+    if (parsedResult?.final_report?.recommended_verification && parsedResult.final_report.recommended_verification !== primaryH?.recommended_next_check) {
+      recommendations.push({
+        id: 'rec-verification',
+        category: 'Immediate' as const,
+        action: parsedResult.final_report.recommended_verification,
+        reason: 'Root cause fix validation',
+        expectedResult: 'Verify system stabilization',
         risk: 'Low' as const,
       });
     }
