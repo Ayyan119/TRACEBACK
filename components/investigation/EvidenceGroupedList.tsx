@@ -102,12 +102,10 @@ export const EvidenceGroupedList: React.FC = () => {
   ];
 
   return (
-    <Card className="p-4 space-y-4">
-      <div className="border-b border-borderColor pb-2">
-        <h3 className="font-semibold text-xs text-textPrimary flex items-center gap-2">
-          <FileText className="w-3.5 h-3.5 text-accentPrimary" />
-          <span>Evidence Artifacts (Grouped by Telemetry Source)</span>
-        </h3>
+    <Card className="p-5 space-y-4 border-borderColor bg-bgSurface">
+      <div className="flex items-center gap-2 pb-3 border-b border-borderColor">
+        <FileText className="w-4 h-4 text-accentPrimary" />
+        <h2 className="text-sm font-semibold text-textPrimary tracking-tight">Evidence artifacts</h2>
       </div>
 
       <div className="space-y-4">
@@ -115,39 +113,39 @@ export const EvidenceGroupedList: React.FC = () => {
           const GroupIcon = group.icon;
           return (
             <div key={group.category} className="space-y-2">
-              <h4 className="text-[11px] font-mono font-semibold uppercase text-textMuted flex items-center gap-1.5 tracking-wider">
-                <GroupIcon className="w-3 h-3 text-accentPrimary" />
+              <h3 className="text-xs font-semibold text-textMuted flex items-center gap-1.5">
+                <GroupIcon className="w-3.5 h-3.5 text-accentPrimary" />
                 <span>{group.category} ({group.items.length})</span>
-              </h4>
+              </h3>
 
               <div className="space-y-2">
                 {group.items.map((item) => {
                   const isExpanded = expandedId === item.id;
                   return (
-                    <div key={item.id} className="p-3 bg-bgApp border border-borderColor rounded-md space-y-2 text-xs">
+                    <div key={item.id} className="p-3.5 bg-bgApp border border-borderColor rounded-lg space-y-2.5 text-xs">
                       <div
                         onClick={() => setExpandedId(isExpanded ? null : item.id)}
                         className="flex items-center justify-between cursor-pointer"
                       >
                         <div>
-                          <p className="font-semibold text-textPrimary">{item.title}</p>
-                          <p className="text-[10px] text-textMuted font-mono mt-0.5">
+                          <p className="font-semibold text-textPrimary font-sans">{item.title}</p>
+                          <p className="text-[11px] text-textMuted font-mono mt-0.5">
                             Source: {item.source} • Timestamp: {item.timestamp}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="info" className="text-[9px] font-mono">{item.relevance}</Badge>
-                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                          <Badge variant="info" className="text-[10px] font-mono">{item.relevance}</Badge>
+                          {isExpanded ? <ChevronUp className="w-4 h-4 text-textMuted" /> : <ChevronDown className="w-4 h-4 text-textMuted" />}
                         </div>
                       </div>
 
                       {isExpanded && (
-                        <div className="pt-2 border-t border-borderColor space-y-2 font-mono text-[11px]">
-                          <div className="p-2 bg-black/60 rounded border border-borderColor text-textPrimary overflow-x-auto">
+                        <div className="pt-2.5 border-t border-borderColor space-y-2 font-mono text-[11px]">
+                          <div className="p-3 bg-bgSurface border border-borderColor rounded-md text-textPrimary overflow-x-auto font-mono">
                             <code>{item.excerpt}</code>
                           </div>
-                          <div className="p-2 bg-accentSubtle/20 border border-accentPrimary/30 rounded text-accentPrimary font-sans text-xs">
-                            <span className="font-semibold font-mono text-[10px] uppercase block mb-0.5">Why It Matters:</span>
+                          <div className="p-2.5 bg-accentSubtle/30 border border-accentPrimary/25 rounded-md text-textPrimary font-sans text-xs">
+                            <span className="font-semibold text-[11px] text-accentPrimary block mb-0.5">Relevance:</span>
                             {item.whyItMatters}
                           </div>
                         </div>

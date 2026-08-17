@@ -184,27 +184,27 @@ export default function ProjectInvestigationReportPage() {
       )}
 
       {/* Main Report Title Banner */}
-      <div className="bg-bgSurface border border-borderColor p-5 rounded-lg space-y-3">
+      <div className="bg-bgSurface border border-borderColor p-5 rounded-xl space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="font-mono font-bold text-accentPrimary text-xs">{displayIncidentCode}:</span>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="font-mono font-bold text-accentPrimary text-xs">{displayIncidentCode}</span>
               {(inv as any).investigationNumber && (
-                <span className="px-2 py-0.5 rounded bg-accentPrimary/20 text-accentPrimary font-mono text-[10px]">
+                <span className="px-2 py-0.5 rounded bg-bgApp border border-borderColor text-textSecondary font-mono text-[11px]">
                   Run #{(inv as any).investigationNumber}
                 </span>
               )}
               <SeverityBadge severity={inv.severity} />
               <StatusBadge status={isIncidentResolved ? 'Resolved' : inv.status === 'analyzing' ? 'Investigating' : 'Identified'} />
             </div>
-            <h1 className="text-lg font-bold text-textPrimary">{inv.title}</h1>
+            <h1 className="text-xl font-semibold text-textPrimary tracking-tight">{inv.title}</h1>
           </div>
 
-          <div className="flex items-center gap-3 border-l border-borderColor pl-4">
+          <div className="flex items-center gap-3 border-l border-borderColor pl-4 shrink-0">
             <div className="text-right">
-              <p className="text-[10px] text-textMuted uppercase font-mono tracking-wider mb-1">Investigation Confidence</p>
+              <span className="text-[11px] text-textMuted font-medium block mb-0.5">Confidence</span>
               <Badge variant="confidence" className="font-mono text-xs px-2.5 py-1">
-                {inv.confidence}% CONFIDENCE
+                {inv.confidence}%
               </Badge>
             </div>
 
@@ -214,9 +214,9 @@ export default function ProjectInvestigationReportPage() {
             </Button>
 
             {isIncidentResolved ? (
-              <Badge variant="success" className="font-mono text-xs px-3 py-1.5 gap-1.5 bg-statusSuccess/20 text-statusSuccess border-statusSuccess/40">
+              <Badge variant="success" className="font-mono text-xs px-3 py-1.5 gap-1.5">
                 <CheckCircle2 className="w-4 h-4" />
-                <span>RESOLVED & HEALTHY</span>
+                <span>Resolved & Healthy</span>
               </Badge>
             ) : (
               <Button
@@ -244,26 +244,24 @@ export default function ProjectInvestigationReportPage() {
       <RecommendationList recommendations={inv.recommendations} />
 
       {/* 5. ROOT CAUSE HYPOTHESES */}
-      <Card className="p-4 space-y-3">
-        <CardHeader className="p-0 pb-2">
-          <CardTitle className="text-xs uppercase font-mono tracking-wider text-textMuted flex items-center gap-2 font-bold">
-            <HelpCircle className="w-4 h-4 text-accentPrimary" />
-            <span>Root Cause Hypotheses & Confidence Scoring ({projectName})</span>
-          </CardTitle>
-        </CardHeader>
+      <Card className="p-5 space-y-4 border-borderColor bg-bgSurface">
+        <div className="flex items-center gap-2 pb-3 border-b border-borderColor">
+          <HelpCircle className="w-4 h-4 text-accentPrimary" />
+          <h2 className="text-sm font-semibold text-textPrimary tracking-tight">Hypotheses & confidence scoring</h2>
+        </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div>
-            <span className="text-[10px] uppercase font-mono font-semibold text-statusSuccess tracking-wider block mb-1.5">
-              Primary Hypothesis
+            <span className="text-xs font-medium text-statusSuccess block mb-2">
+              Primary hypothesis
             </span>
             <HypothesisCard hypothesis={inv.primaryHypothesis} />
           </div>
 
           {inv.alternativeHypotheses && inv.alternativeHypotheses.length > 0 && (
             <div>
-              <span className="text-[10px] uppercase font-mono font-semibold text-textMuted tracking-wider block mb-1.5">
-                Alternative Hypotheses Evaluated
+              <span className="text-xs font-medium text-textMuted block mb-2">
+                Alternative hypotheses evaluated
               </span>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {inv.alternativeHypotheses.map((alt) => (
@@ -289,32 +287,30 @@ export default function ProjectInvestigationReportPage() {
 
       {/* HISTORICAL INVESTIGATION RUNS */}
       {investigationRuns && investigationRuns.length > 0 && (
-        <Card className="p-4 space-y-3">
-          <CardHeader className="p-0 pb-2">
-            <CardTitle className="text-xs uppercase font-mono tracking-wider text-textMuted flex items-center gap-2">
-              <Clock className="w-4 h-4 text-accentPrimary" />
-              <span>Historical Investigation Runs ({investigationRuns.length})</span>
-            </CardTitle>
-          </CardHeader>
+        <Card className="p-5 space-y-3 border-borderColor bg-bgSurface">
+          <div className="flex items-center gap-2 pb-3 border-b border-borderColor">
+            <Clock className="w-4 h-4 text-accentPrimary" />
+            <h2 className="text-sm font-semibold text-textPrimary tracking-tight">Investigation history ({investigationRuns.length})</h2>
+          </div>
           <div className="space-y-2 font-mono text-xs">
             {investigationRuns.map((run: any) => (
               <div
                 key={run.id}
-                className="bg-bgSurface border border-borderColor p-3 rounded-md flex items-center justify-between"
+                className="bg-bgApp border border-borderColor p-3 rounded-lg flex items-center justify-between"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-accentPrimary">Run #{run.investigation_number}</span>
+                    <span className="font-bold text-accentPrimary font-mono">Run #{run.investigation_number}</span>
                     <Badge variant={run.status === 'COMPLETED' ? 'success' : run.status === 'FAILED' ? 'danger' : 'outline'} className="text-[10px] px-2 py-0.5">
                       {run.status}
                     </Badge>
                     {run.confidence && (
-                      <span className="text-textSecondary text-[10px]">{run.confidence}% Confidence</span>
+                      <span className="text-textSecondary text-[11px] font-mono">{run.confidence}% confidence</span>
                     )}
                   </div>
-                  <p className="text-[11px] text-textMuted font-sans">{run.final_summary || run.error_message || 'Execution completed.'}</p>
+                  <p className="text-xs text-textMuted font-sans">{run.final_summary || run.error_message || 'Execution completed.'}</p>
                 </div>
-                <div className="text-right text-[10px] text-textMuted">
+                <div className="text-right text-[11px] text-textMuted font-mono">
                   <div>{run.completed_at ? new Date(run.completed_at).toLocaleTimeString() : 'Running...'}</div>
                   {run.duration_ms && <div>{(run.duration_ms / 1000).toFixed(2)}s duration</div>}
                 </div>

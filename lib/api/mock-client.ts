@@ -518,9 +518,27 @@ export class MockApiClient implements ApiClient {
     await delay(250);
     const inv = await this.getInvestigation(incidentId, options?.projectId);
     if (!inv) {
-      throw new Error(`Investigation for incident ${incidentId} not found`);
+      throw new Error(`Investigation for incident ${incidentId} not found.`);
     }
     return { ...inv, status: 'analyzing', confidence: 91 };
+  }
+
+  async resolveIncident(incidentId: string, projectId?: string): Promise<Incident> {
+    await delay(100);
+    const inc = await this.getIncident(incidentId, projectId);
+    if (!inc) throw new Error('Incident not found');
+    inc.status = 'Resolved';
+    return inc;
+  }
+
+  async askInvestigationChat(
+    incidentId: string,
+    question: string,
+    messagesHistory: Array<{ role: string; content: string }>,
+    projectId?: string
+  ): Promise<{ reply: string }> {
+    await delay(100);
+    return { reply: `Analyzed report for ${incidentId}: ${question}` };
   }
 
   // LOGS

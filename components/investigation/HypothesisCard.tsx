@@ -34,7 +34,7 @@ export const HypothesisCard: React.FC<{ hypothesis: Hypothesis }> = ({ hypothesi
 
         <div className="text-right shrink-0">
           <Badge variant={probabilityPercent > 0 ? "confidence" : "warning"} className="font-mono text-[10px]">
-            {probabilityPercent > 0 ? `${hypothesis.confidenceLabel} • ${probabilityPercent}% CONFIDENCE` : 'UNVERIFIED (FALLBACK)'}
+            {probabilityPercent > 0 ? `${hypothesis.confidenceLabel} • ${probabilityPercent}% confidence` : 'Unverified'}
           </Badge>
         </div>
       </div>

@@ -421,14 +421,18 @@ export class FastApiClient implements ApiClient {
       });
     }
 
-    const investigatedAffectedServices: string[] = Array.from(new Set([
+    const rawServicesList: string[] = [
       ...(Array.isArray(parsedResult?.final_report?.affected_services) ? parsedResult.final_report.affected_services : []),
       ...(Array.isArray(primaryH?.affected_services) ? primaryH.affected_services : []),
       ...(Array.isArray(incident.affectedServices) ? incident.affectedServices : (incident.affectedService ? [incident.affectedService] : [])),
-    ])).filter(Boolean);
+    ].filter(Boolean);
 
-    const finalAffectedServices = investigatedAffectedServices.length > 0 ? investigatedAffectedServices : ['Backend Services'];
-    const finalAffectedFunctionality = finalAffectedServices.join(', ');
+    const specificServices = rawServicesList.filter((s) => s !== 'Backend' && s !== 'Backend Services');
+    const finalAffectedServices = Array.from(new Set(specificServices.length > 0 ? specificServices : rawServicesList));
+
+    const finalAffectedFunctionality =
+      parsedResult?.final_report?.affected_functionality ||
+      (incident.title ? incident.title.replace(/^Title:\s*/i, '') : finalAffectedServices.join(', '));
 
     const runId = parsedResult?.investigation_run_id || parsedResult?.investigation_id || `inv-${incident.id}-${Date.now()}`;
     const invNumber = parsedResult?.investigation_number || 1;
@@ -438,7 +442,7 @@ export class FastApiClient implements ApiClient {
       incidentId: incident.id,
       runId: runId,
       investigationNumber: invNumber,
-      title: `AI Root-Cause Analysis: ${incident.title}`,
+      title: incident.title ? incident.title.replace(/^(AI Root-Cause Analysis:\s*)+/i, '') : 'Incident Investigation',
       status: 'completed',
       severity: incident.severity,
       confidence: Math.round(confidence * 10) / 10,
@@ -446,9 +450,9 @@ export class FastApiClient implements ApiClient {
       analysisStatus: parsedResult?.analysis_status,
       summary: summaryText,
       impact: {
-        affectedFunctionality: finalAffectedFunctionality || incident.affectedService || 'Core Services',
-        affectedServices: finalAffectedServices,
-        estimatedImpact: `${incident.severity} Outage Impact`,
+        affectedFunctionality: finalAffectedFunctionality,
+        affectedServices: finalAffectedServices.length > 0 ? finalAffectedServices : ['Primary Service'],
+        estimatedImpact: `${incident.severity} Impact`,
         startTime: incident.detectedAt || incident.createdAt || new Date().toISOString(),
         currentDuration: incident.duration || 'Active',
       },

@@ -58,6 +58,13 @@ export interface ApiClient {
   // Investigation
   getInvestigation(incidentId: string, projectId?: string): Promise<Investigation | null>;
   startInvestigation(incidentId: string, options?: { forceRestart?: boolean; projectId?: string }): Promise<Investigation>;
+  resolveIncident(incidentId: string, projectId?: string): Promise<Incident>;
+  askInvestigationChat(
+    incidentId: string,
+    question: string,
+    messagesHistory: Array<{ role: string; content: string }>,
+    projectId?: string
+  ): Promise<{ reply: string }>;
 
   // Logs
   getLogs(incidentId: string, params?: { level?: string; search?: string; projectId?: string }): Promise<LogEvent[]>;

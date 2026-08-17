@@ -32,7 +32,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents, isLoadi
       if (newStatus === 'Resolved') {
         await api.resolveIncident(incidentId);
       } else {
-        await api.updateIncident(incidentId, { status: newStatus });
+        await api.updateIncident(incidentId, { status: newStatus as any });
       }
       if (onRefresh) onRefresh();
     } catch (err) {

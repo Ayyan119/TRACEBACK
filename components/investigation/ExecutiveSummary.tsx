@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card } from '@/components/ui/Card';
 import { FileText, AlertTriangle } from 'lucide-react';
 
 interface ExecutiveSummaryProps {
@@ -16,30 +16,28 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({ summary, roo
     : undefined;
 
   return (
-    <Card className="mb-6 border-borderColor bg-bgSurface shadow-md overflow-hidden">
-      <CardHeader className="border-borderColor pb-2 bg-bgApp/50">
-        <CardTitle className="flex items-center gap-2 text-textPrimary text-xs font-mono font-bold uppercase tracking-wide">
-          <FileText className="w-4 h-4 text-accentPrimary" />
-          <span>Executive Diagnosis & Root Cause</span>
-        </CardTitle>
-      </CardHeader>
+    <Card className="p-5 space-y-4 border-borderColor bg-bgSurface">
+      <div className="flex items-center gap-2 pb-3 border-b border-borderColor">
+        <FileText className="w-4 h-4 text-accentPrimary" />
+        <h2 className="text-sm font-semibold text-textPrimary tracking-tight">Executive diagnosis</h2>
+      </div>
 
-      <div className="p-4 space-y-4 text-xs">
+      <div className="space-y-4">
         {rootCause && (
-          <div className="p-3.5 bg-statusDanger/10 border border-statusDanger/30 rounded-md text-textPrimary shadow-xs">
-            <div className="flex items-center gap-2 font-semibold font-mono uppercase text-[11px] text-statusDanger mb-1.5">
+          <div className="p-4 bg-statusDanger/5 border border-statusDanger/25 rounded-lg text-textPrimary">
+            <div className="flex items-center gap-2 font-medium text-xs text-statusDanger mb-1">
               <AlertTriangle className="w-4 h-4 text-statusDanger shrink-0" />
-              <span>Identified Primary Root Cause</span>
+              <span>Primary root cause</span>
             </div>
-            <p className="font-bold text-sm text-textPrimary leading-snug font-sans">{rootCause}</p>
+            <p className="font-semibold text-sm text-textPrimary leading-snug">{rootCause}</p>
           </div>
         )}
 
         {cleanedSummary && (
           <div className="space-y-1">
-            <p className="text-textMuted uppercase font-mono text-[10px] tracking-wider font-semibold">
-              Analysis Summary
-            </p>
+            <span className="text-xs text-textMuted font-medium block">
+              Analysis summary
+            </span>
             <p className="text-textPrimary text-xs leading-relaxed font-sans">{cleanedSummary}</p>
           </div>
         )}
