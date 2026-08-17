@@ -46,6 +46,18 @@ class BadRequestException(AppException):
         )
 
 
+class PermissionDeniedException(AppException):
+    """Exception raised when a user is forbidden from accessing a resource."""
+
+    def __init__(self, detail: str = "Permission denied for the requested resource."):
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            title="Permission Denied",
+            detail=detail,
+            type_="https://traceback.dev/errors/forbidden",
+        )
+
+
 async def app_exception_handler(request: Request, exc: AppException) -> JSONResponse:
     """HTTP Exception handler returning RFC-7807 compliant problem details."""
     payload = {

@@ -1,5 +1,5 @@
 import { ApiClient } from './client';
-import { getStoredUserProfile } from '@/lib/userProfile';
+import { getStoredUserProfile, getStoredUserId } from '@/lib/userProfile';
 import {
   Project,
   CreateProjectInput,
@@ -27,10 +27,15 @@ export class FastApiClient implements ApiClient {
   }
 
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const userProfile = getStoredUserProfile();
+    const userId = getStoredUserId();
     const res = await fetch(`${this.baseUrl}${endpoint}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        'X-User-ID': userId,
+        'X-User-Name': userProfile.name,
+        'X-User-Role': userProfile.role,
         ...(options?.headers || {}),
       },
     });
@@ -634,5 +639,25 @@ export class FastApiClient implements ApiClient {
       method: 'DELETE',
     });
     return true;
+  }
+
+  // USER PROFILE & API KEY MANAGEMENT
+  async getUserMe(): Promise<any> {
+    return this.request<any>('/users/me');
+  }
+
+  async saveUserProfile(name: string, role: string, openaiApiKey?: string): Promise<any> {
+    return this.request<any>('/users/profile', {
+      method: 'POST',
+      body: JSON.stringify({
+        name,
+        role,
+        openai_api_key: openaiApiKey || null,
+      }),
+    });
+  }
+
+  async getAllUsers(): Promise<any[]> {
+    return this.request<any[]>('/users/all');
   }
 }

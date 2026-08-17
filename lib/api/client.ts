@@ -76,4 +76,9 @@ export interface ApiClient {
   uploadKnowledge(request: DocumentUploadRequest): Promise<KnowledgeDocument>;
   retryKnowledgeIndexing(id: string, projectId?: string): Promise<KnowledgeDocument>;
   deleteKnowledge(id: string, projectId?: string): Promise<boolean>;
+
+  // User Profile
+  getUserMe(): Promise<any>;
+  saveUserProfile(name: string, role: string, openaiApiKey?: string): Promise<any>;
+  getAllUsers(): Promise<any[]>;
 }

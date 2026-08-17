@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from typing import Optional
-from sqlalchemy import DateTime, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from app.db.base import Base
 
@@ -16,6 +16,13 @@ class ProjectModel(Base):
         primary_key=True,
         default=lambda: str(uuid.uuid4()),
         doc="Unique project identifier (UUID string or human slug)",
+    )
+    user_id: Mapped[str] = mapped_column(
+        String(64),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+        doc="Owner user identity ID",
     )
     name: Mapped[str] = mapped_column(
         String(128),

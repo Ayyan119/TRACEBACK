@@ -13,11 +13,15 @@ class ProjectRepository:
     async def get_all(
         self,
         db: AsyncSession,
+        user_id: Optional[str] = None,
         search: Optional[str] = None,
         environment: Optional[str] = None,
     ) -> List[ProjectModel]:
-        """Fetch all workspace projects from PostgreSQL with optional search and environment filtering."""
+        """Fetch all workspace projects belonging to user_id from PostgreSQL with optional search and environment filtering."""
         query = select(ProjectModel).order_by(ProjectModel.name.asc())
+
+        if user_id:
+            query = query.where(ProjectModel.user_id == user_id)
 
         if environment:
             query = query.where(ProjectModel.environment == environment)
@@ -35,30 +39,38 @@ class ProjectRepository:
         result = await db.execute(query)
         return list(result.scalars().all())
 
-    async def get_by_id(self, db: AsyncSession, project_id: str) -> Optional[ProjectModel]:
-        """Fetch a single project by primary key ID."""
-        result = await db.execute(select(ProjectModel).where(ProjectModel.id == project_id))
+    async def get_by_id(self, db: AsyncSession, project_id: str, user_id: Optional[str] = None) -> Optional[ProjectModel]:
+        """Fetch a single project by primary key ID and optional user_id."""
+        stmt = select(ProjectModel).where(ProjectModel.id == project_id)
+        if user_id:
+            stmt = stmt.where(ProjectModel.user_id == user_id)
+        result = await db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_by_slug(self, db: AsyncSession, slug: str) -> Optional[ProjectModel]:
-        """Fetch a single project by unique slug."""
-        result = await db.execute(select(ProjectModel).where(ProjectModel.slug == slug))
+    async def get_by_slug(self, db: AsyncSession, slug: str, user_id: Optional[str] = None) -> Optional[ProjectModel]:
+        """Fetch a single project by unique slug and optional user_id."""
+        stmt = select(ProjectModel).where(ProjectModel.slug == slug)
+        if user_id:
+            stmt = stmt.where(ProjectModel.user_id == user_id)
+        result = await db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def get_by_id_or_slug(self, db: AsyncSession, identifier: str) -> Optional[ProjectModel]:
-        """Fetch a single project matching either primary key ID or slug."""
-        result = await db.execute(
-            select(ProjectModel).where(
-                or_(ProjectModel.id == identifier, ProjectModel.slug == identifier)
-            )
+    async def get_by_id_or_slug(self, db: AsyncSession, identifier: str, user_id: Optional[str] = None) -> Optional[ProjectModel]:
+        """Fetch a single project matching either primary key ID or slug, scoped to user_id."""
+        stmt = select(ProjectModel).where(
+            or_(ProjectModel.id == identifier, ProjectModel.slug == identifier)
         )
+        if user_id:
+            stmt = stmt.where(ProjectModel.user_id == user_id)
+        result = await db.execute(stmt)
         return result.scalar_one_or_none()
 
-    async def create(self, db: AsyncSession, obj_in: ProjectCreate, slug: str) -> ProjectModel:
-        """Create and persist a new ProjectModel record in PostgreSQL."""
+    async def create(self, db: AsyncSession, obj_in: ProjectCreate, slug: str, user_id: str) -> ProjectModel:
+        """Create and persist a new ProjectModel record owned by user_id in PostgreSQL."""
         project_id = str(uuid.uuid4())
         db_obj = ProjectModel(
             id=project_id,
+            user_id=user_id,
             name=obj_in.name,
             slug=slug,
             description=obj_in.description,

@@ -1,3 +1,4 @@
+from app.models.user import UserModel
 from app.models.deployment import DeploymentModel
 from app.models.evidence import EvidenceModel
 from app.models.incident import IncidentModel
@@ -9,6 +10,7 @@ from app.models.project import ProjectModel
 from app.models.service import ServiceModel
 
 __all__ = [
+    "UserModel",
     "ProjectModel",
     "ServiceModel",
     "DeploymentModel",

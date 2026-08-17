@@ -4,12 +4,15 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.core.config import settings
 from app.core.logging import logger
 
-# Create async engine for PostgreSQL (using asyncpg driver)
+# Create async engine for PostgreSQL (using asyncpg driver) with tuned connection pool
 engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=settings.DEBUG,
+    echo=False,
     future=True,
     pool_pre_ping=True,
+    pool_size=20,
+    max_overflow=10,
+    pool_recycle=1800,
 )
 
 # Async session factory

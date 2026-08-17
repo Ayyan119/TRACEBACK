@@ -48,6 +48,19 @@ class AIInvestigationService:
         target_user_name = user_name or "Ayyan Shahid"
         target_user_role = user_role or "Senior Software Engineer"
 
+        # Check if current user has custom encrypted OpenAI API key and decrypt in memory
+        try:
+            from app.repositories.user_repository import user_repository
+            from app.core.security import decrypt_api_key
+            user_obj = await user_repository.get_by_name(db, target_user_name)
+            if user_obj and user_obj.encrypted_openai_api_key:
+                custom_key = decrypt_api_key(user_obj.encrypted_openai_api_key)
+                if custom_key:
+                    os.environ["OPENAI_API_KEY"] = custom_key
+                    logger.info(f"Loaded custom decrypted OpenAI API Key in memory for user '{target_user_name}'")
+        except Exception as key_err:
+            logger.warning(f"Could not load custom user API key (using default env key): {key_err}")
+
         # Dynamically set LangSmith project tracing name to the user's name
         os.environ["LANGCHAIN_TRACING_V2"] = "true"
         os.environ["LANGCHAIN_PROJECT"] = target_user_name

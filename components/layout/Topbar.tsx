@@ -92,6 +92,30 @@ export const Topbar: React.FC = () => {
       <div className="flex items-center gap-3">
         <ThemeToggle />
 
+        {/* User Identity Profile Button */}
+        {mounted && (
+          <button
+            onClick={() => {
+              setIsFirstTime(false);
+              setIsProfileModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-bgApp hover:bg-bgSurfaceHover border border-borderColor text-xs transition-colors"
+            title="Manage User Identity & OpenAI API Key"
+          >
+            <div className="w-5 h-5 rounded-full bg-accentPrimary/20 text-accentPrimary font-bold text-[10px] flex items-center justify-center font-mono">
+              {getInitials(userProfile.name)}
+            </div>
+            <div className="text-left hidden sm:block">
+              <div className="font-mono text-xs text-textPrimary leading-tight font-semibold">
+                {userProfile.name}
+              </div>
+              <div className="text-[10px] text-textMuted leading-tight font-sans">
+                {userProfile.role}
+              </div>
+            </div>
+          </button>
+        )}
+
         {/* Profile & Create Project Modals */}
         {mounted && (
           <>

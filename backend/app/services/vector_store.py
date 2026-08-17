@@ -55,8 +55,8 @@ class VectorStore:
                         ),
                     )
 
-            # Ensure payload field indexes exist for project isolation and source lookup
-            for field_name in ["project_id", "source_type", "source_id", "knowledge_document_id"]:
+            # Ensure payload field indexes exist for user/project isolation and source lookup
+            for field_name in ["user_id", "project_id", "source_type", "source_id", "knowledge_document_id"]:
                 try:
                     client.create_payload_index(
                         collection_name=self.COLLECTION_NAME,
@@ -115,15 +115,20 @@ class VectorStore:
         self,
         query_vector: List[float],
         project_id: str,
+        user_id: Optional[str] = None,
         top_k: int = 5,
         source_type: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
-        """Executes a similarity search against Qdrant scoped to project_id."""
+        """Executes a similarity search against Qdrant scoped strictly to project_id and user_id."""
         client = self.get_client()
         try:
             must_conditions = [
                 qmodels.FieldCondition(key="project_id", match=qmodels.MatchValue(value=project_id))
             ]
+            if user_id:
+                must_conditions.append(
+                    qmodels.FieldCondition(key="user_id", match=qmodels.MatchValue(value=user_id))
+                )
             if source_type:
                 must_conditions.append(
                     qmodels.FieldCondition(key="source_type", match=qmodels.MatchValue(value=source_type))

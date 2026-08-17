@@ -1,11 +1,16 @@
 export interface UserProfile {
+  id?: string;
   name: string;
   role: string;
+  hasOpenAiApiKey?: boolean;
+  maskedApiKey?: string;
 }
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
+  id: 'usr_default_ayyan',
   name: 'Ayyan Shahid',
   role: 'Senior Software Engineer',
+  hasOpenAiApiKey: false,
 };
 
 export const TECH_ROLES = [
@@ -28,6 +33,16 @@ export const TECH_ROLES = [
   'Systems Administrator',
   'Custom Role...',
 ];
+
+export function getStoredUserId(): string {
+  if (typeof window === 'undefined') return 'usr_default_ayyan';
+  return localStorage.getItem('tb_user_id') || 'usr_default_ayyan';
+}
+
+export function saveStoredUserId(id: string): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem('tb_user_id', id);
+}
 
 export function getStoredUserProfile(): UserProfile {
   if (typeof window === 'undefined') return DEFAULT_USER_PROFILE;
@@ -53,6 +68,9 @@ export function getStoredUserProfile(): UserProfile {
 export function saveStoredUserProfile(profile: UserProfile): void {
   if (typeof window === 'undefined') return;
   try {
+    if (profile.id) {
+      saveStoredUserId(profile.id);
+    }
     localStorage.setItem('tb_user_profile', JSON.stringify(profile));
     localStorage.setItem('tb_user_setup_completed', 'true');
     window.dispatchEvent(new Event('tb_user_profile_updated'));

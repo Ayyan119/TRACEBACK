@@ -5,6 +5,9 @@ from fastapi import APIRouter, Body, Depends, File, Form, Header, HTTPException,
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies.common import get_db
+from app.dependencies.user import get_current_user
+from app.dependencies.project_access import validate_project_access
+from app.models.user import UserModel
 from app.schemas.incident import IncidentCreate, IncidentResponse, IncidentUpdate
 from app.schemas.incident_history import IncidentHistoryResponse
 from app.schemas.investigation import InvestigationRunResponse
@@ -31,9 +34,11 @@ async def get_incidents_by_project(
     severity: Optional[str] = Query(None, description="Filter by severity level (Critical, High, Medium, Low)"),
     status_param: Optional[str] = Query(None, alias="status", description="Filter by status (Investigating, Identified, Monitoring, Resolved)"),
     project_id: str = Path(..., description="Target project UUID or unique slug identifier"),
+    current_user: UserModel = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> List[IncidentResponse]:
-    """Retrieves incidents from PostgreSQL for project_id."""
+    """Retrieves incidents from PostgreSQL for project_id owned by current_user."""
+    await validate_project_access(db, project_id, current_user.id)
     incidents_orm = await incident_service.get_incidents_by_project(db, project_id, severity=severity, status=status_param)
     return [IncidentResponse.model_validate(inc) for inc in incidents_orm]
 

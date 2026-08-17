@@ -2,6 +2,9 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, File, Form, Path, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies.common import get_db
+from app.dependencies.user import get_current_user
+from app.dependencies.project_access import validate_project_access
+from app.models.user import UserModel
 from app.schemas.knowledge import KnowledgeDocumentCreate, KnowledgeDocumentResponse
 from app.services.knowledge_service import knowledge_service
 
@@ -18,9 +21,11 @@ router = APIRouter()
 async def get_project_knowledge_documents(
     category: Optional[str] = Query(None, description="Filter by category (Architecture, Runbook, API Spec, Postmortem, Incident Log)"),
     project_id: str = Path(..., description="Target project UUID or unique slug identifier"),
+    current_user: UserModel = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> List[KnowledgeDocumentResponse]:
-    """List knowledge base documents for project_id."""
+    """List knowledge base documents for project_id owned by current_user."""
+    await validate_project_access(db, project_id, current_user.id)
     docs = await knowledge_service.get_documents_by_project(db, project_id, category=category)
     return [KnowledgeDocumentResponse.model_validate(doc) for doc in docs]
 

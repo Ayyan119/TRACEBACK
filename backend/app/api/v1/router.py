@@ -1,10 +1,13 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import deployments, evidence, health, incidents, knowledge, projects, services
+from app.api.v1.endpoints import deployments, evidence, health, incidents, knowledge, projects, services, users
 
 api_v1_router = APIRouter()
 
 # Health Endpoints
 api_v1_router.include_router(health.router, tags=["Health"])
+
+# Users / Profile Endpoints
+api_v1_router.include_router(users.router, prefix="/users", tags=["Users"])
 
 # Projects Endpoints
 api_v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])

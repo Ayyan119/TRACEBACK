@@ -70,6 +70,10 @@ class Settings(BaseSettings):
     GOOGLE_API_KEY: str = ""
     TAVILY_API_KEY: str = ""
 
+    # Encryption & Secret Key Settings
+    SECRET_KEY: str = "traceback-production-secret-key-ayyan-2026"
+    TRACEBACK_ENCRYPTION_KEY: str = "xK7rN9pL3mQ8vW5zY1tG4bF6jH2kS0dX8cR4vF2mN9k="
+
     # Ingestion Chunking Configuration
     CHUNK_SIZE: int = 3000
     CHUNK_OVERLAP: int = 300

@@ -671,4 +671,33 @@ export class MockApiClient implements ApiClient {
     }
     return false;
   }
+
+  // USER PROFILE STUBS
+  async getUserMe(): Promise<any> {
+    await delay(50);
+    return {
+      id: 'usr_default_ayyan',
+      name: 'Ayyan Shahid',
+      role: 'Senior Software Engineer',
+      has_openai_api_key: false,
+    };
+  }
+
+  async saveUserProfile(name: string, role: string, openaiApiKey?: string): Promise<any> {
+    await delay(100);
+    return {
+      id: 'usr_default_ayyan',
+      name,
+      role,
+      has_openai_api_key: !!openaiApiKey,
+      masked_api_key: openaiApiKey ? '••••••••••••••••' : null,
+    };
+  }
+
+  async getAllUsers(): Promise<any[]> {
+    await delay(50);
+    return [
+      { id: 'usr_default_ayyan', name: 'Ayyan Shahid', role: 'Senior Software Engineer', has_openai_api_key: false },
+    ];
+  }
 }

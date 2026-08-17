@@ -2,6 +2,9 @@ from typing import List
 from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies.common import get_db
+from app.dependencies.user import get_current_user
+from app.dependencies.project_access import validate_project_access
+from app.models.user import UserModel
 from app.schemas.service import ServiceCreate, ServiceResponse, ServiceUpdate
 from app.services.service_service import service_service
 
@@ -17,9 +20,11 @@ router = APIRouter()
 )
 async def get_services_by_project(
     project_id: str = Path(..., description="Target project UUID or unique slug identifier"),
+    current_user: UserModel = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> List[ServiceResponse]:
-    """Retrieves all microservices from PostgreSQL for a specific project_id."""
+    """Retrieves all microservices from PostgreSQL for a specific project_id owned by current_user."""
+    await validate_project_access(db, project_id, current_user.id)
     services_orm = await service_service.get_services_by_project(db, project_id)
     return [ServiceResponse.model_validate(s) for s in services_orm]
 
