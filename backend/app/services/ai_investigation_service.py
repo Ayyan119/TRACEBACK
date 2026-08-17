@@ -240,6 +240,10 @@ class AIInvestigationService:
         Generates grounded responses based on the complete final_report dictionary passed into the system prompt.
         Uses a separate fast LLM model (e.g. ChatOpenAI / ChatGoogleGenerativeAI) with short-term in-memory chat.
         """
+        from dotenv import load_dotenv
+        load_dotenv()
+        load_dotenv("/home/jiggra/Traceback/.env")
+
         incident = await incident_service.get_incident_by_id(db, incident_id)
 
         # Build complete final_report dict
@@ -281,9 +285,9 @@ class AIInvestigationService:
             "Below is the COMPLETE CANONICAL FINAL REPORT DICTIONARY for this incident:\n\n"
             f"```json\n{json.dumps(report_dict, indent=2, default=str)}\n```\n\n"
             "INSTRUCTIONS FOR YOUR RESPONSE:\n"
-            "1. Directly, concisely, and accurately answer the engineer's technical question based on the final report dictionary above.\n"
+            "1. Answer the engineer's technical question directly, accurately, and concisely based strictly on the final report dictionary above.\n"
             "2. Refer to specific evidence, log lines, metrics, or service names from the report when answering.\n"
-            "3. Maintain a professional, technical, clear tone.\n"
+            "3. Do NOT output raw JSON unless requested. Provide a natural, clear, professional AI answer.\n"
             "4. Keep your answer focused and well-structured."
         )
 
