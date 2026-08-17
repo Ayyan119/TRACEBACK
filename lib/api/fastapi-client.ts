@@ -1,4 +1,5 @@
 import { ApiClient } from './client';
+import { getStoredUserProfile } from '@/lib/userProfile';
 import {
   Project,
   CreateProjectInput,
