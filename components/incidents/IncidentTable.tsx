@@ -104,7 +104,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents, isLoadi
               return (
                 <tr key={incident.id} className="hover:bg-bgSurfaceHover/60 transition-colors">
                   {/* Left Side Neutral Status Change Dropdown */}
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-2">
                     <div className="relative inline-flex items-center">
                       <select
                         value=""
@@ -126,7 +126,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents, isLoadi
                       <ChevronDown className="w-3 h-3 absolute right-2 top-2 pointer-events-none text-textMuted" />
                     </div>
                   </td>
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-2">
                     <Link
                       href={`/projects/${pid}/incidents/${incident.id}`}
                       className="font-semibold text-textPrimary hover:text-accentPrimary flex items-center gap-1.5 group"
@@ -136,21 +136,21 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents, isLoadi
                       <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </Link>
                   </td>
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-2">
                     <SeverityBadge severity={incident.severity} />
                   </td>
-                  <td className="px-3 py-3 font-mono text-[11px] text-textPrimary">
+                  <td className="px-3 py-2 font-mono text-[11px] text-textPrimary">
                     {incident.affectedService}
                   </td>
-                  <td className="px-3 py-3 font-mono text-[11px] text-textMuted">{incident.detectedAt}</td>
-                  <td className="px-3 py-3 font-mono text-[11px] text-textMuted">{incident.duration}</td>
-                  <td className="px-3 py-3 font-mono text-[11px]">
+                  <td className="px-3 py-2 font-mono text-[11px] text-textMuted">{incident.detectedAt}</td>
+                  <td className="px-3 py-2 font-mono text-[11px] text-textMuted">{incident.duration}</td>
+                  <td className="px-3 py-2 font-mono text-[11px]">
                     <Badge variant="confidence" size="sm">
                       {incident.confidence}%
                     </Badge>
                   </td>
-                  <td className="px-3 py-3 font-mono text-[11px] text-textMuted">{incident.updatedAt}</td>
-                  <td className="px-3 py-3 text-right">
+                  <td className="px-3 py-2 font-mono text-[11px] text-textMuted">{incident.updatedAt}</td>
+                  <td className="px-3 py-2 text-right">
                     <div className="flex items-center justify-end gap-2">
                       {/* Right side: Beautiful text badge showing current status */}
                       <StatusBadge status={incident.status} />

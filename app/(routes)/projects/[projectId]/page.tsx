@@ -94,18 +94,18 @@ export default function ProjectDashboardPage() {
   const criticalServices = services.filter((s) => s.health !== 'Healthy');
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto text-xs pb-10">
+    <div className="space-y-3.5 max-w-7xl mx-auto text-xs pb-6">
       {/* Top Header Banner */}
-      <div className="bg-bgSurface border border-borderColor p-5 rounded-lg space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-bgSurface border border-borderColor p-3.5 rounded-lg space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded bg-accentSubtle text-accentPrimary border border-accentPrimary/40">
-              <FolderGit2 className="w-5 h-5" />
+            <div className="p-2 rounded bg-accentSubtle text-accentPrimary border border-accentPrimary/40">
+              <FolderGit2 className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-textPrimary font-mono">{p.name} Workspace</h1>
-                <Badge variant="outline">{p.environment}</Badge>
+                <h1 className="text-base font-semibold text-textPrimary font-mono">{p.name} Workspace</h1>
+                <Badge variant="outline" className="text-[10px] py-0.5">{p.environment}</Badge>
               </div>
               <p className="text-xs text-textSecondary mt-0.5">{p.description}</p>
             </div>
@@ -115,30 +115,30 @@ export default function ProjectDashboardPage() {
             variant="primary"
             size="sm"
             onClick={() => router.push(`/projects/${projectId}/incidents/new`)}
-            className="gap-1.5 text-xs font-semibold shrink-0"
+            className="gap-1.5 text-xs font-semibold shrink-0 h-8"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>Report Incident</span>
           </Button>
         </div>
       </div>
 
       {/* KPI Stats Bar (Project-Isolated) */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <Card className="p-3.5 space-y-1">
-          <span className="text-[10px] text-textMuted uppercase font-mono tracking-wider">Active Incidents</span>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <Card className="p-3 space-y-1">
+          <span className="text-[10px] text-textMuted uppercase font-mono tracking-wider font-semibold">Active Incidents</span>
           <div className="flex items-baseline justify-between">
-            <span className="text-xl font-bold font-mono text-statusDanger">{activeIncidents.length}</span>
-            <AlertTriangle className="w-4 h-4 text-statusDanger" />
+            <span className="text-lg font-bold font-mono text-statusDanger">{activeIncidents.length}</span>
+            <AlertTriangle className="w-3.5 h-3.5 text-statusDanger" />
           </div>
           <p className="text-[10px] text-textMuted">Isolated to {p.name}</p>
         </Card>
 
-        <Card className="p-3.5 space-y-1">
-          <span className="text-[10px] text-textMuted uppercase font-mono tracking-wider">Monitored Services</span>
+        <Card className="p-3 space-y-1">
+          <span className="text-[10px] text-textMuted uppercase font-mono tracking-wider font-semibold">Monitored Services</span>
           <div className="flex items-baseline justify-between">
-            <span className="text-xl font-bold font-mono text-textPrimary">{services.length}</span>
-            <Server className="w-4 h-4 text-accentPrimary" />
+            <span className="text-lg font-bold font-mono text-textPrimary">{services.length}</span>
+            <Server className="w-3.5 h-3.5 text-accentPrimary" />
           </div>
           <p className="text-[10px] text-textMuted">
             {services.length === 0
@@ -149,24 +149,24 @@ export default function ProjectDashboardPage() {
           </p>
         </Card>
 
-        <Card className="p-3.5 space-y-1">
-          <span className="text-[10px] text-textMuted uppercase font-mono tracking-wider">Knowledge Chunks</span>
+        <Card className="p-3 space-y-1">
+          <span className="text-[10px] text-textMuted uppercase font-mono tracking-wider font-semibold">Knowledge Chunks</span>
           <div className="flex items-baseline justify-between">
-            <span className="text-xl font-bold font-mono text-textPrimary">
+            <span className="text-lg font-bold font-mono text-textPrimary">
               {docs.reduce((acc, d) => acc + (d.chunks || 0), 0)}
             </span>
-            <FileText className="w-4 h-4 text-accentPrimary" />
+            <FileText className="w-3.5 h-3.5 text-accentPrimary" />
           </div>
           <p className="text-[10px] text-textMuted">{docs.length} indexed runbooks</p>
         </Card>
 
-        <Card className="p-3.5 space-y-1">
-          <span className="text-[10px] text-textMuted uppercase font-mono tracking-wider">Telemetry Stream</span>
+        <Card className="p-3 space-y-1">
+          <span className="text-[10px] text-textMuted uppercase font-mono tracking-wider font-semibold">Telemetry Stream</span>
           <div className="flex items-baseline justify-between">
-            <span className="text-xl font-bold font-mono text-statusSuccess">
+            <span className="text-lg font-bold font-mono text-statusSuccess">
               {services.length > 0 ? 'Active' : 'Standby'}
             </span>
-            <Activity className="w-4 h-4 text-statusSuccess" />
+            <Activity className="w-3.5 h-3.5 text-statusSuccess" />
           </div>
           <p className="text-[10px] text-textMuted">Real-time stream channel</p>
         </Card>
@@ -174,11 +174,11 @@ export default function ProjectDashboardPage() {
 
       {/* Primary Active Investigation Workbench Banner */}
       {investigation && (
-        <Card className="p-4 border-accentPrimary/50 bg-accentSubtle/10 space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-borderColor/60 pb-2">
+        <Card className="p-3 border-accentPrimary/40 bg-accentSubtle/10 space-y-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-borderColor/60 pb-1.5">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-accentPrimary" />
-              <span className="font-mono text-xs font-bold text-textPrimary uppercase">Active AI Investigation Workbench</span>
+              <Sparkles className="w-3.5 h-3.5 text-accentPrimary" />
+              <span className="font-mono text-xs font-semibold text-textPrimary uppercase">Active AI Investigation Workbench</span>
               <Badge variant="confidence" className="text-[9px]">
                 {investigation.confidence}% CONFIDENCE
               </Badge>
@@ -192,18 +192,18 @@ export default function ProjectDashboardPage() {
             </Link>
           </div>
 
-          <div className="space-y-1">
-            <h3 className="text-sm font-bold text-textPrimary">{investigation.title}</h3>
-            <p className="text-xs text-textSecondary leading-relaxed">{investigation.summary}</p>
+          <div className="space-y-0.5">
+            <h3 className="text-xs font-bold text-textPrimary">{investigation.title}</h3>
+            <p className="text-[11px] text-textSecondary leading-relaxed">{investigation.summary}</p>
           </div>
         </Card>
       )}
 
       {/* Services Topology Section */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-xs text-textPrimary flex items-center gap-2">
-            <Server className="w-4 h-4 text-accentPrimary" />
+            <Server className="w-3.5 h-3.5 text-accentPrimary" />
             <span>{p.name} Microservices Topology</span>
           </h3>
           {services.length > 0 && (
@@ -214,9 +214,9 @@ export default function ProjectDashboardPage() {
         </div>
 
         {services.length === 0 ? (
-          <Card className="p-6 text-center space-y-3 border-dashed border-borderColor">
-            <div className="w-10 h-10 rounded-full bg-bgApp border border-borderColor flex items-center justify-center mx-auto text-textMuted">
-              <Server className="w-5 h-5" />
+          <Card className="p-4 text-center space-y-2 border-dashed border-borderColor">
+            <div className="w-8 h-8 rounded-full bg-bgApp border border-borderColor flex items-center justify-center mx-auto text-textMuted">
+              <Server className="w-4 h-4" />
             </div>
             <div>
               <p className="font-bold text-textPrimary text-xs font-mono">No services configured yet for {p.name}</p>
@@ -235,13 +235,13 @@ export default function ProjectDashboardPage() {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
             {services.map((srv) => (
               <Card
                 key={srv.id}
                 onClick={() => router.push(`/projects/${projectId}/services`)}
                 hoverable
-                className="p-3.5 space-y-2 cursor-pointer"
+                className="p-3 space-y-1.5 cursor-pointer"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-bold font-mono text-textPrimary text-xs">{srv.name}</span>
@@ -253,7 +253,7 @@ export default function ProjectDashboardPage() {
                   </Badge>
                 </div>
 
-                <div className="space-y-1 font-mono text-[11px] text-textMuted pt-1 border-t border-borderColor">
+                <div className="space-y-0.5 font-mono text-[10px] text-textMuted pt-1 border-t border-borderColor">
                   <div className="flex justify-between">
                     <span>Environment:</span>
                     <span className="text-textSecondary">{srv.environment || 'Production'}</span>
@@ -272,10 +272,10 @@ export default function ProjectDashboardPage() {
       </div>
 
       {/* Incident History Table */}
-      <div className="space-y-3">
+      <div className="space-y-2">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-xs text-textPrimary flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-statusDanger" />
+            <AlertTriangle className="w-3.5 h-3.5 text-statusDanger" />
             <span>{p.name} Incident Directory</span>
           </h3>
           {incidents.length > 0 && (
