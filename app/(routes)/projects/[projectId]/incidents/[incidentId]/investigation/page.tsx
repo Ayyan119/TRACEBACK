@@ -16,12 +16,13 @@ import { RecommendationList } from '@/components/investigation/RecommendationLis
 import { EvidenceGapPanel } from '@/components/investigation/EvidenceGapPanel';
 import { InvestigationActivityTrace } from '@/components/investigation/InvestigationActivityTrace';
 import { AskInvestigationPanel } from '@/components/investigation/AskInvestigationPanel';
+import { AnalyzingInvestigationUI } from '@/components/investigation/AnalyzingInvestigationUI';
 import { SeverityBadge } from '@/components/incidents/SeverityBadge';
 import { StatusBadge } from '@/components/incidents/StatusBadge';
 import { Card, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { ArrowLeft, RefreshCw, HelpCircle, Clock } from 'lucide-react';
+import { ArrowLeft, RefreshCw, HelpCircle, Clock, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function ProjectInvestigationReportPage() {
@@ -35,8 +36,25 @@ export default function ProjectInvestigationReportPage() {
   const [investigation, setInvestigation] = useState<Investigation | null>(null);
   const [investigationRuns, setInvestigationRuns] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isTriggering, setIsTriggering] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const startFreshInvestigation = async () => {
+    setIsAnalyzing(true);
+    setErrorMessage(null);
+    try {
+      const updated = await api.startInvestigation(incidentId, { forceRestart: true, projectId });
+      setInvestigation(updated);
+      const runs = await (api as any).getInvestigationRuns?.(incidentId).catch(() => []) || [];
+      setInvestigationRuns(runs || []);
+    } catch (err: any) {
+      console.error('Failed to run AI investigation:', err);
+      setErrorMessage(err?.message || 'AI investigation workflow failed. Please check log references.');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const fetchInvestigation = async () => {
     setIsLoading(true);
@@ -50,8 +68,14 @@ export default function ProjectInvestigationReportPage() {
       ]);
       setProject(proj);
       setIncident(inc);
-      setInvestigation(data);
       setInvestigationRuns(runs || []);
+
+      if (data) {
+        setInvestigation(data);
+      } else {
+        // Auto-start AI investigation workflow if no report exists yet
+        await startFreshInvestigation();
+      }
     } catch (err: any) {
       console.error('Failed to load AI investigation report:', err);
       setErrorMessage(err?.message || 'Failed to load investigation report from backend API.');
@@ -65,30 +89,43 @@ export default function ProjectInvestigationReportPage() {
   }, [incidentId, projectId]);
 
   const handleReanalyze = async () => {
-    if (isTriggering) return;
+    if (isTriggering || isAnalyzing) return;
     setIsTriggering(true);
-    setErrorMessage(null);
     try {
-      const updated = await api.startInvestigation(incidentId, { forceRestart: true, projectId });
-      setInvestigation(updated);
-      await fetchInvestigation();
-    } catch (err: any) {
-      console.error('Failed to trigger AI investigation:', err);
-      setErrorMessage(err?.message || 'Investigation execution failed. Please check backend log references.');
+      await startFreshInvestigation();
+      const updatedInc = await api.getIncident(incidentId, projectId).catch(() => null);
+      if (updatedInc) setIncident(updatedInc);
     } finally {
       setIsTriggering(false);
     }
   };
 
-  if (isLoading) return <Skeleton className="h-96" />;
-
   const projectName = project ? project.name : projectId;
   const displayIncidentCode = incident?.code || (investigation as any)?.incidentCode || 'INC-1001';
 
+  if (isLoading || isAnalyzing) {
+    return <AnalyzingInvestigationUI incidentCode={displayIncidentCode} projectName={projectName} />;
+  }
+
   if (!investigation) {
     return (
-      <div className="p-8 text-center text-textMuted font-mono">
-        No investigation report available for incident {displayIncidentCode} in project {projectName}.
+      <div className="max-w-2xl mx-auto py-12 px-4 text-center space-y-4">
+        <Card className="p-8 border-borderColor bg-bgSurface space-y-4">
+          <div className="w-12 h-12 rounded-full bg-accentPrimary/20 text-accentPrimary flex items-center justify-center mx-auto">
+            <Sparkles className="w-6 h-6" />
+          </div>
+          <h2 className="text-base font-bold text-textPrimary font-sans">
+            Ready to Analyze Incident <span className="font-mono text-accentPrimary">{displayIncidentCode}</span>
+          </h2>
+          <p className="text-xs text-textMuted font-mono leading-relaxed">
+            No report available yet for project <span className="text-textSecondary">{projectName}</span>. Click below to launch the 10-node autonomous LangGraph AI investigation workflow.
+          </p>
+          {errorMessage && <p className="text-statusDanger text-xs font-mono">{errorMessage}</p>}
+          <Button variant="primary" onClick={startFreshInvestigation} isLoading={isAnalyzing} className="gap-2 font-mono text-xs">
+            <Sparkles className="w-4 h-4" />
+            <span>Launch AI Investigation Workflow</span>
+          </Button>
+        </Card>
       </div>
     );
   }

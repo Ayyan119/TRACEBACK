@@ -1,0 +1,9 @@
+Service: video-transcoding-service
+Queue depth:
+15:38 = 28 jobs
+15:40 = 34 jobs
+15:42 = 61 jobs
+15:44 = 143 jobs
+15:46 = 310 jobs
+15:48 = 470 jobs
+Assessment: queue growth began after the deployment and disk saturation period.
