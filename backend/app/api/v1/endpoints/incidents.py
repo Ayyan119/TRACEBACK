@@ -132,6 +132,11 @@ async def update_incident(
     return IncidentResponse.model_validate(incident_orm)
 
 
+class InvestigatePayload(BaseModel):
+    force_restart: bool = True
+    user_name: Optional[str] = None
+    user_role: Optional[str] = None
+
 @router.post(
     "/incidents/{incident_id}/investigate",
     response_model=IncidentResponse,
@@ -141,10 +146,23 @@ async def update_incident(
 )
 async def run_ai_investigation(
     incident_id: str = Path(..., description="Incident UUID or ticket code identifier (e.g. INC-1001)"),
+    payload: Optional[InvestigatePayload] = Body(None),
+    x_user_name: Optional[str] = Header(None, alias="X-User-Name"),
+    x_user_role: Optional[str] = Header(None, alias="X-User-Role"),
     db: AsyncSession = Depends(get_db),
 ) -> IncidentResponse:
     """Triggers AI investigation workflow and returns updated incident."""
-    return await ai_investigation_service.run_investigation(db, incident_id)
+    name = (payload and payload.user_name) or x_user_name or "Ayyan Shahid"
+    role = (payload and payload.user_role) or x_user_role or "Senior Software Engineer"
+    force_restart = payload.force_restart if payload else True
+
+    return await ai_investigation_service.run_investigation(
+        db=db,
+        incident_id=incident_id,
+        user_name=name,
+        user_role=role,
+        force_restart=force_restart,
+    )
 
 
 @router.get(

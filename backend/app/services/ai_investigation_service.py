@@ -39,14 +39,34 @@ class AIInvestigationService:
         self,
         db: AsyncSession,
         incident_id: str,
+        user_name: Optional[str] = None,
+        user_role: Optional[str] = None,
+        force_restart: bool = True,
     ) -> IncidentResponse:
         """Executes AI root-cause investigation workflow with full persistence and Qdrant history indexing."""
-        logger.info(f"AIInvestigationService.run_investigation starting for incident '{incident_id}'")
+        target_user_name = user_name or "Ayyan Shahid"
+        target_user_role = user_role or "Senior Software Engineer"
+
+        # Dynamically set LangSmith project tracing name to the user's name
+        os.environ["LANGCHAIN_TRACING_V2"] = "true"
+        os.environ["LANGCHAIN_PROJECT"] = target_user_name
+        logger.info(f"Set LangSmith project tracing name to user '{target_user_name}' ({target_user_role})")
+
+        logger.info(f"AIInvestigationService.run_investigation starting for incident '{incident_id}' (User: {target_user_name}, ForceRestart: {force_restart})")
 
         # 1. Fetch target incident
         incident = await incident_service.get_incident_by_id(db, incident_id)
 
-        # 2. Create Investigation Run record (status = CREATED)
+        # 2. Reset cached root cause summary if force_restart is requested
+        if force_restart or not incident.root_cause_summary:
+            incident.root_cause_summary = None
+            incident.confidence = 0.0
+            incident.status = "Investigating"
+            db.add(incident)
+            await db.commit()
+            await db.refresh(incident)
+
+        # 3. Create Investigation Run record (status = CREATED)
         inv_record = await investigation_repository.create(
             db=db,
             incident_id=incident.id,
@@ -54,7 +74,7 @@ class AIInvestigationService:
             incident_description=incident.description,
         )
 
-        # 3. Transition status = RUNNING
+        # 4. Transition status = RUNNING
         await investigation_repository.mark_running(db, inv_record.id)
         start_time = time.time()
 

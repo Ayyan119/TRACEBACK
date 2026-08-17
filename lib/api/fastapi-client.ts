@@ -449,9 +449,19 @@ export class FastApiClient implements ApiClient {
   }
 
   async startInvestigation(incidentId: string, options?: { forceRestart?: boolean; projectId?: string }): Promise<Investigation> {
+    const profile = getStoredUserProfile();
     const updatedIncident = await this.request<Incident>(`/incidents/${incidentId}/investigate`, {
       method: 'POST',
-      body: JSON.stringify(options || {}),
+      headers: {
+        'X-User-Name': profile.name,
+        'X-User-Role': profile.role,
+      },
+      body: JSON.stringify({
+        force_restart: options?.forceRestart ?? true,
+        user_name: profile.name,
+        user_role: profile.role,
+        ...(options || {}),
+      }),
     });
 
     return this.formatInvestigationFromIncident(updatedIncident);
