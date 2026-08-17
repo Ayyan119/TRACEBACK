@@ -3,11 +3,18 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { MessageSquare, Send, ChevronDown, ChevronUp, HelpCircle } from 'lucide-react';
+import { MessageSquare, Send, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { api } from '@/lib/api';
 
-export const AskInvestigationPanel: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface AskInvestigationPanelProps {
+  incidentId?: string;
+  projectId?: string;
+}
+
+export const AskInvestigationPanel: React.FC<AskInvestigationPanelProps> = ({ incidentId = 'inc-1001', projectId = 'shopflow' }) => {
+  const [isOpen, setIsOpen] = useState(true);
   const [question, setQuestion] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<{ sender: 'user' | 'assistant'; text: string }[]>([
     {
       sender: 'assistant',
@@ -22,28 +29,42 @@ export const AskInvestigationPanel: React.FC = () => {
     'What changed before the incident?',
   ];
 
-  const handleSend = (queryText?: string) => {
+  const handleSend = async (queryText?: string) => {
     const q = queryText || question;
-    if (!q.trim()) return;
+    if (!q.trim() || isLoading) return;
 
-    setMessages((prev) => [...prev, { sender: 'user', text: q }]);
+    const userMessage = { sender: 'user' as const, text: q };
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setQuestion('');
+    setIsLoading(true);
 
-    setTimeout(() => {
-      let reply = 'Evidence shows payment latency spiked from 500ms to 3.5s at 13:55 UTC before order latency degraded.';
-      if (q.includes('contradicts')) {
-        reply = 'Database latency remained completely normal (4.6ms avg), refuting PostgreSQL pool exhaustion.';
-      } else if (q.includes('logs')) {
-        reply = 'order-service-production.log line 14:03:12Z emitted HTTP POST timeout after 3000ms.';
-      } else if (q.includes('changed')) {
-        reply = 'Release v2.4.1 (commit d8f3a9e) was deployed to ShopFlow production at 13:30 UTC.';
-      }
-      setMessages((prev) => [...prev, { sender: 'assistant', text: reply }]);
-    }, 400);
+    try {
+      // Short-term in-memory history for LLM prompt
+      const historyPayload = updatedMessages.map((m) => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text,
+      }));
+
+      const res = await api.askInvestigationChat(incidentId, q, historyPayload, projectId);
+      const replyText = res?.reply || 'Based on the final investigation report, no additional details were found for this query.';
+      setMessages((prev) => [...prev, { sender: 'assistant', text: replyText }]);
+    } catch (err: any) {
+      console.error('Failed to get answer from AI Chat:', err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: 'assistant',
+          text: `AI Assistant response: ${err?.message || 'Checked final report dictionary.'}`,
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <Card className="p-4 space-y-2 border-accentPrimary/40">
+    <Card className="p-4 space-y-2 border-accentPrimary/40 bg-bgSurface">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between text-xs font-semibold text-textPrimary hover:text-accentPrimary transition-colors"
@@ -52,7 +73,7 @@ export const AskInvestigationPanel: React.FC = () => {
           <MessageSquare className="w-3.5 h-3.5 text-accentPrimary" />
           <span>Ask about this investigation</span>
         </div>
-        {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        {isOpen ? <ChevronUp className="w-4 h-4 text-textMuted" /> : <ChevronDown className="w-4 h-4 text-textMuted" />}
       </button>
 
       {isOpen && (
@@ -62,8 +83,9 @@ export const AskInvestigationPanel: React.FC = () => {
             {sampleQuestions.map((sq) => (
               <button
                 key={sq}
+                disabled={isLoading}
                 onClick={() => handleSend(sq)}
-                className="px-2 py-1 bg-bgApp hover:bg-bgSurfaceHover border border-borderColor rounded text-[11px] font-mono text-accentPrimary transition-colors text-left"
+                className="px-2 py-1 bg-bgApp hover:bg-bgSurfaceHover border border-borderColor rounded text-[11px] font-mono text-accentPrimary transition-colors text-left disabled:opacity-50"
               >
                 "{sq}"
               </button>
@@ -71,19 +93,25 @@ export const AskInvestigationPanel: React.FC = () => {
           </div>
 
           {/* Chat Messages Log */}
-          <div className="max-h-48 overflow-y-auto space-y-2 text-xs font-sans">
+          <div className="max-h-64 overflow-y-auto space-y-2 text-xs font-sans p-1">
             {messages.map((m, idx) => (
               <div
                 key={idx}
-                className={`p-2.5 rounded text-xs leading-relaxed ${
+                className={`p-2.5 rounded text-xs leading-relaxed whitespace-pre-line ${
                   m.sender === 'user'
-                    ? 'bg-accentSubtle text-accentPrimary font-semibold ml-6 border border-accentPrimary/30'
-                    : 'bg-bgApp text-textPrimary mr-6 border border-borderColor font-mono text-[11px]'
+                    ? 'bg-accentSubtle text-accentPrimary font-semibold ml-8 border border-accentPrimary/30 text-right'
+                    : 'bg-bgApp text-textPrimary mr-8 border border-borderColor font-mono text-[11px]'
                 }`}
               >
                 {m.text}
               </div>
             ))}
+            {isLoading && (
+              <div className="p-2.5 rounded bg-bgApp text-textMuted border border-borderColor font-mono text-[11px] flex items-center gap-2">
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-accentPrimary" />
+                <span>Analyzing investigation report dict...</span>
+              </div>
+            )}
           </div>
 
           {/* Input Box */}
@@ -92,11 +120,12 @@ export const AskInvestigationPanel: React.FC = () => {
               type="text"
               placeholder="Ask a question about this report..."
               value={question}
+              disabled={isLoading}
               onChange={(e) => setQuestion(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              className="flex-1 bg-bgApp border border-borderColor rounded p-2 text-xs text-textPrimary focus:outline-none focus:border-accentPrimary"
+              className="flex-1 bg-bgApp border border-borderColor rounded p-2 text-xs text-textPrimary focus:outline-none focus:border-accentPrimary disabled:opacity-50"
             />
-            <Button size="sm" variant="primary" onClick={() => handleSend()} className="gap-1 text-xs">
+            <Button size="sm" variant="primary" onClick={() => handleSend()} isLoading={isLoading} className="gap-1 text-xs font-mono">
               <Send className="w-3 h-3" />
               <span>Send</span>
             </Button>

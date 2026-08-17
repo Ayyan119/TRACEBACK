@@ -520,6 +520,22 @@ export class FastApiClient implements ApiClient {
     }
   }
 
+  async askInvestigationChat(
+    incidentId: string,
+    question: string,
+    messagesHistory: Array<{ role: string; content: string }>,
+    projectId?: string
+  ): Promise<{ reply: string }> {
+    const pid = projectId || 'shopflow';
+    return this.request<{ reply: string }>(`/projects/${pid}/incidents/${incidentId}/chat`, {
+      method: 'POST',
+      body: JSON.stringify({
+        question,
+        messages: messagesHistory,
+      }),
+    });
+  }
+
   // LOGS
   async getLogs(incidentId: string, params?: { level?: string; search?: string; projectId?: string }): Promise<LogEvent[]> {
     try {

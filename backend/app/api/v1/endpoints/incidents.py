@@ -1,5 +1,5 @@
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List, Optional, Dict, Any
+from pydantic import BaseModel, Field
 from fastapi import APIRouter, Body, Depends, File, Form, Header, HTTPException, Path, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies.common import get_db
@@ -305,3 +305,57 @@ async def query_project_logs(
         offset=offset,
     )
     return [LogRecordResponse.model_validate(l) for l in logs]
+
+
+class InvestigationChatRequest(BaseModel):
+    question: str
+    messages: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
+
+
+class InvestigationChatResponse(BaseModel):
+    reply: str
+
+
+@router.post(
+    "/projects/{project_id}/incidents/{incident_id}/chat",
+    response_model=InvestigationChatResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Ask Investigation Report AI Chatbot",
+    description="Interactive grounded AI chat answering technical questions about an incident investigation report.",
+)
+async def ask_investigation_chat(
+    payload: InvestigationChatRequest,
+    project_id: str = Path(..., description="Target project UUID or unique slug identifier"),
+    incident_id: str = Path(..., description="Target incident UUID or ticket code"),
+    db: AsyncSession = Depends(get_db),
+) -> InvestigationChatResponse:
+    """Answers technical questions about an incident final_report dictionary."""
+    reply = await ai_investigation_service.answer_investigation_chat(
+        db=db,
+        incident_id=incident_id,
+        question=payload.question,
+        chat_history=payload.messages or [],
+    )
+    return InvestigationChatResponse(reply=reply)
+
+
+@router.post(
+    "/incidents/{incident_id}/chat",
+    response_model=InvestigationChatResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Ask Investigation Report AI Chatbot (Direct)",
+    description="Interactive grounded AI chat answering technical questions about an incident investigation report.",
+)
+async def ask_investigation_chat_direct(
+    payload: InvestigationChatRequest,
+    incident_id: str = Path(..., description="Target incident UUID or ticket code"),
+    db: AsyncSession = Depends(get_db),
+) -> InvestigationChatResponse:
+    """Answers technical questions about an incident final_report dictionary."""
+    reply = await ai_investigation_service.answer_investigation_chat(
+        db=db,
+        incident_id=incident_id,
+        question=payload.question,
+        chat_history=payload.messages or [],
+    )
+    return InvestigationChatResponse(reply=reply)

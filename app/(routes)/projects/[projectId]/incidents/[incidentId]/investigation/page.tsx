@@ -325,7 +325,7 @@ export default function ProjectInvestigationReportPage() {
       )}
 
       {/* 12. CHAT / FOLLOW-UP */}
-      <AskInvestigationPanel />
+      <AskInvestigationPanel incidentId={incidentId} projectId={projectId} />
     </div>
   );
 }
