@@ -103,29 +103,27 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({ incidents, isLoadi
 
               return (
                 <tr key={incident.id} className="hover:bg-bgSurfaceHover/60 transition-colors">
-                  {/* Left Side Interactive Status Badge Dropdown */}
+                  {/* Left Side Neutral Status Change Dropdown */}
                   <td className="px-3 py-3">
                     <div className="relative inline-flex items-center">
                       <select
-                        value={incident.status}
+                        value=""
                         disabled={isUpdating}
-                        onChange={(e) => handleStatusChange(incident.id, e.target.value)}
-                        className={`font-mono text-[11px] font-bold rounded px-2.5 py-1 border cursor-pointer focus:outline-none appearance-none pr-6 transition-all ${
-                          isResolved
-                            ? 'bg-statusSuccess/15 text-statusSuccess border-statusSuccess/30 hover:bg-statusSuccess/25'
-                            : incident.status === 'Identified'
-                            ? 'bg-statusWarning/15 text-statusWarning border-statusWarning/30 hover:bg-statusWarning/25'
-                            : incident.status === 'Investigating'
-                            ? 'bg-accentPrimary/15 text-accentPrimary border-accentPrimary/30 hover:bg-accentPrimary/25'
-                            : 'bg-statusInfo/15 text-statusInfo border-statusInfo/30 hover:bg-statusInfo/25'
-                        }`}
+                        onChange={(e) => {
+                          if (e.target.value) handleStatusChange(incident.id, e.target.value);
+                        }}
+                        className="bg-bgApp border border-borderColor text-textSecondary hover:text-textPrimary hover:border-accentPrimary font-mono text-[11px] font-semibold rounded px-2.5 py-1 cursor-pointer focus:outline-none appearance-none pr-6 transition-colors"
+                        title="Click to change status"
                       >
+                        <option value="" disabled className="text-textMuted bg-bgSurface">
+                          Status
+                        </option>
                         <option value="Investigating" className="bg-bgSurface text-textPrimary">Investigating</option>
                         <option value="Identified" className="bg-bgSurface text-textPrimary">Identified</option>
                         <option value="Monitoring" className="bg-bgSurface text-textPrimary">Monitoring</option>
                         <option value="Resolved" className="bg-bgSurface text-statusSuccess font-bold">✓ Resolved</option>
                       </select>
-                      <ChevronDown className="w-3 h-3 absolute right-1.5 top-2 pointer-events-none text-current opacity-70" />
+                      <ChevronDown className="w-3 h-3 absolute right-2 top-2 pointer-events-none text-textMuted" />
                     </div>
                   </td>
                   <td className="px-3 py-3">
