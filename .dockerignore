@@ -77,9 +77,9 @@ docs/
 # Logs, Temporary Scratch & Local Storage Data
 # ------------------------------------------------------------------------------
 *.log
-**/logs
+logs/
+storage/logs/
 storage/
-**/storage
 scratch/
 tmp/
 temp/

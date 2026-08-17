@@ -17,6 +17,21 @@ async def lifespan(app: FastAPI):
     """Application lifespan context manager for startup and shutdown events."""
     setup_logging()
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION} ({settings.ENVIRONMENT})")
+    try:
+        from app.db.session import engine, AsyncSessionLocal
+        from app.db.base import Base
+        from app.services.user_service import user_service
+
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+        async with AsyncSessionLocal() as session:
+            await user_service.get_or_create_default_user(session)
+            await session.commit()
+
+        logger.info("Database tables and seed profiles initialized successfully.")
+    except Exception as e:
+        logger.error(f"Database startup initialization error: {e}")
     yield
     logger.info(f"Shutting down {settings.APP_NAME}")
 

@@ -11,6 +11,9 @@ logger = logging.getLogger("traceback.services.user")
 DEFAULT_USER_ID = "usr_default_ayyan"
 
 
+from app.repositories.project_repository import project_repository
+from app.schemas.project import ProjectCreate
+
 class UserService:
     """Business logic service for TRACEBACK user profile management."""
 
@@ -46,6 +49,50 @@ class UserService:
             await user_repository.create(
                 db, UserCreate(name="Guest Tester", role="Guest Tester")
             )
+
+        # Seed default sample projects if Ayyan Shahid currently has 0 projects in PostgreSQL
+        try:
+            existing_projects = await project_repository.get_all(db, user_id=user.id)
+            if len(existing_projects) == 0:
+                logger.info(f"Seeding default workspace projects for {user.name} ({user.id})...")
+                samples = [
+                    {
+                        "name": "NovaStream Production",
+                        "slug": "novastream-production",
+                        "environment": "production",
+                        "description": "Core real-time video streaming & microservice transcoding platform.",
+                        "owner_team": "Core Platform Engineering",
+                    },
+                    {
+                        "name": "ShopFlow",
+                        "slug": "shopflow",
+                        "environment": "production",
+                        "description": "E-commerce checkout & inventory management microservice stack.",
+                        "owner_team": "Commerce Team",
+                    },
+                    {
+                        "name": "FinBank Platform",
+                        "slug": "finbank-platform",
+                        "environment": "staging",
+                        "description": "Financial ledger & payment transaction processing pipeline.",
+                        "owner_team": "FinTech Core",
+                    },
+                ]
+                for sp in samples:
+                    await project_repository.create(
+                        db,
+                        ProjectCreate(
+                            name=sp["name"],
+                            environment=sp["environment"],
+                            description=sp["description"],
+                            ownerTeam=sp["owner_team"],
+                        ),
+                        slug=sp["slug"],
+                        user_id=user.id,
+                    )
+                logger.info("Default workspace projects seeded successfully.")
+        except Exception as seed_err:
+            logger.warning(f"Project seed check skipped: {seed_err}")
 
         return user
 
