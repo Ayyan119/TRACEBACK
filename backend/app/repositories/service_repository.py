@@ -67,7 +67,7 @@ class ServiceRepository:
             health="Healthy",
             type=obj_in.type.value if hasattr(obj_in.type, "value") else (obj_in.type or "Backend"),
             description=obj_in.description,
-            latency_ms=15.0,
+            latency_ms=None,
             error_rate_percent=0.0,
             recent_incidents_count=0,
             dependencies=deps_json,

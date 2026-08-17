@@ -133,6 +133,23 @@ async def update_incident(
     return IncidentResponse.model_validate(incident_orm)
 
 
+@router.post(
+    "/incidents/{incident_id}/resolve",
+    response_model=IncidentResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Mark Incident as Resolved",
+    description="Transitions incident lifecycle status to Resolved and resets impacted services back to Healthy.",
+)
+async def resolve_incident(
+    incident_id: str = Path(..., description="Incident UUID or ticket code identifier"),
+    db: AsyncSession = Depends(get_db),
+) -> IncidentResponse:
+    """Marks an incident as Resolved and restores system services to Healthy state."""
+    update_dto = IncidentUpdate(status="Resolved")
+    incident_orm = await incident_service.update_incident(db, incident_id, update_dto)
+    return IncidentResponse.model_validate(incident_orm)
+
+
 from pydantic import BaseModel, ConfigDict, Field
 
 class InvestigatePayload(BaseModel):

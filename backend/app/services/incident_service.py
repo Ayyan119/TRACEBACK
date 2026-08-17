@@ -83,13 +83,44 @@ class IncidentService:
                     db.add(project)
                 await db.flush()
 
-        # If incident is Resolved, index its complete historical representation into Qdrant
+        # If incident is Resolved, reset affected services back to Healthy and index into Qdrant
         if new_status == "Resolved":
             try:
+                from app.repositories.service_repository import service_repository
+                import json
+
+                aff_list = list(updated_incident.affected_services or [])
+                if updated_incident.affected_service:
+                    aff_list.append(updated_incident.affected_service)
+                if updated_incident.root_cause_summary:
+                    try:
+                        parsed = json.loads(updated_incident.root_cause_summary)
+                        report_aff = parsed.get("final_report", {}).get("affected_services", [])
+                        if isinstance(report_aff, list):
+                            aff_list.extend(report_aff)
+                    except Exception:
+                        pass
+
+                all_services = await service_repository.get_all_by_project(db, updated_incident.project_id)
+                def is_service_match(aff_raw: str, db_name: str) -> bool:
+                    aff = aff_raw.lower().replace("-", " ").replace("_", " ").strip()
+                    srv = db_name.lower().replace("-", " ").replace("_", " ").strip()
+                    return srv in aff or aff in srv or any(p in aff for p in srv.split() if len(p) > 3)
+
+                for srv in all_services:
+                    for aff_raw in aff_list:
+                        if aff_raw and isinstance(aff_raw, str) and is_service_match(aff_raw, srv.name):
+                            srv.health = "Healthy"
+                            srv.error_rate_percent = 0.0
+                            srv.recent_incidents_count = max(0, (srv.recent_incidents_count or 1) - 1)
+                            db.add(srv)
+                            break
+
+                await db.flush()
                 await incident_history_service.index_incident_history(db, updated_incident)
             except Exception as e:
                 import logging
-                logging.getLogger(__name__).warning(f"Failed to index incident history for {updated_incident.id}: {e}")
+                logging.getLogger(__name__).warning(f"Failed during incident resolution updates for {updated_incident.id}: {e}")
 
         return updated_incident
 

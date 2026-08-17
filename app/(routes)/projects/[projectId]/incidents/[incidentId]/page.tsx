@@ -12,8 +12,9 @@ import { EvidenceViewer } from '@/components/evidence/EvidenceViewer';
 import { LogViewer } from '@/components/logs/LogViewer';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { DeleteIncidentModal } from '@/components/incidents/DeleteIncidentModal';
-import { ArrowLeft, Sparkles, Clock, Server, FileText, Terminal, Trash2 } from 'lucide-react';
+import { ArrowLeft, Sparkles, Clock, Server, FileText, Terminal, Trash2, CheckCircle2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 export default function ProjectIncidentDetailPage() {
@@ -74,18 +75,29 @@ export default function ProjectIncidentDetailPage() {
     reporter: 'Datadog Alert Manager',
   };
 
+  const handleResolveIncident = async () => {
+    try {
+      await api.resolveIncident(incidentId, projectId);
+      await fetchData();
+    } catch (err: any) {
+      console.error('Failed to resolve incident:', err);
+    }
+  };
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto text-xs pb-12">
-      {/* Top Bar */}
+    <div className="space-y-6 max-w-7xl mx-auto text-xs pb-10">
+      {/* Navigation Header */}
       <div className="flex items-center justify-between border-b border-borderColor pb-3">
         <Link
           href={`/projects/${projectId}/incidents`}
-          className="inline-flex items-center gap-1.5 text-textSecondary hover:text-textPrimary transition-colors"
+          className="inline-flex items-center gap-1 text-textSecondary hover:text-textPrimary transition-colors font-mono"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to {projectName} Incident Directory</span>
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Incidents Catalog ({projectName})</span>
         </Link>
-        <span className="font-mono text-[10px] text-textMuted uppercase">Workspace: {projectName}</span>
+        <span className="font-mono text-[10px] text-textMuted uppercase tracking-wider">
+          Evidence Hub • Project: {projectName}
+        </span>
       </div>
 
       {/* Incident Header */}
@@ -111,6 +123,23 @@ export default function ProjectIncidentDetailPage() {
               <Sparkles className="w-4 h-4" />
               <span>Launch AI Report</span>
             </Button>
+
+            {inc.status !== 'Resolved' ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResolveIncident}
+                className="gap-1.5 font-mono text-statusSuccess border-statusSuccess/40 hover:bg-statusSuccess/10"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Mark as Resolved</span>
+              </Button>
+            ) : (
+              <Badge variant="success" className="font-mono text-xs px-2.5 py-1 bg-statusSuccess/20 text-statusSuccess border-statusSuccess/40">
+                Resolved
+              </Badge>
+            )}
+
             <Button
               variant="danger"
               size="sm"

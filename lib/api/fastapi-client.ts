@@ -498,6 +498,12 @@ export class FastApiClient implements ApiClient {
     return this.formatInvestigationFromIncident(updatedIncident);
   }
 
+  async resolveIncident(incidentId: string, projectId?: string): Promise<Incident> {
+    return this.request<Incident>(`/incidents/${incidentId}/resolve`, {
+      method: 'POST',
+    });
+  }
+
   async getInvestigationRuns(incidentId: string): Promise<any[]> {
     try {
       return await this.request<any[]>(`/incidents/${incidentId}/investigations`);

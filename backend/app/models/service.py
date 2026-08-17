@@ -47,10 +47,10 @@ class ServiceModel(Base):
         nullable=True,
         doc="Service functionality overview",
     )
-    latency_ms: Mapped[float] = mapped_column(
+    latency_ms: Mapped[Optional[float]] = mapped_column(
         Float,
-        default=15.0,
-        nullable=False,
+        default=None,
+        nullable=True,
         doc="P95 latency in milliseconds",
     )
     error_rate_percent: Mapped[float] = mapped_column(

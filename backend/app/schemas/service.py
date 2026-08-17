@@ -70,7 +70,7 @@ class ServiceResponse(ServiceBase):
     id: str
     project_id: str = Field(..., alias="projectId")
     health: ServiceHealth = ServiceHealth.HEALTHY
-    latency_ms: float = Field(15.0, alias="latencyMs")
+    latency_ms: Optional[float] = Field(None, alias="latencyMs")
     error_rate_percent: float = Field(0.0, alias="errorRatePercent")
     recent_incidents_count: int = Field(0, alias="recentIncidentsCount")
     dependencies: List[ServiceDependency] = Field(default_factory=list)
