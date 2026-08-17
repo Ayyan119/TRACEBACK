@@ -4,21 +4,29 @@ export interface UserProfile {
 }
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
-  name: 'Alex Chen',
-  role: 'Senior SRE',
+  name: 'Ayyan Shahid',
+  role: 'Senior Software Engineer',
 };
 
 export const TECH_ROLES = [
+  'Senior Software Engineer',
+  'AI Engineer',
+  'Gen AI Engineer',
+  'MLOps Engineer',
+  'AI/ML Research Engineer',
   'Senior SRE',
-  'DevOps Engineer',
   'Site Reliability Engineer',
+  'DevOps Engineer',
   'Platform Engineer',
   'Backend Architect',
   'Fullstack Engineer',
+  'Frontend Engineer',
   'Cloud Infrastructure Lead',
   'Security & Compliance Officer',
+  'Data Engineer',
   'Software Engineer',
   'Systems Administrator',
+  'Custom Role...',
 ];
 
 export function getStoredUserProfile(): UserProfile {
@@ -28,6 +36,11 @@ export function getStoredUserProfile(): UserProfile {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && parsed.name && parsed.role) {
+        if (parsed.name === 'Alex Chen') {
+          parsed.name = 'Ayyan Shahid';
+          parsed.role = 'Senior Software Engineer';
+          localStorage.setItem('tb_user_profile', JSON.stringify(parsed));
+        }
         return parsed;
       }
     }

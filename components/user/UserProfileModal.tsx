@@ -22,15 +22,22 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
   onClose,
   isFirstTime = false,
 }) => {
-  const [name, setName] = useState('');
-  const [role, setRole] = useState('Senior SRE');
+  const [name, setName] = useState('Ayyan Shahid');
+  const [roleSelect, setRoleSelect] = useState('Senior Software Engineer');
+  const [customRole, setCustomRole] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       const current = getStoredUserProfile();
       setName(current.name);
-      setRole(current.role);
+      if (TECH_ROLES.includes(current.role) && current.role !== 'Custom Role...') {
+        setRoleSelect(current.role);
+        setCustomRole('');
+      } else {
+        setRoleSelect('Custom Role...');
+        setCustomRole(current.role);
+      }
       setError(null);
     }
   }, [isOpen]);
@@ -43,9 +50,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
       setError('Please enter your name.');
       return;
     }
+    const finalRole = roleSelect === 'Custom Role...' ? customRole.trim() : roleSelect;
+    if (!finalRole) {
+      setError('Please select or specify your tech profession / role.');
+      return;
+    }
     saveStoredUserProfile({
       name: name.trim(),
-      role,
+      role: finalRole,
     });
     onClose();
   };
@@ -96,7 +108,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
               <input
                 type="text"
                 required
-                placeholder="e.g. Alex Chen"
+                placeholder="e.g. Ayyan Shahid"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full bg-bgSurface border border-borderColor rounded px-2.5 py-1.5 text-xs text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-accentPrimary font-mono"
@@ -105,14 +117,19 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
           </div>
 
           {/* Profession Selection */}
-          <div>
-            <label className="block text-[11px] font-mono text-textSecondary mb-1.5 flex items-center gap-1.5">
+          <div className="space-y-2">
+            <label className="block text-[11px] font-mono text-textSecondary flex items-center gap-1.5">
               <Briefcase className="w-3.5 h-3.5 text-accentPrimary" />
               <span>Tech Profession / Role *</span>
             </label>
             <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
+              value={roleSelect}
+              onChange={(e) => {
+                setRoleSelect(e.target.value);
+                if (e.target.value !== 'Custom Role...') {
+                  setCustomRole('');
+                }
+              }}
               className="w-full bg-bgApp border border-borderColor text-textPrimary text-xs rounded px-3 py-2 focus:outline-none focus:border-accentPrimary font-mono cursor-pointer"
             >
               {TECH_ROLES.map((r) => (
@@ -121,6 +138,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                 </option>
               ))}
             </select>
+
+            {roleSelect === 'Custom Role...' && (
+              <input
+                type="text"
+                required
+                placeholder="Write custom role (e.g. AI Engineer, Gen AI Engineer)"
+                value={customRole}
+                onChange={(e) => setCustomRole(e.target.value)}
+                className="w-full bg-bgSurface border border-borderColor rounded px-3 py-2 text-xs text-textPrimary placeholder:text-textMuted focus:outline-none focus:border-accentPrimary font-mono"
+              />
+            )}
           </div>
 
           {error && <p className="text-statusDanger text-xs font-mono">{error}</p>}
