@@ -18,9 +18,7 @@ export default function ProjectNewIncidentPage() {
   const projectId = (params?.projectId as string) || '';
 
   const [project, setProject] = useState<Project | null>(null);
-  const [description, setDescription] = useState(
-    'Orders are completing, but application checkout latency is approximately 10x slower than normal.'
-  );
+  const [description, setDescription] = useState('');
 
   // Separate file staging state
   const [stagedLogFile, setStagedLogFile] = useState<File | null>(null);

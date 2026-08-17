@@ -394,6 +394,15 @@ export class FastApiClient implements ApiClient {
       });
     }
 
+    const investigatedAffectedServices: string[] = Array.from(new Set([
+      ...(Array.isArray(parsedResult?.final_report?.affected_services) ? parsedResult.final_report.affected_services : []),
+      ...(Array.isArray(primaryH?.affected_services) ? primaryH.affected_services : []),
+      ...(Array.isArray(incident.affectedServices) ? incident.affectedServices : (incident.affectedService ? [incident.affectedService] : [])),
+    ])).filter(Boolean);
+
+    const finalAffectedServices = investigatedAffectedServices.length > 0 ? investigatedAffectedServices : ['Backend Services'];
+    const finalAffectedFunctionality = finalAffectedServices.join(', ');
+
     return {
       id: `inv-${incident.id}`,
       incidentId: incident.id,
@@ -405,8 +414,8 @@ export class FastApiClient implements ApiClient {
       analysisStatus: parsedResult?.analysis_status,
       summary: summaryText,
       impact: {
-        affectedFunctionality: incident.affectedService || 'Core Services',
-        affectedServices: incident.affectedServices || [incident.affectedService || 'Backend'],
+        affectedFunctionality: finalAffectedFunctionality || incident.affectedService || 'Core Services',
+        affectedServices: finalAffectedServices,
         estimatedImpact: `${incident.severity} Outage Impact`,
         startTime: incident.detectedAt || incident.createdAt || new Date().toISOString(),
         currentDuration: incident.duration || 'Active',
