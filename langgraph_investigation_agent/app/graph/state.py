@@ -63,6 +63,7 @@ class InvestigationState(TypedDict, total=False):
     retrieved_previous_incidents: List[Dict[str, Any]]
     reranked_documents: List[Dict[str, Any]]
     
+
     # Analysis & Synthesis
     evidence_analysis: Optional[Dict[str, Any]]
     hypotheses: List[Dict[str, Any]]
@@ -83,3 +84,7 @@ class InvestigationState(TypedDict, total=False):
     errors: Annotated[List[str], add_lists]
     warnings: Annotated[List[str], add_lists]
     execution_trace: Annotated[List[Dict[str, Any]], add_lists]
+
+
+
+a = "Ali"
