@@ -1,6 +1,8 @@
+import json
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, Body, Depends, File, Form, Header, HTTPException, Path, Query, UploadFile, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies.common import get_db
 from app.schemas.incident import IncidentCreate, IncidentResponse, IncidentUpdate
@@ -359,3 +361,52 @@ async def ask_investigation_chat_direct(
         chat_history=payload.messages or [],
     )
     return InvestigationChatResponse(reply=reply)
+
+
+@router.post(
+    "/projects/{project_id}/incidents/{incident_id}/chat/stream",
+    summary="Stream Investigation Report AI Chatbot",
+    description="Streams real-time LLM token response using Server-Sent Events (text/event-stream).",
+)
+async def stream_investigation_chat(
+    payload: InvestigationChatRequest,
+    project_id: str = Path(..., description="Target project UUID or unique slug identifier"),
+    incident_id: str = Path(..., description="Target incident UUID or ticket code"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Streams token responses in real-time."""
+    async def event_generator():
+        async for chunk in ai_investigation_service.stream_investigation_chat(
+            db=db,
+            incident_id=incident_id,
+            question=payload.question,
+            chat_history=payload.messages or [],
+        ):
+            yield f"data: {json.dumps({'text': chunk})}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
+
+
+@router.post(
+    "/incidents/{incident_id}/chat/stream",
+    summary="Stream Investigation Report AI Chatbot (Direct)",
+    description="Streams real-time LLM token response using Server-Sent Events (text/event-stream).",
+)
+async def stream_investigation_chat_direct(
+    payload: InvestigationChatRequest,
+    incident_id: str = Path(..., description="Target incident UUID or ticket code"),
+    db: AsyncSession = Depends(get_db),
+):
+    """Streams token responses in real-time."""
+    async def event_generator():
+        async for chunk in ai_investigation_service.stream_investigation_chat(
+            db=db,
+            incident_id=incident_id,
+            question=payload.question,
+            chat_history=payload.messages or [],
+        ):
+            yield f"data: {json.dumps({'text': chunk})}\n\n"
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")

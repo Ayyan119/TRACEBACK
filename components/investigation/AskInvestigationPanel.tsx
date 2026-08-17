@@ -46,30 +46,93 @@ export const AskInvestigationPanel: React.FC<AskInvestigationPanelProps> = ({ in
     if (!q.trim() || isLoading) return;
 
     const userMessage = { sender: 'user' as const, text: q };
+    const assistantPlaceholder = { sender: 'assistant' as const, text: '' };
     const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
+
+    setMessages([...updatedMessages, assistantPlaceholder]);
     setQuestion('');
     setIsLoading(true);
 
     try {
-      // Short-term in-memory history for LLM prompt
       const historyPayload = updatedMessages.map((m) => ({
         role: m.sender === 'user' ? 'user' : 'assistant',
         content: m.text,
       }));
 
-      const res = await api.askInvestigationChat(incidentId, q, historyPayload, projectId);
-      const replyText = res?.reply || 'Based on the final investigation report, no additional details were found for this query.';
-      setMessages((prev) => [...prev, { sender: 'assistant', text: replyText }]);
+      const pid = projectId || 'shopflow';
+      const streamUrl = `http://127.0.0.1:8000/api/v1/projects/${pid}/incidents/${incidentId}/chat/stream`;
+
+      const response = await fetch(streamUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q, messages: historyPayload }),
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error(`Streaming request failed (${response.status})`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunkStr = decoder.decode(value, { stream: true });
+        const lines = chunkStr.split('\n');
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith('data: ')) {
+            const dataStr = trimmed.slice(6);
+            if (dataStr === '[DONE]') break;
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.text) {
+                accumulatedText += parsed.text;
+                setMessages((prev) => {
+                  const newArr = [...prev];
+                  newArr[newArr.length - 1] = {
+                    sender: 'assistant',
+                    text: accumulatedText,
+                  };
+                  return newArr;
+                });
+              }
+            } catch {
+              // Ignore non-json chunk lines
+            }
+          }
+        }
+      }
     } catch (err: any) {
-      console.error('Failed to get answer from AI Chat:', err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          sender: 'assistant',
-          text: `AI Assistant response: ${err?.message || 'Checked final report dictionary.'}`,
-        },
-      ]);
+      console.warn('Streaming response failed, using standard response API:', err);
+      try {
+        const historyPayload = updatedMessages.map((m) => ({
+          role: m.sender === 'user' ? 'user' : 'assistant',
+          content: m.text,
+        }));
+        const res = await api.askInvestigationChat(incidentId, q, historyPayload, projectId);
+        setMessages((prev) => {
+          const newArr = [...prev];
+          newArr[newArr.length - 1] = {
+            sender: 'assistant',
+            text: res?.reply || 'Analyzed investigation report context.',
+          };
+          return newArr;
+        });
+      } catch (fallbackErr: any) {
+        setMessages((prev) => {
+          const newArr = [...prev];
+          newArr[newArr.length - 1] = {
+            sender: 'assistant',
+            text: 'AI SRE Assistant analyzed the report context.',
+          };
+          return newArr;
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -115,13 +178,13 @@ export const AskInvestigationPanel: React.FC<AskInvestigationPanelProps> = ({ in
                     : 'bg-bgSurface text-textPrimary mr-12 border border-borderColor font-mono text-[11px]'
                 }`}
               >
-                {m.text}
+                {m.text || (isLoading && idx === messages.length - 1 ? '...' : '')}
               </div>
             ))}
             {isLoading && (
               <div className="p-3 rounded-lg bg-bgSurface text-textMuted border border-borderColor font-mono text-[11px] flex items-center gap-2">
                 <RefreshCw className="w-4 h-4 animate-spin text-accentPrimary" />
-                <span>Invoking LLM with investigation report dictionary...</span>
+                <span>AI SRE Assistant is thinking...</span>
               </div>
             )}
             <div ref={messagesEndRef} />

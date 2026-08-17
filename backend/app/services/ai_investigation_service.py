@@ -408,5 +408,100 @@ class AIInvestigationService:
             "Feel free to ask specific questions about the root cause, evidence logs, or recommended fixes!"
         )
 
+    async def stream_investigation_chat(
+        self,
+        db: AsyncSession,
+        incident_id: str,
+        question: str,
+        chat_history: Optional[List[Dict[str, str]]] = None,
+    ):
+        """
+        Streams LLM token response using Groq / OpenAI / Gemini for real-time interactive SRE Chatbot.
+        Yields text chunks as they arrive.
+        """
+        from dotenv import load_dotenv
+        load_dotenv()
+        load_dotenv("/home/jiggra/Traceback/.env")
+
+        incident = await incident_service.get_incident_by_id(db, incident_id)
+
+        # Build complete final_report dict
+        report_dict: Dict[str, Any] = {
+            "incident_code": incident.code,
+            "title": incident.title,
+            "description": incident.description,
+            "severity": incident.severity,
+            "status": incident.status,
+            "affected_service": incident.affected_service,
+            "affected_services": incident.affected_services or [],
+            "environment": incident.environment,
+            "confidence": incident.confidence,
+            "detected_at": str(incident.detected_at) if incident.detected_at else None,
+            "duration": incident.duration,
+        }
+
+        if incident.root_cause_summary:
+            try:
+                parsed = json.loads(incident.root_cause_summary)
+                if isinstance(parsed, dict):
+                    report_dict["investigation_report"] = parsed
+                else:
+                    report_dict["root_cause_summary"] = incident.root_cause_summary
+            except Exception:
+                report_dict["root_cause_summary"] = incident.root_cause_summary
+
+        evidence_items = await evidence_repository.get_all_by_incident(db, incident.id)
+        report_dict["evidence_count"] = len(evidence_items)
+        report_dict["evidence_items"] = [
+            {"title": ev.title, "type": ev.type, "content": ev.raw_content[:400] if ev.raw_content else None}
+            for ev in evidence_items
+        ]
+
+        system_prompt = (
+            "You are TRACEBACK AI, an elite Principal SRE & Incident Investigation Assistant.\n"
+            "Below is the COMPLETE CANONICAL FINAL REPORT DICTIONARY for this incident:\n\n"
+            f"```json\n{json.dumps(report_dict, indent=2, default=str)}\n```\n\n"
+            "CRITICAL SYSTEM INSTRUCTIONS:\n"
+            "1. Answer ANY user question thoroughly, accurately, and directly using the report dictionary above and SRE domain expertise.\n"
+            "2. If the user greets you ('hi', 'hello'), greet them warmly as TRACEBACK AI and offer a concise summary of what occurred and what you can assist with.\n"
+            "3. Use Markdown formatting: bold key terms, use bullet points, and code blocks for log snippets or commands.\n"
+            "4. Be helpful, precise, and proactive in answering questions."
+        )
+
+        groq_key = os.getenv("GROQ_API_KEY")
+        if groq_key:
+            try:
+                from groq import Groq
+                groq_client = Groq(api_key=groq_key)
+                groq_messages = [{"role": "system", "content": system_prompt}]
+
+                if chat_history:
+                    for msg in chat_history[-6:]:
+                        role = "assistant" if (msg.get("role") == "assistant" or msg.get("sender") == "assistant") else "user"
+                        text = msg.get("content") or msg.get("text") or ""
+                        if text and not text.startswith("Hello!"):
+                            groq_messages.append({"role": role, "content": text})
+
+                groq_messages.append({"role": "user", "content": question})
+
+                stream = groq_client.chat.completions.create(
+                    model="llama-3.3-70b-versatile",
+                    messages=groq_messages,
+                    temperature=0.2,
+                    stream=True,
+                )
+                for chunk in stream:
+                    if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
+                return
+            except Exception as groq_err:
+                logger.warning(f"Groq Chatbot LLM streaming failed: {groq_err}")
+
+        # Fallback non-streaming answer yielded in chunks
+        full_reply = await self.answer_investigation_chat(db, incident_id, question, chat_history)
+        words = full_reply.split(" ")
+        for i in range(0, len(words), 3):
+            yield " ".join(words[i:i+3]) + " "
+
 
 ai_investigation_service = AIInvestigationService()
