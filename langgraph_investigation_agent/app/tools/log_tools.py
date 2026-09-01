@@ -26,9 +26,11 @@ async def query_incident_logs(
     # Sanitize limit
     limit = max(1, min(limit, 200))
     
-    # Try real PostgreSQL or fallback to structured mock query if DB connection fails
     try:
-        engine = create_async_engine(config.DATABASE_URL, echo=False)
+        if config.DATABASE_URL.startswith("sqlite"):
+            engine = create_async_engine(config.DATABASE_URL, echo=False, connect_args={"check_same_thread": False})
+        else:
+            engine = create_async_engine(config.DATABASE_URL, echo=False)
         async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
         
         async with async_session() as session:

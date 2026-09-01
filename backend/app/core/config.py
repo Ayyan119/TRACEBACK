@@ -42,8 +42,8 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
 
-    # Database Configuration (Future SQLAlchemy Async Postgres)
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/traceback_db"
+    # Database Configuration
+    DATABASE_URL: str = "sqlite+aiosqlite:///./storage/traceback.db"
 
     # Redis Configuration (Future Cache & Worker Queue)
     REDIS_URL: str = "redis://localhost:6379/0"

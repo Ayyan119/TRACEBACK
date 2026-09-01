@@ -27,7 +27,7 @@ class AgentConfig:
     QDRANT_API_KEY: str = os.getenv("QDRANT_API_KEY", "")
     QDRANT_COLLECTION: str = os.getenv("QDRANT_COLLECTION", "traceback_vectors")
     
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/traceback_db")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./storage/traceback.db")
     
     raw_default = os.getenv("DEFAULT_LLM_MODEL", "gpt-4o-mini")
     DEFAULT_LLM_MODEL: str = raw_default if raw_default.startswith("gpt-") else "gpt-4o-mini"

@@ -4,16 +4,25 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 from app.core.config import settings
 from app.core.logging import logger
 
-# Create async engine for PostgreSQL (using asyncpg driver) with tuned connection pool
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=False,
-    future=True,
-    pool_pre_ping=True,
-    pool_size=20,
-    max_overflow=10,
-    pool_recycle=1800,
-)
+def create_engine_instance(db_url: str):
+    if db_url.startswith("sqlite"):
+        return create_async_engine(
+            db_url,
+            echo=False,
+            future=True,
+            connect_args={"check_same_thread": False},
+        )
+    return create_async_engine(
+        db_url,
+        echo=False,
+        future=True,
+        pool_pre_ping=True,
+        pool_size=20,
+        max_overflow=10,
+        pool_recycle=1800,
+    )
+
+engine = create_engine_instance(settings.DATABASE_URL)
 
 # Async session factory
 AsyncSessionLocal = async_sessionmaker(
